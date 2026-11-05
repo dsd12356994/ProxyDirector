@@ -1,0 +1,11 @@
+# 密钥与本地环境
+.env
+.venv/
+__pycache__/
+.DS_Store
+
+# 运行产物与账本（含真实成本数据，不入库）
+data/cache/
+data/runs/
+data/ledger.jsonl
+ui/logs/

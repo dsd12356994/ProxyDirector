@@ -1,0 +1,70 @@
+# DSAI4207 Agent 管线配置
+# 可插拔 LLM 后端：切换后端只改 run.py 的 --backend 参数，不改代码。
+
+backends:
+  mock:                      # 本地脚本模型，不调任何 LLM API，用于打通和演示
+    kind: mock
+  astra:                     # GPT 系。接入方式待确认（PolyU API 服务？），填好 base_url/model/key 后可用
+    kind: openai_compatible
+    base_url: https://api.openai.com/v1
+    model: gpt-5-astra
+    api_key_env: ASTRA_API_KEY
+    supports_vision: true
+  deepseek:                  # OpenAI 兼容端点；deepseek-flash 支持图片，v4-pro 不支持
+    kind: openai_compatible
+    base_url: https://api.deepseek.com/v1
+    model: deepseek-flash
+    api_key_env: DEEPSEEK_API_KEY
+    supports_vision: true
+
+pipeline:
+  views_dir: assets/views                  # 冻结的四个视角白底图（与 20260921 批次逐字节一致）
+  seed_glb: assets/seed_tripo/model.glb    # 冻结几何：该批次 Tripo 实际输出，三组条件共用
+  blender_bin: /Applications/Blender.app/Contents/MacOS/Blender
+  ffmpeg_bin: ffmpeg
+  width: 960
+  height: 540
+  fps: 30
+  frames: 300                # 10 秒整圈
+  audit_samples: 301         # 取景机器检查逐帧+首末（41k 顶点 × 301 位姿在 numpy 里秒级）
+  normalize_horizontal: 3.0  # 最长水平尺寸归一（与 04 批次一致）
+  render_timeout_s: 900
+  max_orbit_iterations: 4    # 免费段 LLM 最多调参重渲次数
+  baseline_plan:             # 条件①（人工基线）的固定相机方案 = 05 紧凑取景实验的参数
+    elevation_degrees: 50.0
+    radius: 6.0
+    start_degrees: 0.0
+    direction: cw
+    margin: 0.05
+
+tripo:
+  base_url: https://openapi.tripo3d.ai/v3   # global 账号；若为 mainland 账号需换 .cn 域名（待组员确认）
+  model: v3.1-20260211                       # 显式传版本，SDK 默认是旧版 v2.5，不要依赖默认值
+  face_limit: 100000
+  model_seed: 4207
+  texture: false
+  pbr: false
+  geometry_quality: standard
+  credits_per_task: 20                       # 历史实测：多图建模 20 积分 ≈ $0.20
+  usd_per_credit: 0.01
+  poll_interval_s: 5
+  poll_timeout_s: 600
+
+runway:
+  base_url: https://api.dev.runwayml.com/v1
+  api_version: "2024-11-06"                  # X-Runway-Version 头，老批次实测值
+  model: seedance2_5
+  mode: reference
+  duration: 10
+  seed: 4207
+  audio: false                               # 显式关音频：默认开启会按 30 秒计费
+  data_uri_limit_bytes: 5242880              # 5MiB，超限走 ephemeral upload
+  qualities:
+    480p: { ratio: "854:480", credits: 300, usd: 3.00 }   # 调研表：480p 10 秒 $3.00（待线上核实）
+    720p: { ratio: "1280:720", credits: 450, usd: 4.50 }  # 720p 10s 实测 450 积分
+
+budget:
+  max_usd: 50.0
+
+gate:
+  auto_approve: false        # true = 付费前不再人工确认（仅建议 dry-run/实验批已授权时用）

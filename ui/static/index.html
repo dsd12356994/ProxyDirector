@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProxyDirector · Agent Console</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">A</div>
+  <h1>ProxyDirector</h1>
+  <span class="sub">Agent Console · Tripo → Blender → Seedance</span>
+  <div class="spacer"></div>
+  <span class="keydot" id="key-status"></span>
+  <span class="badge b-mut mono" id="budget-pill"></span>
+  <span class="badge b-mut mono" title="冻结几何 SHA-256（三组条件共用）" id="glb-pill"></span>
+</header>
+
+<div class="main">
+  <!-- 左列 -->
+  <div class="col">
+    <div class="card">
+      <div class="card-h"><h2>新建运行</h2></div>
+      <div class="card-b">
+        <div class="form-row"><label>后端</label><select id="f-backend"></select></div>
+        <div class="form-row"><label>条件</label>
+          <select id="f-condition">
+            <option value="agent">agent（LLM 决策）</option>
+            <option value="baseline">baseline（固定方案）</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Seed</label><input type="number" id="f-seed" value="4207"></div>
+        <label class="check"><input type="checkbox" id="f-dry" checked>
+          dry-run（不触网不扣费，Seedance 只冻结请求）</label>
+        <div class="warnbox" id="paid-warn">
+          关闭 dry-run 将<b>真实调用付费 API</b>（Seedance 每条 $3.00–$4.50，Tripo 缓存未命中时 $0.20）。
+          提交即视为已确认报价。
+        </div>
+        <button class="btn primary" id="btn-run" style="width:100%; justify-content:center">发起运行</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>运行记录</h2><span class="badge b-mut mono" id="runs-count"></span></div>
+      <div class="runlist" id="runlist"></div>
+    </div>
+  </div>
+
+  <!-- 右列 -->
+  <div class="col">
+    <div class="card">
+      <div class="card-h"><h2>管线 · 8 步 + 闸门</h2><span id="flow-note" class="mono" style="color:var(--faint)"></span></div>
+      <div class="card-b"><div class="flow" id="flow"></div></div>
+    </div>
+
+    <div id="detail">
+      <div class="empty">选择左侧一次运行查看详情，或发起新运行</div>
+    </div>
+  </div>
+</div>
+
+<!-- 付费确认弹窗 -->
+<div class="overlay" id="pay-overlay">
+  <div class="modal">
+    <h3>确认真实扣费提交</h3>
+    <div class="desc">本次运行将跳过 dry-run，真实调用付费 API。这是本系统的人工闸门，确认后等同于命令行输入 yes。</div>
+    <div class="quote" id="pay-quote"></div>
+    <label class="check"><input type="checkbox" id="pay-ack"> 我已核对单价与预算，授权本次扣费</label>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px">
+      <button class="btn" id="pay-cancel">取消</button>
+      <button class="btn danger" id="pay-go" disabled>确认提交</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
