@@ -7,7 +7,7 @@ backends:
   astra:                     # GPT 系。接入方式待确认（PolyU API 服务？），填好 base_url/model/key 后可用
     kind: openai_compatible
     base_url: https://api.openai.com/v1
-    model: gpt-5-astra
+    model: gpt-5-astra       # 2026-11-05 实测：key 有效但 OpenAI 拒绝香港地区(403)，待校网/PolyU 通道
     api_key_env: ASTRA_API_KEY
     supports_vision: true
   deepseek:                  # OpenAI 兼容端点；deepseek-flash 支持图片，v4-pro 不支持
@@ -15,6 +15,30 @@ backends:
     base_url: https://api.deepseek.com/v1
     model: deepseek-flash
     api_key_env: DEEPSEEK_API_KEY
+    supports_vision: true
+  glm:                       # 智谱国际端点（api.z.ai）； mainland 账号换 open.bigmodel.cn/api/paas/v4
+    kind: openai_compatible
+    base_url: https://api.z.ai/api/paas/v4
+    model: glm-5.3-flash     # 2026-11-05 实测 /models 可用；与 deepseek-flash 同档对比
+    api_key_env: GLM_API_KEY
+    supports_vision: true
+  kimi:                      # Moonshot 国际端点；内地账号换 api.moonshot.cn
+    kind: openai_compatible
+    base_url: https://api.moonshot.ai/v1
+    model: kimi-k2           # K 系工具调用强；具体版本名以控制台为准
+    api_key_env: KIMI_API_KEY
+    supports_vision: false
+  qwen:                      # 阿里 DashScope 的 OpenAI 兼容模式
+    kind: openai_compatible
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model: qwen-max
+    api_key_env: QWEN_API_KEY
+    supports_vision: true
+  gemini:                    # Google 的 OpenAI 兼容端点，香港可直连
+    kind: openai_compatible
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    model: gemini-2.5-flash
+    api_key_env: GEMINI_API_KEY
     supports_vision: true
 
 pipeline:
