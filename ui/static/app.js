@@ -205,13 +205,53 @@ function renderDetail() {
     </div>`;
 }
 
+/* ── 提示词扩写 ── */
+let expandedStyle = null;   // {spec, style_block}：AI 扩写预览结果
+
+$("#btn-expand").onclick = async () => {
+  const idea = $("#f-style").value.trim();
+  if (!idea) { toast("先输入一句风格想法"); return; }
+  const btn = $("#btn-expand");
+  btn.disabled = true; btn.textContent = "扩写中…";
+  try {
+    const r = await fetch("/api/expand_prompt", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idea, backend: $("#f-backend").value === "mock" ? null : $("#f-backend").value }),
+    });
+    const j = await r.json();
+    if (!r.ok) { toast(j.detail || "扩写失败"); return; }
+    expandedStyle = j;
+    const s = j.spec;
+    const lines = [
+      s.visual_style && `风格: ${s.visual_style}`,
+      s.lighting && `灯光: ${s.lighting}`,
+      s.background && `背景: ${s.background}`,
+      s.mood && `氛围: ${s.mood}`,
+      ...(s.extra_notes || []).map(n => `· ${n}`),
+    ].filter(Boolean);
+    $("#expand-result").textContent = lines.join("\n");
+    $("#expand-box").style.display = "block";
+    toast("风格块已生成（非镜头维度）");
+  } catch (e) { toast("扩写失败：" + e.message); }
+  finally { btn.disabled = false; btn.textContent = "AI 扩写"; }
+};
+
+function stylePayload() {
+  const idea = $("#f-style").value.trim();
+  if (!idea) return "";
+  // 已生成预览但未勾选"附加"→ 不带风格；预览只是预览，运行时服务端按同一规则重新扩写并落档
+  if ($("#expand-box").style.display !== "none" && !$("#f-use-style").checked) return "";
+  return idea;
+}
+
 /* ── 新建运行 ── */
 $("#f-dry").onchange = (e) => $("#paid-warn").classList.toggle("show", !e.target.checked);
 
 $("#btn-run").onclick = () => {
   const spec = {
     backend: $("#f-backend").value, condition: $("#f-condition").value,
-    seed: parseInt($("#f-seed").value) || 4207, dry_run: $("#f-dry").checked, ack_paid: false,
+    seed: parseInt($("#f-seed").value) || 4207, dry_run: $("#f-dry").checked,
+    ack_paid: false, style: stylePayload(),
   };
   if (!spec.dry_run) { openPayModal(spec); return; }
   launch(spec);

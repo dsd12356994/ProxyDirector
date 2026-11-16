@@ -109,7 +109,21 @@ def submit_request(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
         rw.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=dry_run)
 
 
-def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_approve: bool) -> None:
+def expand_style(cfg: dict, run_dir: Path, run_id: str, idea: str,
+                 backend: str | None) -> str:
+    """提示词扩写：一句想法 → 结构化风格块。产物与账目落 run 目录，风格块供两条条件路径共用。"""
+    from pipeline import prompt_expander
+    spec, block = prompt_expander.expand(idea, cfg, backend, run_id,
+                                         Path(cfg["_root"]) / "data" / "ledger.jsonl")
+    (run_dir / "style_expansion.json").write_text(
+        json.dumps({"idea": idea, "spec": spec.model_dump(), "style_block": block},
+                   ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"风格块已生成（{run_dir / 'style_expansion.json'}）：{block[:120]}…")
+    return block
+
+
+def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_approve: bool,
+                 style_block: str = "") -> None:
     """条件①：人工基线。固定相机方案（05 实验参数）+ 冻结模板，不经 LLM。"""
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
     glb = tripo.ensure_glb(cfg, run_dir, ledger_path, run_id, dry_run)
@@ -119,7 +133,7 @@ def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_appr
     if not fr.passed:
         print("基线取景未通过——需要人工调参后重跑（这正是基线条件的语义）")
         return
-    prompt = render_prompt(fr, video_duration(cfg))
+    prompt = render_prompt(fr, video_duration(cfg), style_block=style_block)
     (run_dir / "seedance_prompt.txt").write_text(prompt, encoding="utf-8")
     if dry_run:
         submit_request(cfg, run_dir, ledger_path, run_id, fr, prompt, dry_run=True)
@@ -143,6 +157,10 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true", help="不触网、不扣费；Seedance 只冻结请求")
     p.add_argument("--auto-approve", action="store_true", help="付费前跳过人工确认（UI 弹窗确认后等效）")
     p.add_argument("--run-id", default=None, help="指定运行目录名（UI 发起时用），只允许安全字符")
+    p.add_argument("--style", default=None,
+                   help="提示词扩写：一句风格想法（如'深色科技感'），LLM 扩成非镜头风格块附加到冻结模板")
+    p.add_argument("--expand-backend", default=None,
+                   help="扩写用的后端（默认取 run 后端；mock 时回退到 config.prompt_expand.backend）")
     args, extra = p.parse_known_args()
 
     cfg = load_config()
@@ -174,13 +192,19 @@ def main() -> int:
     run_id = run_dir.name
     print(f"运行目录：{run_dir}")
 
+    style_block = ""
+    if args.style:
+        style_block = expand_style(cfg, run_dir, run_id, args.style,
+                                   args.expand_backend or args.backend)
+
     if args.condition == "baseline":
-        run_baseline(cfg, run_dir, run_id, args.dry_run, args.auto_approve)
+        run_baseline(cfg, run_dir, run_id, args.dry_run, args.auto_approve, style_block)
     else:
         ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
         ctx = ToolContext(cfg=cfg, run_dir=run_dir, run_id=run_id,
                           dry_run=args.dry_run,
-                          auto_approve=args.auto_approve or cfg["gate"]["auto_approve"])
+                          auto_approve=args.auto_approve or cfg["gate"]["auto_approve"],
+                          style_block=style_block)
         ctx.glb = tripo.ensure_glb(cfg, run_dir, ledger_path, run_id, args.dry_run)
         output, usage = director.run_agent(ctx, args.backend)
         print("\n=== Agent 结论 ===")

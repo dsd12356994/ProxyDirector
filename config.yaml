@@ -106,6 +106,9 @@ kling:                                       # 全能参考：POST /omni-video/{
   poll_interval_s: 10
   poll_timeout_s: 900
 
+prompt_expand:
+  backend: deepseek          # 提示词扩写默认后端（run 后端为 mock 时的回退；真实后端则共用）
+
 budget:
   max_usd: 50.0
 

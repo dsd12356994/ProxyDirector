@@ -198,6 +198,29 @@ class RunSpec(BaseModel):
     seed: int = 4207
     dry_run: bool = True
     ack_paid: bool = False
+    style: str = ""            # 提示词扩写：一句风格想法（空=完全走原冻结模板）
+
+
+class ExpandSpec(BaseModel):
+    idea: str
+    backend: str | None = None
+
+
+@app.post("/api/expand_prompt")
+def expand_prompt(spec: ExpandSpec):
+    """提示词扩写预览：LLM 把一句想法扩成结构化非镜头风格块（不发起运行）。"""
+    idea = spec.idea.strip()
+    if not idea or len(idea) > 300:
+        raise HTTPException(400, "idea 需为 1-300 字")
+    from pipeline import prompt_expander
+    try:
+        ps, block = prompt_expander.expand(idea, CFG, spec.backend, "-",
+                                           LEDGER)
+    except ValueError as e:                     # 镜头词汇红线拦截
+        raise HTTPException(422, str(e))
+    except RuntimeError as e:
+        raise HTTPException(400, str(e))
+    return {"spec": ps.model_dump(), "style_block": block}
 
 
 @app.post("/api/runs")
@@ -211,6 +234,8 @@ def launch(spec: RunSpec):
     run_id = f"{time.strftime('%Y%m%d_%H%M%S')}_{spec.backend}_{spec.condition}_s{spec.seed}"
     cmd = [str(ROOT / ".venv/bin/python"), "run.py", "--backend", spec.backend,
            "--condition", spec.condition, "--seed", str(spec.seed), "--run-id", run_id]
+    if spec.style.strip():
+        cmd += ["--style", spec.style.strip()]
     if spec.dry_run:
         cmd.append("--dry-run")
     elif spec.ack_paid:

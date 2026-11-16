@@ -14,6 +14,13 @@ never writing geometry or executing generated code.
   reconstruction service.
 - **Pluggable by config** — swap GPT / DeepSeek / any OpenAI-compatible backend by editing
   `config.yaml` + `.env`; swap the video layer with one `video_backend:` line. No code changes.
+- **Prompt expansion (style channel)** — a one-line user idea is expanded by any configured
+  LLM into a structured style block (lighting / background / mood), appended to the frozen
+  template. Camera vocabulary is rejected at the door: the style channel can never touch
+  camera behavior. No idea given → template stays byte-identical (experiment comparability).
+- **Team wiki** — `knowledge/wiki.md` is injected into the director's system prompt:
+  framing-failure fixes, API pitfalls, money rules. Edit the file to teach the agent;
+  no vector DB, no retrieval infrastructure (by design).
 - **Money-safe by construction** — free local loop for camera iteration, a machine framing
   audit + human confirmation gate before any paid call, a JSONL ledger as the single source
   of cost truth, and no-resubmit state files for paid tasks.
@@ -47,6 +54,8 @@ cp .env.example .env            # fill API keys (optional: everything below runs
 .venv/bin/python run.py seed-tripo-cache       # seed the frozen GLB cache (once)
 .venv/bin/python run.py --backend mock --dry-run         # full pipeline rehearsal, $0
 .venv/bin/python run.py --condition baseline --dry-run   # manual-baseline condition
+.venv/bin/python run.py --backend deepseek --dry-run \
+  --style "深色科技感，冷色调"                   # 提示词扩写：LLM 扩成非镜头风格块
 ```
 
 Console UI（推荐，双击 `启动控制台.command` 或）：

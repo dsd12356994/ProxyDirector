@@ -168,3 +168,11 @@ td.r, th.r { text-align: right; }
 ::-webkit-scrollbar-thumb { background: #2c2c33; border-radius: 5px; border: 2px solid var(--bg); }
 ::-webkit-scrollbar-track { background: transparent; }
 .empty { color: var(--faint); text-align: center; padding: 42px 20px; font-size: 13px; }
+
+.expand-box {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: rgba(255,255,255,.02);
+}

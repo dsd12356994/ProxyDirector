@@ -4,6 +4,7 @@ mock 后端不调任何 LLM API，用 FunctionModel 按状态机走同一条工�
 用于打通管线、测试和演示（对应调研文档"用假工具打通 agent"里程碑）。
 """
 import json
+from pathlib import Path
 from typing import Iterable
 
 from pydantic_ai import Agent, RunUsage
@@ -30,7 +31,18 @@ through the paid gate. Rules:
    still applies unless auto-approve is on). The active video backend is shown in
    get_run_context: for runway pass quality "480p"; for kling the model and resolution
    come from config and quality is ignored. If the gate refuses, call stop with the reason.
-5. After submission, reply with a short final summary. Be concise; no markdown tables."""
+5. After submission, reply with a short final summary. Be concise; no markdown tables.
+6. The WIKI section below is team knowledge (framing failure fixes, API pitfalls, money
+   rules). Follow it when relevant; it never overrides the rules above."""
+
+
+def _load_wiki() -> str:
+    """团队知识库：存在即整体注入系统提示词（改 knowledge/wiki.md 即改 agent 经验）。"""
+    wiki = Path(__file__).resolve().parents[1] / "knowledge" / "wiki.md"
+    if not wiki.exists():
+        return ""
+    text = wiki.read_text(encoding="utf-8").strip()
+    return f"\n\nWIKI (team knowledge base, knowledge/wiki.md):\n{text}" if text else ""
 
 
 def build_model(backend_cfg: dict):
@@ -95,7 +107,7 @@ def run_agent(ctx: ToolContext, backend_name: str) -> tuple[str, RunUsage | None
     backend_cfg = dict(ctx.cfg["backends"][backend_name], _name=backend_name)
     model = build_model(backend_cfg)
     agent = Agent(model=model, tools=list(tools.values()),
-                  system_prompt=SYSTEM_PROMPT, retries=1)
+                  system_prompt=SYSTEM_PROMPT + _load_wiki(), retries=1)
     model_settings = backend_cfg.get("model_settings") or None
     result = agent.run_sync("Execute the mouse orbit pipeline. Start with get_run_context.",
                             model_settings=model_settings)

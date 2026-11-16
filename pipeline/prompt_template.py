@@ -21,7 +21,8 @@ def to_kling(text: str) -> str:
     return text
 
 
-def render_prompt(report, duration: int, emphasis_notes: str = "", kling: bool = False) -> str:
+def render_prompt(report, duration: int, emphasis_notes: str = "", kling: bool = False,
+                  style_block: str = "") -> str:
     emphasis = ""
     if emphasis_notes.strip():
         emphasis = " " + emphasis_notes.strip()
@@ -32,4 +33,6 @@ def render_prompt(report, duration: int, emphasis_notes: str = "", kling: bool =
         side_sequence=", then ".join(report.side_sequence),
         emphasis=emphasis,
     )
+    if style_block.strip():                          # 提示词扩写：只附加，不改冻结正文
+        text = text + "\n\n" + style_block.strip()
     return to_kling(text) if kling else text

@@ -27,6 +27,7 @@ class ToolContext:
     framing: FramingReport = field(default=None)
     prompt_path: Path = field(default=None)
     iterations: int = 0
+    style_block: str = ""      # 提示词扩写产物（只附加到冻结模板末尾，非镜头维度）
 
     @property
     def ledger_path(self) -> Path:
@@ -74,9 +75,11 @@ def make_tools(ctx: ToolContext):
             raise GateRefused("提示词要基于取景通过的渲染结果生成；先 plan_orbit 并通过检查")
         backend = ctx.cfg.get("video_backend", "runway")
         if backend == "kling":
-            text = render_prompt(ctx.framing, ctx.cfg["kling"]["duration"], emphasis_notes, kling=True)
+            text = render_prompt(ctx.framing, ctx.cfg["kling"]["duration"], emphasis_notes,
+                                 kling=True, style_block=ctx.style_block)
         else:
-            text = render_prompt(ctx.framing, ctx.cfg["runway"]["duration"], emphasis_notes)
+            text = render_prompt(ctx.framing, ctx.cfg["runway"]["duration"], emphasis_notes,
+                                 style_block=ctx.style_block)
         ctx.prompt_path = ctx.run_dir / "seedance_prompt.txt"
         ctx.prompt_path.write_text(text, encoding="utf-8")
         ledger.log({"run_id": ctx.run_id, "stage": "prompt", "provider": "local",
