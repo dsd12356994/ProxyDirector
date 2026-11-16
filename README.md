@@ -4,7 +4,8 @@
 
 ProxyDirector is an agent pipeline that turns four photographs of a static object into a
 10-second, single-take 360° product video: it reconstructs proxy geometry with Tripo,
-renders a compact-framing orbit reference in headless Blender, and hands it to Seedance 2.5 —
+renders a compact-framing orbit reference in headless Blender, and hands it to the
+configured video model (Kling 4.0 omni-reference by default, Runway Seedance 2.5 optional) —
 with the **LLM acting only as the camera director** (camera plan, prompt, retry decisions),
 never writing geometry or executing generated code.
 
@@ -12,7 +13,7 @@ never writing geometry or executing generated code.
   comparable or lower generation cost, when proxy geometry comes from a fixed multiview
   reconstruction service.
 - **Pluggable by config** — swap GPT / DeepSeek / any OpenAI-compatible backend by editing
-  `config.yaml` + `.env`. No code changes.
+  `config.yaml` + `.env`; swap the video layer with one `video_backend:` line. No code changes.
 - **Money-safe by construction** — free local loop for camera iteration, a machine framing
   audit + human confirmation gate before any paid call, a JSONL ledger as the single source
   of cost truth, and no-resubmit state files for paid tasks.
@@ -33,7 +34,7 @@ photos ─▶ Tripo multiview ─▶ GLB checks ─▶ Blender orbit render ─�
                                               │
                                         GATE: human confirm
                                               ▼
-                                  Seedance 2.5 (Runway) ─▶ ledger ─▶ eval
+                            video model (config: kling | runway) ─▶ ledger ─▶ eval
 ```
 
 ## Quickstart
@@ -82,7 +83,8 @@ pipeline/
   blender_step.py       宿主侧 Blender/ffmpeg 编排
   worker_render.py      无头 Blender 工人（解析紧凑取景 + 逐帧审计）
   runway.py             Runway Seedance 客户端（audio:false、状态文件、账本）
-  prompt_template.py    冻结提示词模板（数字由审计结果填充）
+  kling.py              Kling 全能参考客户端（api-beijing、积分计费、素材发布 GitHub release）
+  prompt_template.py    冻结提示词模板（数字由审计结果填充；Kling 版仅替换素材 @id 指代）
 ui/                     FastAPI 控制台（server.py + static/）
 assets/                 冻结输入：四张白底图 + 种子 GLB（勿改动）
 data/                   运行产物 / 缓存 / 账本（已 gitignore）
@@ -94,6 +96,9 @@ data/                   运行产物 / 缓存 / 账本（已 gitignore）
 - Tripo 视图按显式槽位（front/right/back/left）传入，避开位置参数左右互换不报错的坑；
   `model_version` 显式指定；轮询带超时。
 - Runway 显式 `audio: false`、`duration: 10`；提交前检查参考视频是否超 5 MiB data-URI 上限。
+- Kling 全能参考：`feature_video` 只收公网 URL → 参考视频与冻结视图发布到本仓库 GitHub
+  release（gh CLI；上传后回验 200）；`audio: original` 配静音参考视频实现无声输出；
+  计费按积分（输入 10s + 输出 10s = 20s × 0.4 = 8 积分/条，Flash 720p），失败任务实测不扣积分。
 - 付费提交先写状态文件；恢复只轮询原任务 ID，绝不重发 POST；预算闸门拦截超支调用。
 - **Blender 5.x 脚本崩溃时退出码是 0** —— 失败靠产物缺失 + Traceback 判定，不能信退出码（实测踩过）。
 - 紧凑取景算法移植自已验证实验（对拍：FOV 19.97° vs 20.03°、上下最小边距 5.01% vs 5.01%），
@@ -102,5 +107,7 @@ data/                   运行产物 / 缓存 / 账本（已 gitignore）
 ## Status
 
 本地已用 mock 后端全流程验证（真实 300 帧渲染、取景审计、闸门逻辑、账本、dry-run 请求冻结）。
-网络路径（Tripo / Runway / LLM 后端）代码就绪，待填 API key 后做首次小额真实验证。
-预算：上限 $50；480p 每条约 $3.00；Tripo 重建 $0.20/次（缓存命中免费）。
+LLM 后端已实测：DeepSeek / GLM / GPT-6-astra（全流程 dry-run 通过）；成片层当前为
+Kling 4.0 Flash（api-beijing 新域名 + api-key Bearer 鉴权，已实测任务提交成功）。
+预算：LLM 上限 $50；Kling Flash 720p 8 积分/条（试用旗舰包 56 积分 ≈ 7 条）；
+Runway 480p 每条约 $3.00；Tripo 重建 $0.20/次（缓存命中免费）。

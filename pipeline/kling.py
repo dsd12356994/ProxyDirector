@@ -93,13 +93,26 @@ def _ensure_release(cfg: dict) -> None:
 
 
 def publish_asset(cfg: dict, path: Path, filename: str) -> str:
-    """把文件传到 GitHub release（已存在同名资产则跳过），返回公网 URL。"""
+    """把文件传到 GitHub release（先复制成目标资产名再上传——gh 只认 basename，
+    `path#name` 重命名语法实测不生效）；已存在同名资产则跳过；上传后回验公网 200。"""
     k = cfg["kling"]
     _ensure_release(cfg)
     resp = json.loads(_gh(k["gh_asset_repo"], "release", "view", k["gh_asset_tag"], "--json", "assets"))
     if filename not in {a["name"] for a in resp.get("assets", [])}:
-        _gh(k["gh_asset_repo"], "release", "upload", k["gh_asset_tag"], str(path))
-    return _asset_url(cfg, filename)
+        import shutil
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:            # basename 即资产名
+            staged = Path(td) / filename
+            shutil.copy2(path, staged)
+            _gh(k["gh_asset_repo"], "release", "upload", k["gh_asset_tag"], str(staged))
+    url = _asset_url(cfg, filename)
+    with httpx.Client(timeout=60, follow_redirects=True) as client:
+        for attempt in range(6):                     # 新资产 CDN 生效有延迟，重试回验
+            r = client.get(url)
+            if r.status_code == 200 and len(r.content) == path.stat().st_size:
+                return url
+            time.sleep(10)
+    raise RuntimeError(f"素材发布后回验失败 {r.status_code}：{url}")
 
 
 VIEW_ASSET_NAMES = {"view_1.png", "view_2.png", "view_3.png", "view_4.png"}
