@@ -93,17 +93,53 @@ def overview():
             backends[name] = {"model": "scripted", "has_key": True}
     cache_dir = ROOT / "data" / "cache" / "tripo"
     runs = sorted(RUNS_DIR.glob("*"), key=lambda p: p.stat().st_mtime, reverse=True) if RUNS_DIR.exists() else []
+    k = CFG.get("kling")
+    kling_info = None
+    if k:
+        kling_info = {"model": k["model"], "resolution": k["resolution"],
+                      "duration": k["duration"],
+                      "credits_per_video": round(2 * k["duration"] * k["rates"][k["model"]][k["resolution"]], 2)}
     return {
         "backends": backends,
+        "video_backend": CFG.get("video_backend", "runway"),
         "budget": {"max_usd": CFG["budget"]["max_usd"],
                    "spent_usd": ledger.spent_usd(LEDGER),
                    "runs_total": len(runs)},
         "runway_key": bool(api_key("RUNWAYML_API_SECRET")),
+        "kling_key": bool(api_key(k["api_key_env"])) if k else False,
         "tripo_key": bool(api_key("TRIPO_API_KEY")),
         "frozen_glb_sha256": (tripo.digest(ROOT / CFG["pipeline"]["seed_glb"])
                               if (ROOT / CFG["pipeline"]["seed_glb"]).exists() else None)[:16],
         "qualities": CFG["runway"]["qualities"],
+        "kling": kling_info,
     }
+
+
+_KLING_PACK_CACHE = {"t": 0.0, "data": None}
+
+
+@app.get("/api/kling/packs")
+def kling_packs():
+    """Kling 资源包实时余量（免费接口，60s 缓存；余量口径有 12h 延迟）。"""
+    k = CFG.get("kling")
+    if not k or not api_key(k["api_key_env"]):
+        return {"packs": [], "remaining": None}
+    now = time.time()
+    if _KLING_PACK_CACHE["data"] is None or now - _KLING_PACK_CACHE["t"] > 60:
+        from pipeline import kling as kling_mod
+        try:
+            packs = kling_mod.packs(CFG)
+            _KLING_PACK_CACHE["data"] = {
+                "packs": [{"name": p.get("resource_pack_name"), "tier": p.get("resource_pack_tier"),
+                           "models": p.get("resource_pack_applicable_models"),
+                           "remaining": p.get("remaining_quantity"),
+                           "total": p.get("total_quantity"), "status": p.get("status")}
+                          for p in packs],
+                "remaining": kling_mod.credits_remaining(CFG)}
+            _KLING_PACK_CACHE["t"] = now
+        except Exception as e:
+            return {"packs": [], "remaining": None, "error": str(e)[:200]}
+    return _KLING_PACK_CACHE["data"]
 
 
 @app.get("/api/runs")

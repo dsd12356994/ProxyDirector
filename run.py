@@ -41,7 +41,23 @@ def check(cfg: dict) -> int:
     key = api_key("TRIPO_API_KEY")
     print(("OK  " if key else "--  ") + "  TRIPO_API_KEY（建模用，缓存命中可不需要）")
     key = api_key("RUNWAYML_API_SECRET")
-    print(("OK  " if key else "--  ") + "  RUNWAYML_API_SECRET（成片生成必需）")
+    print(("OK  " if key else "--  ") + "  RUNWAYML_API_SECRET（video_backend=runway 时必需）")
+    if cfg.get("video_backend") == "kling":
+        key = api_key(cfg["kling"]["api_key_env"])
+        print(("OK  " if key else "MISS") + f"  {cfg['kling']['api_key_env']}（video_backend=kling）")
+        if key:
+            from pipeline import kling as kling_mod
+            try:
+                packs = kling_mod.packs(cfg)
+                if packs:
+                    for p in packs:
+                        print(f"     资源包：{p['resource_pack_name']} 剩余 "
+                              f"{p.get('remaining_quantity')}（{p.get('resource_pack_applicable_models')}）")
+                else:
+                    print("     注意：查无生效资源包；Kling 4.0 系需旗舰包或现金余额")
+            except Exception as e:                       # 查询失败不阻断自检
+                print(f"     资源包查询失败（{str(e)[:120]}）")
+        ok &= bool(key)
     for b in cfg["backends"]:
         if cfg["backends"][b].get("kind") == "openai_compatible":
             env = cfg["backends"][b]["api_key_env"]
@@ -61,6 +77,27 @@ def new_run_dir(cfg: dict, backend: str, condition: str, seed: int) -> Path:
     return d
 
 
+def video_duration(cfg: dict) -> int:
+    return cfg["kling"]["duration"] if cfg.get("video_backend") == "kling" \
+        else cfg["runway"]["duration"]
+
+
+def freeze_request(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
+                   fr, prompt: str) -> None:
+    """按当前成片后端冻结一份请求（不触网不扣费）。"""
+    views_dir = resolve(cfg["pipeline"]["views_dir"])
+    view_files = {n: views_dir / n for n in tripo.SLOT_OF_VIEW}
+    if cfg.get("video_backend") == "kling":
+        from pipeline import kling as kling_mod
+        body, record = kling_mod.build_request(cfg, run_id, Path(fr.video_path),
+                                               view_files, prompt, dry_run=True)
+        kling_mod.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=True)
+    else:
+        from pipeline import runway as rw
+        body, record = rw.build_request(cfg, Path(fr.video_path), view_files, prompt, "480p")
+        rw.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=True)
+
+
 def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_approve: bool) -> None:
     """条件①：人工基线。固定相机方案（05 实验参数）+ 冻结模板，不经 LLM。"""
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
@@ -71,15 +108,10 @@ def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_appr
     if not fr.passed:
         print("基线取景未通过——需要人工调参后重跑（这正是基线条件的语义）")
         return
-    prompt = render_prompt(fr, cfg["runway"]["duration"])
+    prompt = render_prompt(fr, video_duration(cfg))
     (run_dir / "seedance_prompt.txt").write_text(prompt, encoding="utf-8")
     if dry_run:
-        from pipeline import runway as rw
-        views_dir = resolve(cfg["pipeline"]["views_dir"])
-        body, record = rw.build_request(cfg, Path(fr.video_path),
-                                        {n: views_dir / n for n in tripo.SLOT_OF_VIEW},
-                                        prompt, "480p")
-        rw.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=True)
+        freeze_request(cfg, run_dir, ledger_path, run_id, fr, prompt)
         print("[dry-run] 基线请求已冻结：", run_dir / "commercial" / "frozen_request.json")
     else:
         print("基线成片提交请在闸门确认后执行真实运行（去掉 --dry-run）")
@@ -119,7 +151,7 @@ def main() -> int:
         if not _re.fullmatch(r"[0-9A-Za-z_.-]+", args.run_id):
             raise SystemExit("--run-id 含非法字符")
         run_dir = runs_base / args.run_id
-        run_dir.mkdir(parents=True)
+        run_dir.mkdir(parents=True, exist_ok=True)   # 允许同目录恢复：付费任务只轮询不重发
     else:
         run_dir = new_run_dir(cfg, args.backend, args.condition, args.seed)
     run_id = run_dir.name

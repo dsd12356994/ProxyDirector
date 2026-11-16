@@ -26,9 +26,10 @@ through the paid gate. Rules:
    top/bottom margins fail) and retry. Never fabricate a passing result.
 3. Only after a PASSED framing report, call build_seedance_prompt. Keep emphasis_notes
    empty or one short sentence; the template is frozen.
-4. submit_seedance spends real money. Call it only with quality "480p" and confirm=true
-   (the human gate still applies unless auto-approve is on). If the gate refuses, call
-   stop with the reason.
+4. submit_seedance spends real money. Call it only with confirm=true (the human gate
+   still applies unless auto-approve is on). The active video backend is shown in
+   get_run_context: for runway pass quality "480p"; for kling the model and resolution
+   come from config and quality is ignored. If the gate refuses, call stop with the reason.
 5. After submission, reply with a short final summary. Be concise; no markdown tables."""
 
 

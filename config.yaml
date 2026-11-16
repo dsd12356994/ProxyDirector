@@ -41,13 +41,15 @@ backends:
     api_key_env: GEMINI_API_KEY
     supports_vision: true
 
+video_backend: kling            # 成片层选择：kling | runway。同一实验批次内不混用两家
+
 pipeline:
   views_dir: assets/views                  # 冻结的四个视角白底图（与 20260921 批次逐字节一致）
   seed_glb: assets/seed_tripo/model.glb    # 冻结几何：该批次 Tripo 实际输出，三组条件共用
   blender_bin: /Applications/Blender.app/Contents/MacOS/Blender
   ffmpeg_bin: ffmpeg
-  width: 960
-  height: 540
+  width: 1280
+  height: 720                   # Kling feature_video 要求宽高均 ≥700px；取景数学与分辨率无关
   fps: 30
   frames: 300                # 10 秒整圈
   audit_samples: 301         # 取景机器检查逐帧+首末（41k 顶点 × 301 位姿在 numpy 里秒级）
@@ -86,6 +88,23 @@ runway:
   qualities:
     480p: { ratio: "854:480", credits: 300, usd: 3.00 }   # 调研表：480p 10 秒 $3.00（待线上核实）
     720p: { ratio: "1280:720", credits: 450, usd: 4.50 }  # 720p 10s 实测 450 积分
+
+kling:                                       # 全能参考：POST /omni-video/{model}，api-beijing 新域名
+  base_url: https://api-beijing.klingai.com
+  api_key_env: KLING_API_KEY
+  model: kling-4.0-flash                     # 试用旗舰包仅覆盖 4.0 / 4.0-flash；flash 最便宜
+  resolution: 720p                           # flash 仅 720p；4.0 可 1080p
+  duration: 10
+  aspect_ratio: "16:9"
+  audio: original                            # omni 无静音枚举：参考视频本身无声→继承静音
+  watermark: false
+  rates:                                     # 有输入视频时积分/秒；输入≤输出 → 总时长=2×输出
+    kling-4.0: { "720p": 0.6, "1080p": 0.9 }
+    kling-4.0-flash: { "720p": 0.4 }
+  gh_asset_repo: dsd12356994/ProxyDirector   # feature_video 只收公网 URL → 素材发布到本仓库 release
+  gh_asset_tag: pipeline-assets
+  poll_interval_s: 10
+  poll_timeout_s: 900
 
 budget:
   max_usd: 50.0

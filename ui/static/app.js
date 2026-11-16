@@ -55,6 +55,7 @@ function renderTopbar() {
   $("#glb-pill").textContent = "GLB " + (o.frozen_glb_sha256 || "—");
   $("#key-status").innerHTML =
     `<span class="keydot"><i class="dot ${o.runway_key ? "on" : ""}"></i>Runway</span>` +
+    (o.kling_key !== undefined ? `<span class="keydot" style="margin-left:12px"><i class="dot ${o.kling_key ? "on" : ""}"></i>Kling${o.video_backend === "kling" ? " ✓当前" : ""}</span>` : "") +
     `<span class="keydot" style="margin-left:12px"><i class="dot ${o.tripo_key ? "on" : ""}"></i>Tripo</span>`;
 }
 
@@ -168,7 +169,7 @@ function renderDetail() {
 
   const ledgerRows = (d.ledger || []).map(r => `
     <tr><td>${(r.stage || "")}</td><td>${r.status || ""}</td>
-    <td class="r mono">${r.cost_usd ? fmtUSD(r.cost_usd) : "—"}</td></tr>`).join("");
+    <td class="r mono">${r.kling_credits ? r.kling_credits + "积分" : r.cost_usd ? fmtUSD(r.cost_usd) : "—"}</td></tr>`).join("");
 
   el.innerHTML = `
     ${stats}
@@ -183,11 +184,16 @@ function renderDetail() {
           ${d.prompt_text ? '<span class="badge b-ok">已生成</span>' : '<span class="badge b-mut">未生成</span>'}</div>
           <div class="card-b"><div class="prompt-box mono">${(d.prompt_text || "（取景通过后生成）")}</div></div></div>
         ${d.frozen_request ? `<div class="card"><div class="card-h"><h2>冻结请求</h2>
-          <span class="badge ${d.frozen_request.estimated_usd >= 4 ? "b-paid" : "b-warn"}">${d.frozen_request.quality} · ${fmtUSD(d.frozen_request.estimated_usd)}</span></div>
+          <span class="badge ${d.frozen_request.provider === "kling" ? "b-paid" : d.frozen_request.estimated_usd >= 4 ? "b-paid" : "b-warn"}">${d.frozen_request.provider === "kling" ? `${d.frozen_request.model} · ${d.frozen_request.estimated_kling_credits}积分` : `${d.frozen_request.quality} · ${fmtUSD(d.frozen_request.estimated_usd)}`}</span></div>
           <div class="card-b"><table>
+            ${d.frozen_request.provider === "kling" ? `
+            <tr><td>模型/模式</td><td class="mono">${d.frozen_request.model} · 全能参考（feature_video + 4×refer_image）</td></tr>
+            <tr><td>分辨率/时长</td><td class="mono">${d.frozen_request.resolution} · ${d.frozen_request.duration}s · ${d.frozen_request.aspect_ratio} · audio ${d.frozen_request.audio}</td></tr>
+            <tr><td>预估扣费</td><td class="mono">${d.frozen_request.estimated_kling_credits} 积分（输入10s+输出10s 计费）</td></tr>
+            <tr><td>素材发布</td><td class="mono" style="font-size:10.5px">${d.frozen_request.assets_published ? "已上传 GitHub release" : "未上传（dry-run）"}</td></tr>` : `
             <tr><td>模式</td><td class="mono">${d.frozen_request.model} / ${d.frozen_request.mode}</td></tr>
             <tr><td>比例 / 时长</td><td class="mono">${d.frozen_request.ratio} · ${d.frozen_request.duration}s · seed ${d.frozen_request.seed}</td></tr>
-            <tr><td>预估扣费</td><td class="mono">${d.frozen_request.estimated_credits} credits ≈ ${fmtUSD(d.frozen_request.estimated_usd)}</td></tr>
+            <tr><td>预估扣费</td><td class="mono">${d.frozen_request.estimated_credits} credits ≈ ${fmtUSD(d.frozen_request.estimated_usd)}</td></tr>`}
             <tr><td>请求哈希</td><td class="mono" style="font-size:10.5px">${d.frozen_request.request_sha256.slice(0, 24)}…</td></tr>
           </table></div></div>` : ""}
         <div class="card"><div class="card-h"><h2>账本（本次运行）</h2>
@@ -212,10 +218,17 @@ $("#btn-run").onclick = () => {
 };
 
 function openPayModal(spec) {
-  const q = state.overview.qualities;
-  $("#pay-quote").innerHTML =
-    `Seedance <b>${fmtUSD(q["720p"].usd)}</b>/条(720p) 或 <b>${fmtUSD(q["480p"].usd)}</b>/条(480p，10 秒)；` +
-    `Tripo 缓存未命中时 $0.20。当前已花费 ${fmtUSD(state.overview.budget.spent_usd)} / $${state.overview.budget.max_usd}。`;
+  const o = state.overview;
+  let quote;
+  if (o.video_backend === "kling" && o.kling) {
+    quote = `Kling <b>${o.kling.model}</b> ${o.kling.resolution} · ${o.kling.duration}s ≈ <b>${o.kling.credits_per_video} 积分</b>/条（按积分资源包扣）；` +
+      `Tripo 缓存未命中时 $0.20。LLM 已花费 ${fmtUSD(o.budget.spent_usd)} / $${o.budget.max_usd}。`;
+  } else {
+    const q = o.qualities;
+    quote = `Seedance <b>${fmtUSD(q["720p"].usd)}</b>/条(720p) 或 <b>${fmtUSD(q["480p"].usd)}</b>/条(480p，10 秒)；` +
+      `Tripo 缓存未命中时 $0.20。当前已花费 ${fmtUSD(o.budget.spent_usd)} / $${o.budget.max_usd}。`;
+  }
+  $("#pay-quote").innerHTML = quote;
   $("#pay-overlay").classList.add("show");
   $("#pay-ack").checked = false; $("#pay-go").disabled = true;
   $("#pay-go").onclick = () => { $("#pay-overlay").classList.remove("show"); launch({ ...spec, ack_paid: true }); };

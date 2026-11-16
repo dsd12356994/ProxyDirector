@@ -1,11 +1,12 @@
 """LLM 的工具层。上排（本地免费）与下排（付费）之间隔着闸门：submit_seedance 必须过
-取景检查 + 人工确认（或显式 auto_approve）才放行。所有调用都写账本。"""
+取景检查 + 人工确认（或显式 auto_approve）才放行。所有调用都写账本。
+成片层可插拔：cfg.video_backend = runway | kling，工具签名不变、内部路由。"""
 import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import blender_step, ledger, runway, tripo
+from . import blender_step, kling, ledger, runway, tripo
 from .models import FramingReport, ShotPlan
 from .prompt_template import render_prompt
 
@@ -44,6 +45,7 @@ def make_tools(ctx: ToolContext):
                                  "构图紧凑（安全边距约 5%），无切镜无反转",
             "budget_usd": ctx.cfg["budget"]["max_usd"], "spent_usd_all_runs": spent,
             "dry_run": ctx.dry_run, "auto_approve": ctx.auto_approve,
+            "video_backend": ctx.cfg.get("video_backend", "runway"),
             "max_orbit_iterations": ctx.cfg["pipeline"]["max_orbit_iterations"],
             "glb_frozen_sha256": tripo.digest(ctx.glb) if ctx.glb else None,
             "note": "plan_orbit 与取景检查免费，可反复调；submit_seedance 花钱，需先通过取景检查",
@@ -67,10 +69,14 @@ def make_tools(ctx: ToolContext):
         return json.dumps(ctx.framing.model_dump(), ensure_ascii=False)
 
     def build_seedance_prompt(emphasis_notes: str = "") -> str:
-        """[免费] 用已通过的取景结果按冻结模板生成 Seedance 提示词。emphasis_notes 可加 1-2 句补充要求。"""
+        """[免费] 用已通过的取景结果按冻结模板生成成片提示词。emphasis_notes 可加 1-2 句补充要求。"""
         if ctx.framing is None or not ctx.framing.passed:
             raise GateRefused("提示词要基于取景通过的渲染结果生成；先 plan_orbit 并通过检查")
-        text = render_prompt(ctx.framing, ctx.cfg["runway"]["duration"], emphasis_notes)
+        backend = ctx.cfg.get("video_backend", "runway")
+        if backend == "kling":
+            text = render_prompt(ctx.framing, ctx.cfg["kling"]["duration"], emphasis_notes, kling=True)
+        else:
+            text = render_prompt(ctx.framing, ctx.cfg["runway"]["duration"], emphasis_notes)
         ctx.prompt_path = ctx.run_dir / "seedance_prompt.txt"
         ctx.prompt_path.write_text(text, encoding="utf-8")
         ledger.log({"run_id": ctx.run_id, "stage": "prompt", "provider": "local",
@@ -78,16 +84,41 @@ def make_tools(ctx: ToolContext):
         return f"提示词已生成（{ctx.prompt_path}）：\n{text}"
 
     def submit_seedance(quality: str, confirm: bool) -> str:
-        """[付费闸门] 提交 Seedance 生成。前置条件：取景通过 + 提示词已生成 + confirm=true。
-        价格：480p=$3.00 / 720p=$4.50（10 秒）。"""
-        if quality not in ctx.cfg["runway"]["qualities"]:
-            return f"quality 只支持 {list(ctx.cfg['runway']['qualities'])}"
+        """[付费闸门] 提交成片生成。前置条件：取景通过 + 提示词已生成 + confirm=true。
+        Runway 后端：quality 480p=$3.00 / 720p=$4.50（10 秒）。
+        Kling 后端：模型/分辨率来自 config（quality 参数忽略），按积分计费。"""
         if ctx.framing is None or not ctx.framing.passed:
             raise GateRefused("取景检查未通过，禁止提交")
         if ctx.prompt_path is None or not ctx.prompt_path.exists():
             raise GateRefused("提示词未生成，禁止提交")
         if not confirm:
             raise GateRefused("confirm=false：付费提交必须显式确认")
+        views_dir = Path(ctx.cfg["_root"]) / ctx.cfg["pipeline"]["views_dir"]
+        view_files = {n: views_dir / n for n in tripo.SLOT_OF_VIEW}
+        prompt_text = ctx.prompt_path.read_text(encoding="utf-8")
+        backend = ctx.cfg.get("video_backend", "runway")
+
+        if backend == "kling":
+            est = kling.estimate_credits(ctx.cfg,
+                                         ctx.cfg["pipeline"]["frames"] / ctx.cfg["pipeline"]["fps"],
+                                         ctx.cfg["kling"]["duration"])
+            if not ctx.dry_run and not ctx.auto_approve:
+                answer = input(f"\n[付费闸门] Kling {ctx.cfg['kling']['model']} "
+                               f"{ctx.cfg['kling']['resolution']} {ctx.cfg['kling']['duration']}s "
+                               f"预计 {est} 积分，输入 yes 提交 / 其他放弃： ").strip().lower()
+                if answer != "yes":
+                    ledger.log({"run_id": ctx.run_id, "stage": "seedance", "provider": "kling",
+                                "status": "gate_declined_by_human", "cost_usd": 0.0, "mock": False},
+                               ctx.ledger_path)
+                    raise GateRefused("人工闸门未放行")
+            body, record = kling.build_request(ctx.cfg, ctx.run_id, Path(ctx.framing.video_path),
+                                               view_files, prompt_text, dry_run=ctx.dry_run)
+            video = kling.submit(ctx.cfg, ctx.run_dir, ctx.ledger_path, ctx.run_id,
+                                 body, record, ctx.dry_run)
+            return ("[dry-run] 请求已冻结未触网：" if ctx.dry_run else "生成完成：") + str(video)
+
+        if quality not in ctx.cfg["runway"]["qualities"]:
+            return f"quality 只支持 {list(ctx.cfg['runway']['qualities'])}"
         if not ctx.dry_run and not ctx.auto_approve:
             q = ctx.cfg["runway"]["qualities"][quality]
             answer = input(f"\n[付费闸门] {quality} 预计 {q['credits']} 积分 ≈ ${q['usd']:.2f}，"
@@ -97,11 +128,8 @@ def make_tools(ctx: ToolContext):
                             "status": "gate_declined_by_human", "cost_usd": 0.0, "mock": False},
                            ctx.ledger_path)
                 raise GateRefused("人工闸门未放行")
-        views_dir = Path(ctx.cfg["_root"]) / ctx.cfg["pipeline"]["views_dir"]
-        view_files = {n: views_dir / n for n in tripo.SLOT_OF_VIEW}
         body, record = runway.build_request(ctx.cfg, Path(ctx.framing.video_path),
-                                            view_files, ctx.prompt_path.read_text(encoding="utf-8"),
-                                            quality)
+                                            view_files, prompt_text, quality)
         video = runway.submit(ctx.cfg, ctx.run_dir, ctx.ledger_path, ctx.run_id,
                               body, record, ctx.dry_run)
         return ("[dry-run] 请求已冻结未触网：" if ctx.dry_run else "生成完成：") + str(video)

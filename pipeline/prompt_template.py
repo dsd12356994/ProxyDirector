@@ -8,14 +8,28 @@ The FOUR reference PHOTOS are appearance and identity references only, not instr
 The mouse and every part of its cable remain completely stationary and rigid on a white studio tabletop. Camera makes exactly one smooth continuous 360-degree orbit over {duration} seconds at a constant elevated angle of about {elevation_degrees:.0f} degrees, constant distance and fixed lens, following the reference video. The four sides pass in order ({side_sequence}) and the camera returns to its initial view. No scene cuts, jumps, reversal, repeated partial arcs, object rotation, wire motion or object deformation. Preserve the reference video compact composition all the way through. White seamless background, soft lighting and faint contact shadow. No captions, hands or furniture. Silent video."""
 
 
-def render_prompt(report, duration: int, emphasis_notes: str = "") -> str:
+def to_kling(text: str) -> str:
+    """Kling 全能参考适配：素材指代改为 @id 语法（contents 里的 video_1/image_1..4），
+    冻结文本的其余部分逐字保留。"""
+    text = text.replace("The supplied gray reference VIDEO is the authority",
+                        "The supplied gray reference video @video_1 is the authority")
+    text = text.replace("The FOUR reference PHOTOS are appearance and identity references only",
+                        "The four reference photos @image_1 @image_2 @image_3 @image_4 are "
+                        "appearance and identity references only")
+    text = text.replace("Use the coarse video for the location",
+                        "Use the coarse video @video_1 for the location")
+    return text
+
+
+def render_prompt(report, duration: int, emphasis_notes: str = "", kling: bool = False) -> str:
     emphasis = ""
     if emphasis_notes.strip():
         emphasis = " " + emphasis_notes.strip()
-    return TEMPLATE.format(
+    text = TEMPLATE.format(
         margin_percent=round(min(report.min_margins_lbrt) * 100),
         duration=duration,
         elevation_degrees=report.plan.elevation_degrees,
         side_sequence=", then ".join(report.side_sequence),
         emphasis=emphasis,
     )
+    return to_kling(text) if kling else text
