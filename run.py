@@ -82,20 +82,31 @@ def video_duration(cfg: dict) -> int:
         else cfg["runway"]["duration"]
 
 
-def freeze_request(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
-                   fr, prompt: str) -> None:
-    """按当前成片后端冻结一份请求（不触网不扣费）。"""
+def _paid_gate_quote(cfg: dict) -> str:
+    if cfg.get("video_backend") == "kling":
+        from pipeline import kling as kling_mod
+        est = kling_mod.estimate_credits(
+            cfg, cfg["pipeline"]["frames"] / cfg["pipeline"]["fps"], cfg["kling"]["duration"])
+        return (f"Kling {cfg['kling']['model']} {cfg['kling']['resolution']} "
+                f"{cfg['kling']['duration']}s 预计 {est} 积分")
+    q = cfg["runway"]["qualities"]["480p"]
+    return f"Runway 480p 预计 {q['credits']} 积分 ≈ ${q['usd']:.2f}"
+
+
+def submit_request(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
+                   fr, prompt: str, dry_run: bool) -> None:
+    """按当前成片后端提交（dry_run=True 时只冻结请求不触网不扣费）。"""
     views_dir = resolve(cfg["pipeline"]["views_dir"])
     view_files = {n: views_dir / n for n in tripo.SLOT_OF_VIEW}
     if cfg.get("video_backend") == "kling":
         from pipeline import kling as kling_mod
         body, record = kling_mod.build_request(cfg, run_id, Path(fr.video_path),
-                                               view_files, prompt, dry_run=True)
-        kling_mod.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=True)
+                                               view_files, prompt, dry_run=dry_run)
+        kling_mod.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=dry_run)
     else:
         from pipeline import runway as rw
         body, record = rw.build_request(cfg, Path(fr.video_path), view_files, prompt, "480p")
-        rw.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=True)
+        rw.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=dry_run)
 
 
 def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_approve: bool) -> None:
@@ -111,10 +122,17 @@ def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_appr
     prompt = render_prompt(fr, video_duration(cfg))
     (run_dir / "seedance_prompt.txt").write_text(prompt, encoding="utf-8")
     if dry_run:
-        freeze_request(cfg, run_dir, ledger_path, run_id, fr, prompt)
+        submit_request(cfg, run_dir, ledger_path, run_id, fr, prompt, dry_run=True)
         print("[dry-run] 基线请求已冻结：", run_dir / "commercial" / "frozen_request.json")
-    else:
-        print("基线成片提交请在闸门确认后执行真实运行（去掉 --dry-run）")
+        return
+    if not auto_approve:
+        answer = input(f"\n[付费闸门][基线] {_paid_gate_quote(cfg)}，"
+                       f"输入 yes 提交 / 其他放弃： ").strip().lower()
+        if answer != "yes":
+            print("人工闸门未放行，基线未提交")
+            return
+    submit_request(cfg, run_dir, ledger_path, run_id, fr, prompt, dry_run=False)
+    print("基线成片：", run_dir / "commercial" / "video.mp4")
 
 
 def main() -> int:
