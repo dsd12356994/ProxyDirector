@@ -4,10 +4,10 @@
 backends:
   mock:                      # 本地脚本模型，不调任何 LLM API，用于打通和演示
     kind: mock
-  astra:                     # GPT 系。接入方式待确认（PolyU API 服务？），填好 base_url/model/key 后可用
-    kind: openai_compatible
+  astra:                     # GPT 系（gpt-6-astra 需走 /v1/responses 才能带工具调用）
+    kind: openai_responses
     base_url: https://api.openai.com/v1
-    model: gpt-5-astra       # 2026-11-05 实测：key 有效但 OpenAI 拒绝香港地区(403)，待校网/PolyU 通道
+    model: gpt-6-astra       # 2026-11-16 实测可用（当时 403 地区封锁，换网络后通）
     api_key_env: ASTRA_API_KEY
     supports_vision: true
   deepseek:                  # OpenAI 兼容端点；deepseek-flash 支持图片，v4-pro 不支持

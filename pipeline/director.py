@@ -9,7 +9,7 @@ from typing import Iterable
 from pydantic_ai import Agent, RunUsage
 from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart, TextPart
 from pydantic_ai.models.function import FunctionModel
-from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
 from . import ledger
@@ -42,6 +42,14 @@ def build_model(backend_cfg: dict):
             raise RuntimeError(f".env 缺少 {backend_cfg['api_key_env']}（后端 {backend_cfg.get('_name')}）")
         client_provider = OpenAIProvider(base_url=backend_cfg["base_url"], api_key=key)
         return OpenAIChatModel(backend_cfg["model"], provider=client_provider)
+    if kind == "openai_responses":
+        # gpt-6-astra 等模型在 chat/completions 上不允许工具+reasoning_effort 并用，
+        # OpenAI 官方建议这类模型走 /v1/responses（pydantic-ai 的 OpenAIResponsesModel）
+        key = api_key(backend_cfg["api_key_env"])
+        if not key:
+            raise RuntimeError(f".env 缺少 {backend_cfg['api_key_env']}（后端 {backend_cfg.get('_name')}）")
+        client_provider = OpenAIProvider(base_url=backend_cfg["base_url"], api_key=key)
+        return OpenAIResponsesModel(backend_cfg["model"], provider=client_provider)
     raise ValueError(f"未知后端类型：{kind}")
 
 
@@ -83,10 +91,13 @@ async def mock_director(messages: list[ModelMessage], info) -> ModelResponse:
 def run_agent(ctx: ToolContext, backend_name: str) -> tuple[str, RunUsage | None]:
     """跑一次完整 agent 循环，返回最终文本与用量。"""
     tools = make_tools(ctx)
-    model = build_model(dict(ctx.cfg["backends"][backend_name], _name=backend_name))
+    backend_cfg = dict(ctx.cfg["backends"][backend_name], _name=backend_name)
+    model = build_model(backend_cfg)
     agent = Agent(model=model, tools=list(tools.values()),
                   system_prompt=SYSTEM_PROMPT, retries=1)
-    result = agent.run_sync("Execute the mouse orbit pipeline. Start with get_run_context.")
+    model_settings = backend_cfg.get("model_settings") or None
+    result = agent.run_sync("Execute the mouse orbit pipeline. Start with get_run_context.",
+                            model_settings=model_settings)
     usage = result.usage
     llm_cost = None
     if usage and getattr(usage, "cost", None) is not None:
