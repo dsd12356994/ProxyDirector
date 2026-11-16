@@ -106,8 +106,19 @@ data/                   运行产物 / 缓存 / 账本（已 gitignore）
 
 ## Status
 
-本地已用 mock 后端全流程验证（真实 300 帧渲染、取景审计、闸门逻辑、账本、dry-run 请求冻结）。
-LLM 后端已实测：DeepSeek / GLM / GPT-6-astra（全流程 dry-run 通过）；成片层当前为
-Kling 4.0 Flash（api-beijing 新域名 + api-key Bearer 鉴权，已实测任务提交成功）。
-预算：LLM 上限 $50；Kling Flash 720p 8 积分/条（试用旗舰包 56 积分 ≈ 7 条）；
-Runway 480p 每条约 $3.00；Tripo 重建 $0.20/次（缓存命中免费）。
+**2026-11-16 实验批次已全部完成：11 条成片，11/11 通过完整环绕目检（构图合规、部件全程在画、无水印）。**
+
+| 条件 | 条数 | 命令 |
+| --- | --- | --- |
+| ① Manual baseline（mock=固定基线方案） | 3 | `run.py --condition baseline` |
+| ② Agent + GPT 系（gpt-6-astra） | 3 | `run.py --backend astra` |
+| ③ Agent + 其他 LLM（deepseek×3 + glm×2） | 5 | `run.py --backend deepseek / glm` |
+
+- 视频层：Kling 4.0 Flash 全能参考（720p/10s/无声），8.03 积分/条，共 11 条 = 88.33 积分
+  （两个 ¥50 试用包 112 积分，剩 23.67；失败任务与中断恢复均未重复计费，已逐笔对账）
+- LLM 层：累计 $0.19（deepseek <0.2¢/次、glm ≈0.2¢/次、astra ≈4.5¢/次）
+- Tripo：冻结 GLB 缓存命中，$0
+- 观察：本批全部 LLM 后端独立收敛到与基线相同的相机方案（50°/r6.0/cw）；
+  同日早些 dry-run 中 deepseek 曾选 35°/r6.5 且一次通过——闸门保证任意选择皆合规
+- 盲评包：`data/eval/videos/`（eval_01..11 匿名）+ `data/eval/评分表.md`；
+  映射表 `key.json` 盲评结束后公开。生成命令：`.venv/bin/python -m pipeline.eval_pack`

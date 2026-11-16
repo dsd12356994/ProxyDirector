@@ -107,12 +107,15 @@ def publish_asset(cfg: dict, path: Path, filename: str) -> str:
             _gh(k["gh_asset_repo"], "release", "upload", k["gh_asset_tag"], str(staged))
     url = _asset_url(cfg, filename)
     with httpx.Client(timeout=60, follow_redirects=True) as client:
-        for attempt in range(6):                     # 新资产 CDN 生效有延迟，重试回验
-            r = client.get(url)
-            if r.status_code == 200 and len(r.content) == path.stat().st_size:
+        for attempt in range(6):                     # 新资产 CDN 生效有延迟；下载流偶发中断
+            try:
+                r = client.get(url)
+            except httpx.HTTPError:
+                r = None
+            if r is not None and r.status_code == 200 and len(r.content) == path.stat().st_size:
                 return url
             time.sleep(10)
-    raise RuntimeError(f"素材发布后回验失败 {r.status_code}：{url}")
+    raise RuntimeError(f"素材发布后回验失败 {getattr(r, 'status_code', 'ERR')}：{url}")
 
 
 VIEW_ASSET_NAMES = {"view_1.png", "view_2.png", "view_3.png", "view_4.png"}
@@ -244,7 +247,17 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
             raise ValueError("输出 URL 异常")
         video = out / "video.mp4"
         if not video.exists():                         # 防盗链 URL 有有效期，先到先存
-            video.write_bytes(client.get(url).content)
+            last_err = None
+            for _ in range(4):                         # 下载偶发被 CDN 掐断，重试
+                try:
+                    video.write_bytes(client.get(url, timeout=120).content)
+                    last_err = None
+                    break
+                except httpx.HTTPError as e:
+                    last_err = e
+                    time.sleep(5)
+            if last_err is not None:
+                raise RuntimeError(f"成片下载失败（任务已成功，重跑同目录即恢复）：{last_err}")
         state.update(status="succeeded")
         state_path.write_text(json.dumps(state), encoding="utf-8")
         usage = task.get("usage") or {}
