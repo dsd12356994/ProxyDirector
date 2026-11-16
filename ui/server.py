@@ -182,6 +182,17 @@ def run_detail(run_id: str):
 MEDIA_OK = re.compile(r"^render_[\w.]+/(reference\.mp4|closure_end\.png|frames/\d{4}\.png)$")
 
 
+@app.get("/api/views/{name}")
+def frozen_view(name: str):
+    """冻结的四张参考视图（管线的真实输入，UI 接触表用）。"""
+    if not re.fullmatch(r"view_[1-4]\.png", name):
+        raise HTTPException(400, "只允许 view_1.png ~ view_4.png")
+    f = ROOT / CFG["pipeline"]["views_dir"] / name
+    if not f.exists():
+        raise HTTPException(404, "文件不存在")
+    return FileResponse(f)
+
+
 @app.get("/api/media/{run_id}/{path:path}")
 def media(run_id: str, path: str):
     if not re.fullmatch(r"[0-9A-Za-z_.-]+", run_id) or not MEDIA_OK.match(path):

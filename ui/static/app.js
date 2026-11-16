@@ -13,17 +13,17 @@ function renderAll() {
   renderTopbar(); renderBackendSelect(); renderRunlist(); renderFlow(); renderDetail();
 }
 
-/* ── 流程节点定义（上排免费 / 闸门 / 下排付费）── */
+/* ── 流程节点定义（免费帧组 / 闸门 / 付费帧组）── */
 const FLOW = [
-  { k: "llm_plan",  label: "LLM 规划",   n: 1, free: true },
-  { k: "frozen",    label: "冻结照片",   n: 2, free: true, always: true },
-  { k: "tripo_model", label: "Tripo 建模", n: 3, free: true },
-  { k: "glb_check", label: "GLB 检查",   n: 4, free: true },
-  { k: "blender_render", label: "渲染+审计", n: 5, free: true, loop: true },
+  { k: "llm_plan",  label: "LLM 规划",   n: 1 },
+  { k: "frozen",    label: "冻结照片",   n: 2 },
+  { k: "tripo_model", label: "Tripo 建模", n: 3 },
+  { k: "glb_check", label: "GLB 检查",   n: 4 },
+  { k: "blender_render", label: "渲染+审计", n: 5, loop: true },
   { k: "gate",      label: "闸门",       gate: true },
-  { k: "prompt",    label: "提示词",     n: 6 },
-  { k: "seedance",  label: "Seedance",   n: 7, paid: true },
-  { k: "ledger",    label: "账本",       n: 8 },
+  { k: "prompt",    label: "提示词",     n: 6, paid: true },
+  { k: "seedance",  label: "成片生成",   n: 7, paid: true },
+  { k: "ledger",    label: "账本",       n: 8, paid: true },
 ];
 
 function fmtUSD(x) { return "$" + (x || 0).toFixed(2); }
@@ -49,14 +49,13 @@ async function refresh() {
 /* ── 渲染 ── */
 function renderTopbar() {
   const o = state.overview; if (!o) return;
-  $("#budget-pill").textContent = `预算 ${fmtUSD(o.budget.spent_usd)} / $${o.budget.max_usd.toFixed(0)}`;
-  const pct = Math.min(100, o.budget.spent_usd / o.budget.max_usd * 100);
-  $("#budget-pill").className = "badge mono " + (pct > 80 ? "b-err" : pct > 50 ? "b-warn" : "b-ok");
-  $("#glb-pill").textContent = "GLB " + (o.frozen_glb_sha256 || "—");
+  $("#takes-count").textContent = o.budget.runs_total;
+  $("#budget-pill").textContent = `${fmtUSD(o.budget.spent_usd)} / $${o.budget.max_usd.toFixed(0)}`;
+  $("#glb-pill").textContent = (o.frozen_glb_sha256 || "").slice(0, 10);
   $("#key-status").innerHTML =
     `<span class="keydot"><i class="dot ${o.runway_key ? "on" : ""}"></i>Runway</span>` +
-    (o.kling_key !== undefined ? `<span class="keydot" style="margin-left:12px"><i class="dot ${o.kling_key ? "on" : ""}"></i>Kling${o.video_backend === "kling" ? " ✓当前" : ""}</span>` : "") +
-    `<span class="keydot" style="margin-left:12px"><i class="dot ${o.tripo_key ? "on" : ""}"></i>Tripo</span>`;
+    (o.kling_key !== undefined ? `<span class="keydot"><i class="dot ${o.kling_key ? "on" : ""}"></i>Kling${o.video_backend === "kling" ? " ✓" : ""}</span>` : "") +
+    `<span class="keydot"><i class="dot ${o.tripo_key ? "on" : ""}"></i>Tripo</span>`;
 }
 
 function renderBackendSelect() {
@@ -118,13 +117,19 @@ function renderFlow() {
   $("#flow-note").textContent = r
     ? (r.status === "running" ? "运行中…" : `exit ${r.exit_code ?? 0} · 花费 ${fmtUSD(r.cost_usd)}`)
     : "未选择运行";
-  $("#flow").innerHTML = FLOW.map(node => {
-    if (node.gate) return `<div class="fgate"><span class="g">⏸</span>闸门<br>人工确认</div>`;
+  const nodeHtml = node => {
     const s = nodeState(node, r);
     const cls = s === "paid-done" ? "paid-done" : s;
-    const loop = node.loop ? ' <span style="color:var(--faint)" title="LLM 免费循环：未通过可调参重渲">↺</span>' : "";
+    const loop = node.loop ? ' <span style="color:#57515F" title="LLM 免费循环：未通过可调参重渲">↺</span>' : "";
     return `<div class="fnode ${cls}"><span class="n">${node.n}</span>${node.label}${loop}</div>`;
-  }).join('<span class="farrow">→</span>');
+  };
+  const strip = items => `<div class="fstrip">${items.map(nodeHtml).join("")}</div>`;
+  const free = FLOW.filter(n => !n.gate && !n.paid);
+  const paid = FLOW.filter(n => n.paid);
+  $("#flow").innerHTML =
+    strip(free) +
+    `<div class="fgate"><span class="g">⏸</span><b>GATE</b>人工确认</div>` +
+    strip(paid);
 }
 
 function marginBar(label, v, need) {
@@ -160,10 +165,12 @@ function renderDetail() {
     </div>` : "";
 
   const videoCard = d.video ? `
-    <div class="card"><div class="card-h"><h2>参考视频（粗模）</h2>
+    <div class="card"><div class="card-h"><h2>参考视频（粗模环绕）</h2>
       <span class="badge ${fr && fr.passed ? "b-ok" : "b-err"}">${fr && fr.passed ? "取景审计通过" : "取景审计未通过"}</span></div>
       <div class="card-b">
-        <video controls preload="metadata" src="${d.video}"></video>
+        <div class="monitor"><span class="corners"></span>
+          <video controls preload="metadata" src="${d.video}"></video>
+        </div>
         <div class="frames-strip">${(d.frames || []).map(f => `<img src="${f}">`).join("")}</div>
       </div></div>` : "";
 

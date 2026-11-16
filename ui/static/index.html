@@ -3,39 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ProxyDirector · Agent Console</title>
+<title>ProxyDirector · Director Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<header class="topbar">
-  <div class="logo">A</div>
-  <h1>ProxyDirector</h1>
-  <span class="sub">Agent Console · Tripo → Blender → Seedance</span>
+<!-- 场记板头：项目名 + 计数，像一块 slate -->
+<header class="slate">
+  <div class="slate-title">
+    <span class="mark"></span>
+    <h1>ProxyDirector</h1>
+    <span class="tagline">LLM 只当导演，镜头永远可控</span>
+  </div>
   <div class="spacer"></div>
+  <div class="slate-counters">
+    <span class="counter"><b id="takes-count">—</b><i>takes</i></span>
+    <span class="counter"><b id="budget-pill">—</b><i>LLM 预算</i></span>
+    <span class="counter glb" id="glb-pill-wrap"><b id="glb-pill">—</b><i>冻结 GLB</i></span>
+  </div>
   <span class="keydot" id="key-status"></span>
-  <span class="badge b-mut mono" id="budget-pill"></span>
-  <span class="badge b-mut mono" title="冻结几何 SHA-256（三组条件共用）" id="glb-pill"></span>
 </header>
 
 <div class="main">
-  <!-- 左列 -->
-  <div class="col">
+  <!-- 左列：输入 → 新 take → take log -->
+  <div class="col side">
+    <div class="card sheet">
+      <div class="card-h"><h2>输入 · 冻结四视图</h2><span class="hint">三组条件共用，不可改动</span></div>
+      <div class="contact">
+        <figure><img src="/api/views/view_1.png" alt="front view"><figcaption><b>FRONT</b> view 1</figcaption></figure>
+        <figure><img src="/api/views/view_2.png" alt="right view"><figcaption><b>RIGHT</b> view 2</figcaption></figure>
+        <figure><img src="/api/views/view_3.png" alt="back view"><figcaption><b>BACK</b> view 3</figcaption></figure>
+        <figure><img src="/api/views/view_4.png" alt="left view"><figcaption><b>LEFT</b> view 4</figcaption></figure>
+      </div>
+      <div class="sheet-foot mono">照片 → Tripo 重建 → 冻结 GLB → 本地环绕取景 → 闸门 → 成片</div>
+    </div>
+
     <div class="card">
-      <div class="card-h"><h2>新建运行</h2></div>
+      <div class="card-h"><h2>新 take</h2></div>
       <div class="card-b">
-        <div class="form-row"><label>后端</label><select id="f-backend"></select></div>
+        <div class="form-row"><label>导演</label><select id="f-backend"></select></div>
         <div class="form-row"><label>条件</label>
           <select id="f-condition">
-            <option value="agent">agent（LLM 决策）</option>
-            <option value="baseline">baseline（固定方案）</option>
+            <option value="agent">agent · LLM 决策</option>
+            <option value="baseline">baseline · 固定方案</option>
           </select>
         </div>
         <div class="form-row"><label>Seed</label><input type="number" id="f-seed" value="4207"></div>
-        <div class="form-row"><label>风格想法<span class="opt">（可选）</span></label>
-          <div style="display:flex; gap:8px">
-            <input type="text" id="f-style" placeholder="如：深色科技感，冷色调" style="flex:1">
-            <button class="btn" id="btn-expand" title="内置 LLM 扩写成结构化风格块（非镜头维度）">AI 扩写</button>
+        <div class="form-row"><label>风格</label>
+          <div class="style-row">
+            <input type="text" id="f-style" placeholder="一句外观想法，如：深色科技感">
+            <button class="btn ghost" id="btn-expand" title="内置 LLM 扩写成结构化风格块（不碰镜头）">AI 扩写</button>
           </div>
         </div>
         <div class="expand-box" id="expand-box" style="display:none">
@@ -44,44 +64,44 @@
             本次运行附加该风格块（只影响外观，不影响镜头）</label>
         </div>
         <label class="check"><input type="checkbox" id="f-dry" checked>
-          dry-run（不触网不扣费，视频层只冻结请求）</label>
+          dry-run（不触网不扣费，成片请求只冻结）</label>
         <div class="warnbox" id="paid-warn">
-          关闭 dry-run 将<b>真实调用付费 API</b>（Seedance 每条 $3.00–$4.50，Tripo 缓存未命中时 $0.20）。
+          关闭 dry-run 将<b>真实调用付费 API</b>（成片 8 积分/条，Tripo 缓存未命中时 $0.20）。
           提交即视为已确认报价。
         </div>
-        <button class="btn primary" id="btn-run" style="width:100%; justify-content:center">发起运行</button>
+        <button class="btn primary" id="btn-run" style="width:100%; justify-content:center">开拍</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-h"><h2>运行记录</h2><span class="badge b-mut mono" id="runs-count"></span></div>
+      <div class="card-h"><h2>Take log</h2><span class="badge b-mut mono" id="runs-count"></span></div>
       <div class="runlist" id="runlist"></div>
     </div>
   </div>
 
-  <!-- 右列 -->
+  <!-- 右列：胶片流程 + 详情 -->
   <div class="col">
     <div class="card">
-      <div class="card-h"><h2>管线 · 8 步 + 闸门</h2><span id="flow-note" class="mono" style="color:var(--faint)"></span></div>
+      <div class="card-h"><h2>管线 · 免费循环 + 付费闸门</h2><span id="flow-note" class="mono"></span></div>
       <div class="card-b"><div class="flow" id="flow"></div></div>
     </div>
 
     <div id="detail">
-      <div class="empty">选择左侧一次运行查看详情，或发起新运行</div>
+      <div class="empty">从左侧 take log 选一条，或直接开拍</div>
     </div>
   </div>
 </div>
 
-<!-- 付费确认弹窗 -->
+<!-- 付费确认（tally 红语义只出现在这里和录制状态） -->
 <div class="overlay" id="pay-overlay">
   <div class="modal">
-    <h3>确认真实扣费提交</h3>
-    <div class="desc">本次运行将跳过 dry-run，真实调用付费 API。这是本系统的人工闸门，确认后等同于命令行输入 yes。</div>
+    <h3>确认真实扣费</h3>
+    <div class="desc">关闭 dry-run 等于真实调用付费 API。这是本系统的人工闸门，确认后等同命令行输入 yes。</div>
     <div class="quote" id="pay-quote"></div>
     <label class="check"><input type="checkbox" id="pay-ack"> 我已核对单价与预算，授权本次扣费</label>
-    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px">
-      <button class="btn" id="pay-cancel">取消</button>
-      <button class="btn danger" id="pay-go" disabled>确认提交</button>
+    <div class="modal-actions">
+      <button class="btn ghost" id="pay-cancel">取消</button>
+      <button class="btn rec" id="pay-go" disabled>确认开拍</button>
     </div>
   </div>
 </div>
