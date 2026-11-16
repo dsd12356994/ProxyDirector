@@ -6,97 +6,151 @@
 <title>ProxyDirector · Director Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<!-- 场记板头：项目名 + 计数，像一块 slate -->
-<header class="slate">
-  <div class="slate-title">
-    <span class="mark"></span>
-    <h1>ProxyDirector</h1>
-    <span class="tagline">LLM 只当导演，镜头永远可控</span>
-  </div>
-  <div class="spacer"></div>
-  <div class="slate-counters">
-    <span class="counter"><b id="takes-count">—</b><i>takes</i></span>
-    <span class="counter"><b id="budget-pill">—</b><i>LLM 预算</i></span>
-    <span class="counter glb" id="glb-pill-wrap"><b id="glb-pill">—</b><i>冻结 GLB</i></span>
-  </div>
-  <span class="keydot" id="key-status"></span>
-</header>
-
-<div class="main">
-  <!-- 左列：输入 → 新 take → take log -->
-  <div class="col side">
-    <div class="card sheet">
-      <div class="card-h"><h2>输入 · 冻结四视图</h2><span class="hint">三组条件共用，不可改动</span></div>
-      <div class="contact">
-        <figure><img src="/api/views/view_1.png" alt="front view"><figcaption><b>FRONT</b> view 1</figcaption></figure>
-        <figure><img src="/api/views/view_2.png" alt="right view"><figcaption><b>RIGHT</b> view 2</figcaption></figure>
-        <figure><img src="/api/views/view_3.png" alt="back view"><figcaption><b>BACK</b> view 3</figcaption></figure>
-        <figure><img src="/api/views/view_4.png" alt="left view"><figcaption><b>LEFT</b> view 4</figcaption></figure>
-      </div>
-      <div class="sheet-foot mono">照片 → Tripo 重建 → 冻结 GLB → 本地环绕取景 → 闸门 → 成片</div>
+<div class="app">
+  <!-- ── 侧栏：产品铬件 ─────────────────── -->
+  <aside class="side">
+    <div class="brand">
+      <span class="mark"></span>
+      <div><b>ProxyDirector</b><i>director console</i></div>
     </div>
 
-    <div class="card">
-      <div class="card-h"><h2>新 take</h2></div>
-      <div class="card-b">
-        <div class="form-row"><label>导演</label><select id="f-backend"></select></div>
-        <div class="form-row"><label>条件</label>
-          <select id="f-condition">
-            <option value="agent">agent · LLM 决策</option>
-            <option value="baseline">baseline · 固定方案</option>
-          </select>
-        </div>
-        <div class="form-row"><label>Seed</label><input type="number" id="f-seed" value="4207"></div>
-        <div class="form-row"><label>风格</label>
-          <div class="style-row">
-            <input type="text" id="f-style" placeholder="一句外观想法，如：深色科技感">
-            <button class="btn ghost" id="btn-expand" title="内置 LLM 扩写成结构化风格块（不碰镜头）">AI 扩写</button>
+    <nav class="nav">
+      <button class="navbtn active" id="nav-chat"><span class="ico">◈</span>导演对话</button>
+      <button class="navbtn" id="nav-runs"><span class="ico">☰</span>运行记录</button>
+    </nav>
+
+    <div class="side-sec">
+      <h3>会话</h3>
+      <button class="btn wide ghost" id="btn-newchat">＋ 新对话</button>
+      <div class="sessions" id="sessions"></div>
+    </div>
+
+    <div class="side-sec">
+      <h3>服务状态</h3>
+      <div class="statline" id="key-status"></div>
+      <div class="statline mono" id="budget-pill"></div>
+      <div class="statline mono" id="glb-pill"></div>
+    </div>
+
+    <div class="side-sec inputs">
+      <h3>冻结输入</h3>
+      <div class="mini-contact">
+        <img src="/api/views/view_1.png" alt="front"><img src="/api/views/view_2.png" alt="right">
+        <img src="/api/views/view_3.png" alt="back"><img src="/api/views/view_4.png" alt="left">
+      </div>
+      <div class="mono cap">4 视图 · FRONT/RIGHT/BACK/LEFT</div>
+    </div>
+  </aside>
+
+  <!-- ── 主区 ─────────────────────────────── -->
+  <main class="main">
+    <!-- 对话视图 -->
+    <section class="view" id="view-chat">
+      <div class="chatwrap">
+        <div class="chatlog" id="chatlog">
+          <div class="chat-hero" id="chat-hero">
+            <h2>对导演说一句话，它来拍</h2>
+            <p>LLM 只做镜头决策：规划环绕 → 本地渲染审计 → 过闸门 → 生成成片。镜头永远受取景闸门约束。</p>
+            <div class="chips">
+              <button class="chip">拍一条 35° 俯角、更紧凑的环绕</button>
+              <button class="chip">换逆时针方向再来一条</button>
+              <button class="chip">俯角高一点，物体再小一点</button>
+            </div>
           </div>
         </div>
-        <div class="expand-box" id="expand-box" style="display:none">
-          <div class="mono" id="expand-result" style="font-size:11.5px; white-space:pre-wrap"></div>
-          <label class="check" style="margin-top:8px"><input type="checkbox" id="f-use-style" checked>
-            本次运行附加该风格块（只影响外观，不影响镜头）</label>
+        <div class="composer">
+          <div class="c-controls">
+            <label>导演 <select id="c-backend"></select></label>
+            <label>seed <input type="number" id="c-seed" value="4207" style="width:74px"></label>
+            <label class="check inline"><input type="checkbox" id="c-dry" checked> dry-run</label>
+            <label class="check inline danger"><input type="checkbox" id="c-ack"> 授权付费</label>
+            <span class="spacer"></span>
+            <span class="runid mono" id="c-runid"></span>
+          </div>
+          <div class="c-row">
+            <textarea id="c-input" rows="2" placeholder="例如：拍一条俯角 35°、构图紧凑的 10 秒环绕"></textarea>
+            <button class="btn primary" id="btn-send">发送<div class="senddot" id="senddot"></div></button>
+          </div>
         </div>
-        <label class="check"><input type="checkbox" id="f-dry" checked>
-          dry-run（不触网不扣费，成片请求只冻结）</label>
-        <div class="warnbox" id="paid-warn">
-          关闭 dry-run 将<b>真实调用付费 API</b>（成片 8 积分/条，Tripo 缓存未命中时 $0.20）。
-          提交即视为已确认报价。
-        </div>
-        <button class="btn primary" id="btn-run" style="width:100%; justify-content:center">开拍</button>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-h"><h2>Take log</h2><span class="badge b-mut mono" id="runs-count"></span></div>
-      <div class="runlist" id="runlist"></div>
-    </div>
-  </div>
+      <aside class="rail">
+        <div class="railcard">
+          <h3>当前运行</h3>
+          <div class="runlink mono" id="rail-runid">—</div>
+          <div class="monitor small"><span class="corners"></span>
+            <video id="rail-video" controls preload="metadata" style="display:none"></video>
+            <div class="rail-empty" id="rail-empty">本轮结束后，参考视频与取景读数出现在这里</div>
+          </div>
+          <div class="rail-stats mono" id="rail-stats"></div>
+          <button class="btn wide ghost" id="rail-open" style="display:none">在运行记录中查看</button>
+        </div>
+        <div class="railcard">
+          <h3>本轮模式</h3>
+          <div class="modeline" id="rail-mode"><span class="badge b-info">dry-run</span> 不触网不扣费</div>
+        </div>
+      </aside>
+    </section>
 
-  <!-- 右列：胶片流程 + 详情 -->
-  <div class="col">
-    <div class="card">
-      <div class="card-h"><h2>管线 · 免费循环 + 付费闸门</h2><span id="flow-note" class="mono"></span></div>
-      <div class="card-b"><div class="flow" id="flow"></div></div>
-    </div>
-
-    <div id="detail">
-      <div class="empty">从左侧 take log 选一条，或直接开拍</div>
-    </div>
-  </div>
+    <!-- 运行记录视图 -->
+    <section class="view" id="view-runs" style="display:none">
+      <div class="col narrow">
+        <details class="quickrun card">
+          <summary>表单模式新建运行（baseline / 携带风格）</summary>
+          <div class="card-b">
+            <div class="form-row"><label>后端</label><select id="f-backend"></select></div>
+            <div class="form-row"><label>条件</label>
+              <select id="f-condition">
+                <option value="agent">agent · LLM 决策</option>
+                <option value="baseline">baseline · 固定方案</option>
+              </select>
+            </div>
+            <div class="form-row"><label>Seed</label><input type="number" id="f-seed" value="4207"></div>
+            <div class="form-row"><label>风格</label>
+              <div class="style-row">
+                <input type="text" id="f-style" placeholder="一句外观想法，如：深色科技感">
+                <button class="btn ghost" id="btn-expand">AI 扩写</button>
+              </div>
+            </div>
+            <div class="expand-box" id="expand-box" style="display:none">
+              <div class="mono" id="expand-result" style="font-size:11.5px; white-space:pre-wrap"></div>
+              <label class="check" style="margin-top:8px"><input type="checkbox" id="f-use-style" checked>
+                附加该风格块（只影响外观，不影响镜头）</label>
+            </div>
+            <label class="check"><input type="checkbox" id="f-dry" checked>
+              dry-run（不触网不扣费，成片请求只冻结）</label>
+            <div class="warnbox" id="paid-warn">
+              关闭 dry-run 将<b>真实调用付费 API</b>（成片 8 积分/条，Tripo 缓存未命中时 $0.20）。
+            </div>
+            <button class="btn primary wide" id="btn-run">开拍</button>
+          </div>
+        </details>
+        <div class="card">
+          <div class="card-h"><h2>Take log</h2><span class="badge b-mut mono" id="runs-count"></span></div>
+          <div class="runlist" id="runlist"></div>
+        </div>
+      </div>
+      <div class="col wide">
+        <div class="card">
+          <div class="card-h"><h2>管线 · 免费循环 + 付费闸门</h2><span id="flow-note" class="mono"></span></div>
+          <div class="card-b"><div class="flow" id="flow"></div></div>
+        </div>
+        <div id="detail"><div class="empty">从左侧 take log 选一条</div></div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<!-- 付费确认（tally 红语义只出现在这里和录制状态） -->
+<!-- 付费确认（tally 红） -->
 <div class="overlay" id="pay-overlay">
   <div class="modal">
     <h3>确认真实扣费</h3>
-    <div class="desc">关闭 dry-run 等于真实调用付费 API。这是本系统的人工闸门，确认后等同命令行输入 yes。</div>
+    <div class="desc">本轮将真实调用付费 API。这是人工闸门，确认后等同命令行输入 yes。</div>
     <div class="quote" id="pay-quote"></div>
     <label class="check"><input type="checkbox" id="pay-ack"> 我已核对单价与预算，授权本次扣费</label>
     <div class="modal-actions">

@@ -2,12 +2,17 @@
 
 只读为主；POST /api/runs 发起新运行（默认 dry-run；真实扣费需显式 ack_paid，
 UI 弹窗确认即闸门，等价于命令行的交互确认）。密钥永不返回，只返回是否已配置。
+
+导演对话（/api/chat/*）：常驻多轮会话，工具调用与文本以事件流形式暴露，
+前端轮询渲染——这是产品的主交互面（对齐 Agent UX 共识：过程透明+审批闸门）。
 """
+import asyncio
 import json
 import re
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -261,6 +266,137 @@ def launch(spec: RunSpec):
 @app.get("/api/health")
 def health():
     return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 导演对话会话：多轮、工具内联可见。dry-run 默认开；付费须每轮显式 ack（闸门）。
+# ─────────────────────────────────────────────────────────────────────────────
+CHAT_SESSIONS: dict[str, dict] = {}
+
+
+class ChatNew(BaseModel):
+    backend: str = "mock"
+    seed: int = 4207
+
+
+class ChatSend(BaseModel):
+    text: str
+    dry_run: bool = True
+    ack_paid: bool = False       # true = 本轮允许真实扣费（UI 红色确认后传）
+
+
+def _emit(sess: dict, kind: str, **kw) -> None:
+    sess["events"].append({"id": len(sess["events"]), "t": round(time.time(), 2),
+                           "kind": kind, **kw})
+
+
+async def _run_turn(sess: dict, text: str) -> None:
+    """跑一轮 agent：事件（文本/工具调用/结果）实时进 sess['events']。
+    工具事件由包装层发出（对 mock/真实后端统一），不依赖模型层流式能力。"""
+    from pydantic_ai import Agent
+    from pipeline import director
+    from pipeline.tools import make_tools
+
+    ctx = sess["ctx"]
+    ctx.dry_run = sess["pending_dry_run"]
+    ctx.auto_approve = sess["pending_ack"]
+    _emit(sess, "user", text=text)
+    _emit(sess, "mode", dry_run=ctx.dry_run, ack_paid=ctx.auto_approve)
+    try:
+        backend_cfg = dict(CFG["backends"][sess["backend"]], _name=sess["backend"])
+        raw_tools = make_tools(ctx)
+
+        def wrap(name, fn):
+            import functools
+
+            @functools.wraps(fn)                  # 保留原签名：pydantic-ai 按签名生成工具 schema
+            def wrapped(*a, **k):
+                args = json.dumps({"args": a, **k}, ensure_ascii=False, default=str)[:400]
+                _emit(sess, "tool_call", tool=name, args=args)
+                try:
+                    out = fn(*a, **k)
+                except Exception as e:                        # noqa: BLE001 —— 闸门拒绝等也入流
+                    _emit(sess, "tool_result", tool=name, output=f"{type(e).__name__}: {e}"[:600], ok=False)
+                    raise
+                _emit(sess, "tool_result", tool=name, output=str(out)[:600], ok=True)
+                return out
+            return wrapped
+
+        tools = {name: wrap(name, fn) for name, fn in raw_tools.items()}
+        agent = Agent(model=director.build_model(backend_cfg),
+                      tools=list(tools.values()),
+                      system_prompt=director.SYSTEM_PROMPT + director._load_wiki(),
+                      retries=1)
+        result = await agent.run(text, message_history=sess["history"])
+        sess["history"] = result.all_messages()
+        usage = result.usage
+        ledger.log({"run_id": sess["run_id"], "stage": "llm", "provider": "llm",
+                    "backend": sess["backend"], "status": "chat_turn",
+                    "cost_usd": float(getattr(usage, "cost", None) or 0.0),
+                    "mock": sess["backend"] == "mock"}, LEDGER)
+        _emit(sess, "done", output=result.output)
+    except Exception as e:                                    # noqa: BLE001 —— 会话不死，错误入流
+        _emit(sess, "error", message=f"{type(e).__name__}: {e}"[:400])
+    finally:
+        sess["busy"] = False
+
+
+@app.post("/api/chat/new")
+def chat_new(spec: ChatNew):
+    if spec.backend not in CFG["backends"]:
+        raise HTTPException(400, f"未知后端 {spec.backend}")
+    from pipeline.tools import ToolContext
+    sid = uuid.uuid4().hex[:10]
+    run_id = f"{time.strftime('%Y%m%d_%H%M%S')}_{spec.backend}_agent_s{spec.seed}"
+    run_dir = ROOT / "data" / "runs" / run_id
+    run_dir.mkdir(parents=True)
+    ledger_path = LEDGER
+    glb = tripo.ensure_glb(CFG, run_dir, ledger_path, run_id, dry_run=True)
+    ctx = ToolContext(cfg=CFG, run_dir=run_dir, run_id=run_id,
+                      dry_run=True, auto_approve=False, glb=glb)
+    CHAT_SESSIONS[sid] = {"sid": sid, "backend": spec.backend, "seed": spec.seed,
+                          "run_id": run_id, "created": time.time(),
+                          "events": [], "history": [], "ctx": ctx,
+                          "busy": False, "pending_dry_run": True, "pending_ack": False}
+    if len(CHAT_SESSIONS) > 20:                             # 保留最近 20 个会话
+        for k in sorted(CHAT_SESSIONS, key=lambda s: CHAT_SESSIONS[s]["created"])[:-20]:
+            CHAT_SESSIONS.pop(k, None)
+    return {"sid": sid, "run_id": run_id}
+
+
+@app.post("/api/chat/{sid}/send")
+async def chat_send(sid: str, spec: ChatSend):
+    sess = CHAT_SESSIONS.get(sid)
+    if not sess:
+        raise HTTPException(404, "会话不存在")
+    if sess["busy"]:
+        raise HTTPException(409, "上一轮还在跑（渲染/生成中）")
+    if not spec.text.strip():
+        raise HTTPException(400, "消息为空")
+    if spec.ack_paid and spec.dry_run:
+        raise HTTPException(400, "ack_paid 与 dry-run 互斥")
+    sess["pending_dry_run"] = spec.dry_run
+    sess["pending_ack"] = spec.ack_paid
+    sess["busy"] = True
+    asyncio.create_task(_run_turn(sess, spec.text.strip()))
+    return {"ok": True}
+
+
+@app.get("/api/chat/{sid}/events")
+def chat_events(sid: str, since: int = 0):
+    sess = CHAT_SESSIONS.get(sid)
+    if not sess:
+        raise HTTPException(404, "会话不存在")
+    return {"events": sess["events"][since:], "busy": sess["busy"],
+            "run_id": sess["run_id"], "backend": sess["backend"]}
+
+
+@app.get("/api/chat/sessions")
+def chat_sessions():
+    return [{"sid": s["sid"], "backend": s["backend"], "run_id": s["run_id"],
+             "created": s["created"], "busy": s["busy"],
+             "n_events": len(s["events"])}
+            for s in sorted(CHAT_SESSIONS.values(), key=lambda x: -x["created"])]
 
 
 app.mount("/static", StaticFiles(directory=ROOT / "ui" / "static"), name="static")
