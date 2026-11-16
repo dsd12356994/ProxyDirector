@@ -143,7 +143,6 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true", help="不触网、不扣费；Seedance 只冻结请求")
     p.add_argument("--auto-approve", action="store_true", help="付费前跳过人工确认（UI 弹窗确认后等效）")
     p.add_argument("--run-id", default=None, help="指定运行目录名（UI 发起时用），只允许安全字符")
-    sub = p.add_mutually_exclusive_group()
     args, extra = p.parse_known_args()
 
     cfg = load_config()
