@@ -16,13 +16,10 @@ from pathlib import Path
 
 from .config import load_config
 
-# data/runs 里按时间序的成片 → 盲评条目。新增运行只要匹配命名规则即自动纳入。
-RUN_RE = re.compile(r"^\d{8}_\d{6}_(\w+)_(agent|baseline)_s(\d+)$|^(.+)$")
-
-
 def classify(run_id: str) -> tuple[str, str, str] | None:
     """返回 (condition, backend, seed)；不认识的运行返回 None。"""
-    m = re.match(r"\d{8}_\d{6}_(\w+)_(agent|baseline)_s(\d+)$", run_id)
+    # Interactive camera edits are deliberately outside the fixed evaluation conditions.
+    m = re.match(r"\d{8}_\d{6}(?:-\d+)?_(\w+)_(agent|baseline)_s(\d+)$", run_id)
     if m:
         backend, condition, seed = m.group(1), m.group(2), m.group(3)
     elif re.match(r"\d{8}_mock_kling_real\d*$", run_id):

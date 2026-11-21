@@ -33,48 +33,58 @@ def check(cfg: dict) -> int:
     missing = [p.name for p in sorted(views.glob("view_*.png")) if not p.exists()]
     n_views = len(list(views.glob("view_*.png"))) if views.exists() else 0
     print(("OK  " if n_views == 4 and not missing else "MISS") +
-          f"  冻结视图: {n_views}/4 {views}")
+          f"  Frozen views: {n_views}/4 ({pl['views_dir']})")
     ok &= n_views == 4
     seed = resolve(pl["seed_glb"])
-    print(("OK  " if seed.exists() else "MISS") + f"  冻结 GLB: {seed}")
+    print(("OK  " if seed.exists() else "MISS") + f"  Frozen GLB: {pl['seed_glb']}")
     ok &= seed.exists()
     key = api_key("TRIPO_API_KEY")
-    print(("OK  " if key else "--  ") + "  TRIPO_API_KEY（建模用，缓存命中可不需要）")
+    print(("OK  " if key else "--  ") + "  TRIPO_API_KEY (required for uncached modeling)")
     key = api_key("RUNWAYML_API_SECRET")
-    print(("OK  " if key else "--  ") + "  RUNWAYML_API_SECRET（video_backend=runway 时必需）")
+    print(("OK  " if key else "--  ") + "  RUNWAYML_API_SECRET (required for Runway generation)")
     if cfg.get("video_backend") == "kling":
         key = api_key(cfg["kling"]["api_key_env"])
-        print(("OK  " if key else "MISS") + f"  {cfg['kling']['api_key_env']}（video_backend=kling）")
+        print(("OK  " if key else "MISS") + f"  {cfg['kling']['api_key_env']} (Kling video generation)")
         if key:
             from pipeline import kling as kling_mod
             try:
                 packs = kling_mod.packs(cfg)
                 if packs:
                     for p in packs:
-                        print(f"     资源包：{p['resource_pack_name']} 剩余 "
-                              f"{p.get('remaining_quantity')}（{p.get('resource_pack_applicable_models')}）")
+                        print(f"     Credit pack {p['resource_pack_name']}: remaining "
+                              f"{p.get('remaining_quantity')} ({p.get('resource_pack_applicable_models')})")
                 else:
-                    print("     注意：查无生效资源包；Kling 4.0 系需旗舰包或现金余额")
+                    print("     No active Kling credit pack was reported.")
             except Exception as e:                       # 查询失败不阻断自检
-                print(f"     资源包查询失败（{str(e)[:120]}）")
+                print(f"     Credit lookup failed. {str(e)[:120]}")
         ok &= bool(key)
     for b in cfg["backends"]:
         if cfg["backends"][b].get("kind") == "openai_compatible":
             env = cfg["backends"][b]["api_key_env"]
             key = api_key(env)
-            print(("OK  " if key else "--  ") + f"  {env}（后端 {b}）")
+            print(("OK  " if key else "--  ") + f"  {env} ({b} backend)")
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
     if ledger_path.exists():
-        print(f"     账本已记 {len(ledger_path.read_text().splitlines())} 行，累计真实花费 "
+        print(f"     {len(ledger_path.read_text().splitlines())} ledger entries. Recorded spend "
               f"${ledger.spent_usd(ledger_path):.2f}")
-    print("自检" + ("通过" if ok else "有缺项：见上") )
+    print("Environment check passed." if ok else "Some environment checks failed. See the items above.")
     return 0 if ok else 1
 
 
-def new_run_dir(cfg: dict, backend: str, condition: str, seed: int) -> Path:
-    d = Path(cfg["_root"]) / "data" / "runs" / f"{time.strftime('%Y%m%d_%H%M%S')}_{backend}_{condition}_s{seed}"
-    d.mkdir(parents=True)
-    return d
+def new_run_dir(cfg: dict, backend: str, condition: str, seed: int, *, chat: bool = False) -> Path:
+    """Reserve the run directory before spawning work, including simultaneous web requests."""
+    base = Path(cfg["_root"]) / "data" / "runs"
+    base.mkdir(parents=True, exist_ok=True)
+    timestamp = time.strftime("%Y%m%d_%H%M%S") + ("-chat" if chat else "")
+    attempt = 1
+    while True:
+        suffix = f"-{attempt}" if attempt > 1 else ""
+        directory = base / f"{timestamp}{suffix}_{backend}_{condition}_s{seed}"
+        try:
+            directory.mkdir()
+            return directory
+        except FileExistsError:
+            attempt += 1
 
 
 def video_duration(cfg: dict) -> int:
@@ -88,9 +98,9 @@ def _paid_gate_quote(cfg: dict) -> str:
         est = kling_mod.estimate_credits(
             cfg, cfg["pipeline"]["frames"] / cfg["pipeline"]["fps"], cfg["kling"]["duration"])
         return (f"Kling {cfg['kling']['model']} {cfg['kling']['resolution']} "
-                f"{cfg['kling']['duration']}s 预计 {est} 积分")
+                f"{cfg['kling']['duration']}s, estimated {est} credits")
     q = cfg["runway"]["qualities"]["480p"]
-    return f"Runway 480p 预计 {q['credits']} 积分 ≈ ${q['usd']:.2f}"
+    return f"Runway 480p, estimated {q['credits']} credits (USD {q['usd']:.2f})"
 
 
 def submit_request(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
@@ -118,7 +128,7 @@ def expand_style(cfg: dict, run_dir: Path, run_id: str, idea: str,
     (run_dir / "style_expansion.json").write_text(
         json.dumps({"idea": idea, "spec": spec.model_dump(), "style_block": block},
                    ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"风格块已生成（{run_dir / 'style_expansion.json'}）：{block[:120]}…")
+    print(f"Style saved to style_expansion.json. {block[:120]}…")
     return block
 
 
@@ -129,38 +139,38 @@ def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_appr
     glb = tripo.ensure_glb(cfg, run_dir, ledger_path, run_id, dry_run)
     plan = ShotPlan(**cfg["pipeline"]["baseline_plan"])
     fr = render_orbit(cfg, run_dir, ledger_path, run_id, glb, plan, "baseline")
-    print("基线取景：", fr.summary())
+    print("Baseline shot:", fr.summary())
     if not fr.passed:
-        print("基线取景未通过——需要人工调参后重跑（这正是基线条件的语义）")
+        print("Baseline framing failed. Revise the fixed camera plan before retrying.")
         return
     prompt = render_prompt(fr, video_duration(cfg), style_block=style_block)
     (run_dir / "seedance_prompt.txt").write_text(prompt, encoding="utf-8")
     if dry_run:
         submit_request(cfg, run_dir, ledger_path, run_id, fr, prompt, dry_run=True)
-        print("[dry-run] 基线请求已冻结：", run_dir / "commercial" / "frozen_request.json")
+        print("[dry-run] Baseline request saved to commercial/frozen_request.json.")
         return
     if not auto_approve:
-        answer = input(f"\n[付费闸门][基线] {_paid_gate_quote(cfg)}，"
-                       f"输入 yes 提交 / 其他放弃： ").strip().lower()
+        answer = input(f"\n[Paid baseline] {_paid_gate_quote(cfg)}. "
+                       f"Type yes to submit: ").strip().lower()
         if answer != "yes":
-            print("人工闸门未放行，基线未提交")
+            print("The user declined the baseline submission.")
             return
     submit_request(cfg, run_dir, ledger_path, run_id, fr, prompt, dry_run=False)
-    print("基线成片：", run_dir / "commercial" / "video.mp4")
+    print("Baseline output saved to commercial/video.mp4.")
 
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--backend", default="mock", help="config.yaml 里的 backends 键：mock/astra/deepseek")
+    p.add_argument("--backend", default="mock", help="Backend key from config.yaml, such as mock, astra, or deepseek")
     p.add_argument("--condition", choices=["agent", "baseline"], default="agent")
     p.add_argument("--seed", type=int, default=4207)
-    p.add_argument("--dry-run", action="store_true", help="不触网、不扣费；Seedance 只冻结请求")
-    p.add_argument("--auto-approve", action="store_true", help="付费前跳过人工确认（UI 弹窗确认后等效）")
-    p.add_argument("--run-id", default=None, help="指定运行目录名（UI 发起时用），只允许安全字符")
+    p.add_argument("--dry-run", action="store_true", help="Save the video request locally without submitting it. Remote language models may still incur fees.")
+    p.add_argument("--auto-approve", action="store_true", help="Use prior authorization for the paid video stage")
+    p.add_argument("--run-id", default=None, help="Use this run directory name for a new or resumed run")
     p.add_argument("--style", default=None,
-                   help="提示词扩写：一句风格想法（如'深色科技感'），LLM 扩成非镜头风格块附加到冻结模板")
+                   help="An appearance idea for the style model, such as matte black studio lighting")
     p.add_argument("--expand-backend", default=None,
-                   help="扩写用的后端（默认取 run 后端；mock 时回退到 config.prompt_expand.backend）")
+                   help="Style backend (defaults to the active model or the configured style backend in mock mode)")
     args, extra = p.parse_known_args()
 
     cfg = load_config()
@@ -170,27 +180,27 @@ def main() -> int:
         ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
         ledger_path.parent.mkdir(parents=True, exist_ok=True)
         glb = tripo.seed_cache(cfg, ledger_path,
-                               "20260921_mouse_multiview_01 批次 Tripo 输出（输入=03 文件夹白底四图，"
-                               "SHA-256 与 frozen.json 逐项一致）")
-        print("冻结 GLB 缓存已预置：", glb)
+                               "20260921_mouse_multiview_01 Tripo output from the four frozen views. "
+                               "Each view matches the SHA-256 entry in frozen.json.")
+        print("Frozen GLB cached at", glb.relative_to(Path(cfg["_root"])))
         print("model_sha256 =", tripo.digest(glb))
         return 0
 
     if args.backend not in cfg["backends"]:
-        print(f"未知后端 {args.backend}；可选：{list(cfg['backends'])}")
+        print(f"Unknown backend {args.backend}. Available backends: {list(cfg['backends'])}")
         return 2
 
     runs_base = Path(cfg["_root"]) / "data" / "runs"
     if args.run_id:
         import re as _re
         if not _re.fullmatch(r"[0-9A-Za-z_.-]+", args.run_id):
-            raise SystemExit("--run-id 含非法字符")
+            raise SystemExit("Invalid characters in --run-id.")
         run_dir = runs_base / args.run_id
         run_dir.mkdir(parents=True, exist_ok=True)   # 允许同目录恢复：付费任务只轮询不重发
     else:
         run_dir = new_run_dir(cfg, args.backend, args.condition, args.seed)
     run_id = run_dir.name
-    print(f"运行目录：{run_dir}")
+    print(f"Run directory: data/runs/{run_id}")
 
     style_block = ""
     if args.style:
@@ -207,18 +217,18 @@ def main() -> int:
                           style_block=style_block)
         ctx.glb = tripo.ensure_glb(cfg, run_dir, ledger_path, run_id, args.dry_run)
         output, usage = director.run_agent(ctx, args.backend)
-        print("\n=== Agent 结论 ===")
+        print("\n=== Director result ===")
         print(output)
 
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
     rows = [json.loads(l) for l in ledger_path.read_text().splitlines()
             if json.loads(l).get("run_id") == run_id]
-    print(f"\n=== 本次账本（{len(rows)} 行）===")
+    print(f"\n=== Run ledger ({len(rows)} entries) ===")
     for r in rows:
         cost = f"${r.get('cost_usd', 0):.2f}" if r.get("cost_usd") else "  -  "
         print(f"  {r.get('stage', '?'):16s} {r.get('status', '?'):24s} {cost}")
-    print(f"本次真实花费：${ledger.spent_usd(ledger_path, run_id):.2f} / 全部累计 "
-          f"${ledger.spent_usd(ledger_path):.2f}（预算 ${cfg['budget']['max_usd']:.0f}）")
+    print(f"Run spend: ${ledger.spent_usd(ledger_path, run_id):.2f}. Total recorded spend: "
+          f"${ledger.spent_usd(ledger_path):.2f} (budget ${cfg['budget']['max_usd']:.0f})")
     return 0
 
 

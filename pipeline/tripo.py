@@ -49,7 +49,7 @@ def seed_cache(cfg: dict, ledger_path: Path, provenance: str) -> Path:
     view_files = {n: views_dir / n for n in SLOT_OF_VIEW}
     for p in view_files.values():
         if not p.exists():
-            raise FileNotFoundError(f"冻结视图缺失：{p}")
+            raise FileNotFoundError(f"Frozen view missing: {p.name}")
     key = cache_key(view_files, frozen_params(cfg))
     cache_dir = Path(cfg["_root"]) / "data" / "cache" / "tripo" / key
     glb = cache_dir / "model.glb"
@@ -86,13 +86,13 @@ def ensure_glb(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, dry_run
         return glb
 
     if dry_run:
-        raise RuntimeError("dry-run 下 Tripo 缓存未命中：先运行 `python run.py seed-tripo-cache` "
-                           "预置冻结 GLB，或去掉 --dry-run 真实建模（$0.20/次）")
+        raise RuntimeError("The frozen mesh is missing. Run python run.py seed-tripo-cache "
+                           "to prepare the local rehearsal.")
 
     key_env = "TRIPO_API_KEY"
     token = api_key(key_env)
     if not token:
-        raise RuntimeError(f".env 缺少 {key_env}；请填写后重试")
+        raise RuntimeError(f"Configure {key_env} before submitting a modeling task.")
     auth = {"Authorization": f"Bearer {token}"}
     base = cfg["tripo"]["base_url"].rstrip("/")
     t0 = time.time()
@@ -107,14 +107,14 @@ def ensure_glb(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, dry_run
                 up = client.post(f"{base}/files", headers=auth,
                                  files={"file": (name, open(view_files[name], "rb"), "image/png")}).json()
                 if up.get("code") != 0:
-                    raise RuntimeError(f"Tripo 视图上传被拒（{slot}）：{up}")
+                    raise RuntimeError(f"Tripo rejected the {slot} view (code {up.get('code')}).")
                 inputs.append({slot: up["data"]["file_token"]})
             body = {**params, "inputs": inputs}
             r = client.post(f"{base}/generation/multiview-to-model", headers=auth, json=body).json()
             (cache_dir / "submit_response.json").write_text(json.dumps(r, ensure_ascii=False, indent=2),
                                                             encoding="utf-8")
             if r.get("code") != 0:
-                raise RuntimeError(f"Tripo 任务被拒：{r}")
+                raise RuntimeError(f"Tripo rejected the modeling request (code {r.get('code')}).")
             task_id = r["data"]["task_id"]
             state_path.write_text(json.dumps({"task_id": task_id, "status": "submitted"}), encoding="utf-8")
             ledger.log({"run_id": run_id, "stage": "tripo_model", "provider": "tripo",
@@ -131,15 +131,15 @@ def ensure_glb(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, dry_run
             if status == "success":
                 break
             if status in ("failed", "banned", "cancelled", "expired"):
-                raise RuntimeError(f"Tripo 任务终态失败：{status}")
+                raise RuntimeError(f"Tripo modeling ended with status {status}.")
             if time.time() > deadline:
-                raise RuntimeError(f"Tripo 轮询超时（任务 {task_id} 仍在 {status}）；"
-                                   f"恢复方式：重跑本命令，只会继续轮询，不会重复扣费提交")
+                raise RuntimeError(f"Polling timed out. Tripo task {task_id} is still {status}. "
+                                   f"Resume the same run to check the existing task.")
             time.sleep(cfg["tripo"]["poll_interval_s"])
         url = q["data"]["output"]["model_url"]
         data = client.get(url).content
         if data[:4] != b"glTF":
-            raise ValueError("Tripo 输出不是 GLB")
+            raise ValueError("Tripo returned a file that is not a GLB mesh.")
         glb.write_bytes(data)
         credits = q["data"].get("credits_consumed", cfg["tripo"]["credits_per_task"])
         (cache_dir / "meta.json").write_text(json.dumps({

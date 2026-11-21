@@ -4,16 +4,16 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class ShotPlan(BaseModel):
-    """camera plan：LLM 唯一可改的相机参数。半径按归一化后（最长水平尺寸=3）的尺度。"""
-    elevation_degrees: float = Field(50.0, ge=5.0, le=85.0, description="相机俯视角，度")
-    radius: float = Field(6.0, ge=3.0, le=12.0, description="环绕半径（模型水平尺寸归一为3后）")
-    start_degrees: float = Field(0.0, ge=-360.0, le=360.0, description="起始方位角")
-    direction: Literal["cw", "ccw"] = Field("cw", description="环绕方向")
-    margin: float = Field(0.05, ge=0.03, le=0.15, description="四面安全边距（画面比例）")
+    """Camera controls for the director. Radius uses the normalized model scale."""
+    elevation_degrees: float = Field(50.0, ge=5.0, le=85.0, description="Camera elevation in degrees")
+    radius: float = Field(6.0, ge=3.0, le=12.0, description="Orbit radius in scene units, with the longest horizontal dimension normalized to 3")
+    start_degrees: float = Field(0.0, ge=-360.0, le=360.0, description="Starting azimuth in degrees")
+    direction: Literal["cw", "ccw"] = Field("cw", description="Orbit direction")
+    margin: float = Field(0.05, ge=0.03, le=0.15, description="Required edge clearance as a fraction of the frame")
 
 
 class FramingReport(BaseModel):
-    """取景机器检查结果，回给 LLM 决策。"""
+    """Measured framing data returned to the director."""
     passed: bool
     plan: ShotPlan
     fov_vertical_degrees: float
@@ -28,10 +28,10 @@ class FramingReport(BaseModel):
 
     def summary(self) -> str:
         if self.passed:
-            return (f"取景检查通过：垂直FOV {self.fov_vertical_degrees:.2f}°，"
-                    f"最小边距(左/下/右/上) {['%.1f%%' % (m*100) for m in self.min_margins_lbrt]}，"
-                    f"侧面顺序 {self.side_sequence}，{self.frames} 帧已渲染。")
-        return "取景检查未通过：" + ";".join(self.violations[:5])
+            return (f"Framing passed. Vertical field of view {self.fov_vertical_degrees:.2f}°. "
+                    f"Minimum clearance (left, bottom, right, top): {', '.join(f'{m:.2%}' for m in self.min_margins_lbrt)}. "
+                    f"View order: {' → '.join(self.side_sequence)}. {self.frames} frames rendered.")
+        return "Framing failed. " + " ".join(self.violations[:5])
 
 
 class SeedanceRequest(BaseModel):

@@ -23,11 +23,11 @@ def extrema(a, b, n, c, e, d):
     """(n+a·cosθ+b·sinθ)/(d+c·cosθ+e·sinθ) 在整圆上的精确极值。要求所有顶点全程在相机前方。"""
     q = d * d - c * c - e * e
     if np.any(q <= 0) or np.any(d <= 0):
-        raise ValueError("存在顶点在连续环绕中落到相机后方：请增大 radius 或降低 elevation_degrees")
+        raise ValueError("Some vertices fall behind the camera. Increase the radius or lower the elevation.")
     center = d * n - a * c - b * e
     disc = center * center - q * (n * n - a * a - b * b)
     if np.any(disc < -1e-10):
-        raise ValueError("连续轨道极值判别式异常")
+        raise ValueError("Could not solve the projection extrema along the continuous orbit.")
     spread = np.sqrt(np.maximum(disc, 0))
     return (center - spread) / q, (center + spread) / q
 
@@ -59,7 +59,7 @@ def main():
     p.add_argument("--height", type=int, default=540)
     p.add_argument("--fps", type=int, default=30)
     p.add_argument("--frames", type=int, default=300)
-    p.add_argument("--normalize", type=float, default=3.0, help="最长水平尺寸归一到该值")
+    p.add_argument("--normalize", type=float, default=3.0, help="Normalize the longest horizontal dimension to this value")
     args = p.parse_args(argv)
     plan = json.loads(args.plan)
     out = Path(args.out)
@@ -71,7 +71,7 @@ def main():
     bpy.ops.import_scene.gltf(filepath=args.glb)
     meshes = [o for o in scene.objects if o.type == "MESH"]
     if not meshes:
-        raise ValueError("GLB 导入后没有网格对象")
+        raise ValueError("The imported GLB contains no mesh objects.")
 
     # 归一化：水平居中，最长水平尺寸 -> args.normalize，高度中心放到 z 中点
     pts = np.concatenate([np.array([list(o.matrix_world @ Vector(c[:])) for c in o.bound_box]) for o in meshes])
@@ -158,12 +158,12 @@ def main():
         uv = np.column_stack([.5 + local[:, 0] / (2 * depth * tangent * aspect) - cam_data.shift_x / aspect,
                               .5 + local[:, 1] / (2 * depth * tangent) - cam_data.shift_y])
         if depth.min() <= 0:
-            violations.append(f"第{i}帧有顶点在相机后方")
+            violations.append(f"Frame {i} contains geometry behind the camera.")
         elif uv.min() < margin - eps or uv.max() > 1 - margin + eps:
             lo, hi = uv.min(axis=0), uv.max(axis=0)
             violations.append(
-                f"第{i}帧(方位{(start + (end - start) * i / args.frames) % 360:.0f}°)越界："
-                f"左{lo[0]:.3f}/下{lo[1]:.3f}/右{1 - hi[0]:.3f}/上{1 - hi[1]:.3f}（要求>{margin:.2f}）")
+                f"Frame {i} at {(start + (end - start) * i / args.frames) % 360:.0f}° missed the target clearance. "
+                f"Left {lo[0]:.2%}, bottom {lo[1]:.2%}, right {1 - hi[0]:.2%}, top {1 - hi[1]:.2%}. Target {margin:.2%}.")
         bounds.append([float(uv[:, 0].min()), float(uv[:, 1].min()),
                        float(uv[:, 0].max()), float(uv[:, 1].max())])
     b = np.array(bounds)
@@ -196,7 +196,7 @@ def main():
         "violations": violations[:20],
         "geometry_world_vertices_sha256": geom_sha,
         "render_seconds": round(time.time() - render_t0, 1),
-        "method": "整圈解析极值定焦距+固定偏移；逐帧真实相机矩阵审计全部顶点（含首末）",
+        "method": "The lens and offset remain fixed across the orbit. Every mesh vertex is projected at each pose, including the closure pose.",
     }
     (out / "framing.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print("WORKER_DONE", json.dumps({"passed": report["passed"], "fov": round(fov_v, 2),

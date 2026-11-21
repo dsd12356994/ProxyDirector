@@ -28,51 +28,77 @@ class ToolContext:
     prompt_path: Path = field(default=None)
     iterations: int = 0
     style_block: str = ""      # 提示词扩写产物（只附加到冻结模板末尾，非镜头维度）
+    chat_session: bool = False
+    turn_start_iteration: int = 0
 
     @property
     def ledger_path(self) -> Path:
         return Path(self.cfg["_root"]) / "data" / "ledger.jsonl"
+
+    def paid_record_exists(self) -> bool:
+        commercial = self.run_dir / "commercial"
+        return any((commercial / name).is_file() for name in ("kling_state.json", "state.json"))
+
+    def check_editable(self) -> None:
+        if self.chat_session and self.paid_record_exists():
+            raise GateRefused("This run already has a paid submission. Start a new session to change the shot.")
 
 
 def make_tools(ctx: ToolContext):
     """返回 (工具函数们, 名称->函数 映射)。工具直接注册进 Pydantic AI Agent。"""
 
     def get_run_context() -> str:
-        """获取任务背景：镜头要求、预算与已花费、当前模式。先调这个。"""
+        """Read the shot requirements, available budget, current plan and submission mode."""
         spent = ledger.spent_usd(ctx.ledger_path)
         return json.dumps({
-            "object": "有线鼠标（黑）：本体、两主键、滚轮、顶键、两侧键、单根连续线缆、单 USB-A 接头",
-            "shot_requirements": "10 秒完整 360° 连续环绕，四侧依次呈现，全部部件每帧入画，"
-                                 "构图紧凑（安全边距约 5%），无切镜无反转",
+            "object": "Black wired mouse with two main buttons, scroll wheel, top button, two side buttons, one cable and one USB-A plug.",
+            "shot_requirements": "One continuous 10-second, 360° orbit showing all four sides in sequence. "
+                                 "Keep every component in frame with about 5% edge clearance, without cuts or reversals.",
             "budget_usd": ctx.cfg["budget"]["max_usd"], "spent_usd_all_runs": spent,
             "dry_run": ctx.dry_run, "auto_approve": ctx.auto_approve,
             "video_backend": ctx.cfg.get("video_backend", "runway"),
             "max_orbit_iterations": ctx.cfg["pipeline"]["max_orbit_iterations"],
+            "baseline_plan": ctx.cfg["pipeline"]["baseline_plan"],
+            "current_plan": ctx.framing.plan.model_dump() if ctx.framing else None,
             "glb_frozen_sha256": tripo.digest(ctx.glb) if ctx.glb else None,
-            "note": "plan_orbit 与取景检查免费，可反复调；submit_seedance 花钱，需先通过取景检查",
+            "note": "Local renders and framing checks are free. A live video submission requires a passing framing check and approval.",
         }, ensure_ascii=False)
 
     def plan_orbit(plan: ShotPlan) -> str:
-        """[免费] 按相机方案渲染 10 秒环绕参考视频并做逐帧取景审计。返回审计结果；未通过就调参重试。"""
-        if ctx.iterations >= ctx.cfg["pipeline"]["max_orbit_iterations"]:
-            return "已达本地渲染迭代上限；请基于最后一次结果决策，或调用 stop。"
+        """Render the orbit locally and audit its framing at every pose. Adjust the plan if the audit fails."""
+        ctx.check_editable()
+        if ctx.iterations - ctx.turn_start_iteration >= ctx.cfg["pipeline"]["max_orbit_iterations"]:
+            return "Render limit reached. Use the latest result or stop this turn."
+        if ctx.chat_session and ctx.framing is not None:
+            # 已冻结的演练请求随上一版镜头保留。根目录只呈现当前镜头的提示词和请求。
+            previous = Path(ctx.framing.video_path).parent
+            for name in ("seedance_prompt.txt", "commercial"):
+                artifact = ctx.run_dir / name
+                if artifact.exists():
+                    artifact.rename(previous / name)
+        ctx.prompt_path = None
+        ctx.framing = None
         ctx.iterations += 1
         tag = f"v{ctx.iterations}"
         fr = blender_step.render_orbit(ctx.cfg, ctx.run_dir, ctx.ledger_path,
                                        ctx.run_id, ctx.glb, plan, tag)
         ctx.framing = fr
-        return fr.summary() + f" 参考视频：{fr.video_path}"
+        return fr.summary() + f" Reference video: {Path(fr.video_path).relative_to(ctx.run_dir)}"
 
     def latest_framing_status() -> str:
-        """[免费] 查看最近一次取景审计的完整数据（含未通过的逐帧越界明细）。"""
+        """Read the latest framing audit, including any pose that misses the requested clearance."""
         if ctx.framing is None:
-            return "还没有渲染过；先调用 plan_orbit。"
-        return json.dumps(ctx.framing.model_dump(), ensure_ascii=False)
+            return "No reference has been rendered yet. Run plan_orbit first."
+        report = ctx.framing.model_dump()
+        if ctx.framing.video_path:
+            report["video_path"] = str(Path(ctx.framing.video_path).relative_to(ctx.run_dir))
+        return json.dumps(report, ensure_ascii=False)
 
     def build_seedance_prompt(emphasis_notes: str = "") -> str:
-        """[免费] 用已通过的取景结果按冻结模板生成成片提示词。emphasis_notes 可加 1-2 句补充要求。"""
+        """Build the video prompt from an audited shot and the fixed template. Add up to two short emphasis notes."""
+        ctx.check_editable()
         if ctx.framing is None or not ctx.framing.passed:
-            raise GateRefused("提示词要基于取景通过的渲染结果生成；先 plan_orbit 并通过检查")
+            raise GateRefused("Render a reference and pass the framing audit before building a prompt.")
         backend = ctx.cfg.get("video_backend", "runway")
         if backend == "kling":
             text = render_prompt(ctx.framing, ctx.cfg["kling"]["duration"], emphasis_notes,
@@ -84,18 +110,19 @@ def make_tools(ctx: ToolContext):
         ctx.prompt_path.write_text(text, encoding="utf-8")
         ledger.log({"run_id": ctx.run_id, "stage": "prompt", "provider": "local",
                     "status": "built", "cost_usd": 0.0, "mock": False}, ctx.ledger_path)
-        return f"提示词已生成（{ctx.prompt_path}）：\n{text}"
+        return f"Generation prompt saved to {ctx.prompt_path.name}.\n{text}"
 
     def submit_seedance(quality: str, confirm: bool) -> str:
-        """[付费闸门] 提交成片生成。前置条件：取景通过 + 提示词已生成 + confirm=true。
-        Runway 后端：quality 480p=$3.00 / 720p=$4.50（10 秒）。
-        Kling 后端：模型/分辨率来自 config（quality 参数忽略），按积分计费。"""
+        """Submit a video request after the framing check and prompt build, with explicit confirmation.
+        Runway requests use the configured quality and rate for a 10-second video.
+        Kling uses the configured model and resolution and charges credits."""
+        ctx.check_editable()
         if ctx.framing is None or not ctx.framing.passed:
-            raise GateRefused("取景检查未通过，禁止提交")
+            raise GateRefused("Submission requires a passing framing audit.")
         if ctx.prompt_path is None or not ctx.prompt_path.exists():
-            raise GateRefused("提示词未生成，禁止提交")
+            raise GateRefused("Build the generation prompt before submitting.")
         if not confirm:
-            raise GateRefused("confirm=false：付费提交必须显式确认")
+            raise GateRefused("Explicit confirmation is required to submit a video request.")
         views_dir = Path(ctx.cfg["_root"]) / ctx.cfg["pipeline"]["views_dir"]
         view_files = {n: views_dir / n for n in tripo.SLOT_OF_VIEW}
         prompt_text = ctx.prompt_path.read_text(encoding="utf-8")
@@ -106,43 +133,45 @@ def make_tools(ctx: ToolContext):
                                          ctx.cfg["pipeline"]["frames"] / ctx.cfg["pipeline"]["fps"],
                                          ctx.cfg["kling"]["duration"])
             if not ctx.dry_run and not ctx.auto_approve:
-                answer = input(f"\n[付费闸门] Kling {ctx.cfg['kling']['model']} "
+                answer = input(f"\n[Paid submission] Kling {ctx.cfg['kling']['model']} "
                                f"{ctx.cfg['kling']['resolution']} {ctx.cfg['kling']['duration']}s "
-                               f"预计 {est} 积分，输入 yes 提交 / 其他放弃： ").strip().lower()
+                               f"Estimated {est} credits. Type yes to submit: ").strip().lower()
                 if answer != "yes":
                     ledger.log({"run_id": ctx.run_id, "stage": "seedance", "provider": "kling",
                                 "status": "gate_declined_by_human", "cost_usd": 0.0, "mock": False},
                                ctx.ledger_path)
-                    raise GateRefused("人工闸门未放行")
+                    raise GateRefused("The user declined the paid submission.")
             body, record = kling.build_request(ctx.cfg, ctx.run_id, Path(ctx.framing.video_path),
                                                view_files, prompt_text, dry_run=ctx.dry_run)
             video = kling.submit(ctx.cfg, ctx.run_dir, ctx.ledger_path, ctx.run_id,
                                  body, record, ctx.dry_run)
-            return ("[dry-run] 请求已冻结未触网：" if ctx.dry_run else "生成完成：") + str(video)
+            return ("[dry-run] Request saved to commercial/frozen_request.json."
+                    if ctx.dry_run else f"Video saved to {video.relative_to(ctx.run_dir)}.")
 
         if quality not in ctx.cfg["runway"]["qualities"]:
-            return f"quality 只支持 {list(ctx.cfg['runway']['qualities'])}"
+            return f"Supported quality settings: {list(ctx.cfg['runway']['qualities'])}"
         if not ctx.dry_run and not ctx.auto_approve:
             q = ctx.cfg["runway"]["qualities"][quality]
-            answer = input(f"\n[付费闸门] {quality} 预计 {q['credits']} 积分 ≈ ${q['usd']:.2f}，"
-                           f"输入 yes 提交 / 其他放弃： ").strip().lower()
+            answer = input(f"\n[Paid submission] {quality} estimated at {q['credits']} credits (about USD {q['usd']:.2f}). "
+                           f"Type yes to submit: ").strip().lower()
             if answer != "yes":
                 ledger.log({"run_id": ctx.run_id, "stage": "seedance", "provider": "runway",
                             "status": "gate_declined_by_human", "cost_usd": 0.0, "mock": False},
                            ctx.ledger_path)
-                raise GateRefused("人工闸门未放行")
+                raise GateRefused("The user declined the paid submission.")
         body, record = runway.build_request(ctx.cfg, Path(ctx.framing.video_path),
                                             view_files, prompt_text, quality)
         video = runway.submit(ctx.cfg, ctx.run_dir, ctx.ledger_path, ctx.run_id,
                               body, record, ctx.dry_run)
-        return ("[dry-run] 请求已冻结未触网：" if ctx.dry_run else "生成完成：") + str(video)
+        return ("[dry-run] Request saved to commercial/frozen_request.json."
+                if ctx.dry_run else f"Video saved to {video.relative_to(ctx.run_dir)}.")
 
     def stop(reason: str) -> str:
-        """停止本次运行并给出原因。"""
+        """Stop the current run and record the reason."""
         ledger.log({"run_id": ctx.run_id, "stage": "stop", "provider": "local",
                     "status": "stopped", "reason": reason, "cost_usd": 0.0,
                     "mock": False}, ctx.ledger_path)
-        return f"已停止：{reason}"
+        return f"Run stopped. {reason}"
 
     return {"get_run_context": get_run_context, "plan_orbit": plan_orbit,
             "latest_framing_status": latest_framing_status,

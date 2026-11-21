@@ -1,0 +1,104 @@
+{
+  "cases": {
+    "early-tripo": {
+      "metrics": [
+        {
+          "label": "Full-object framing",
+          "value": "Failed"
+        },
+        {
+          "label": "Reference photos",
+          "value": "4"
+        }
+      ],
+      "findings": [
+        "The USB plug is partly cropped at 0, 0.25, 0.5 and 10 s. It crosses the right edge at 1.25 and 1.5 s.",
+        "The rear of the mouse touches or crosses the bottom edge at 3.5, 3.75, 4 and 4.25 s."
+      ]
+    },
+    "compact": {
+      "metrics": [
+        {
+          "label": "Vertical field of view",
+          "value": "35° → 20.03°"
+        },
+        {
+          "label": "Projected subject size",
+          "value": "1.79×"
+        },
+        {
+          "label": "Camera poses checked",
+          "value": "601"
+        }
+      ],
+      "findings": [
+        "Both framings used the same hand-built mouse mesh. Only the measurements survive here for the wider shot.",
+        "Camera framing and prompt wording changed together. Both clips shown here are from the tighter run.",
+        "The reviewer found the USB plug inside the frame at 1, 6.5 and 8.5 s, where the preceding clip had cropped it."
+      ]
+    },
+    "baseline": {
+      "metrics": [
+        {
+          "label": "Elevation / radius",
+          "value": "50° / 6"
+        },
+        {
+          "label": "Vertical field of view",
+          "value": "19.97°"
+        },
+        {
+          "label": "Reference audit",
+          "value": "300 frames · Passed"
+        }
+      ],
+      "findings": [
+        "The run reused the frozen Tripo mesh.",
+        "The archived request specified kling-4.0-flash, 720p and 10 seconds."
+      ]
+    },
+    "deepseek": {
+      "metrics": [
+        {
+          "label": "Elevation / radius",
+          "value": "50° / 6"
+        },
+        {
+          "label": "Vertical field of view",
+          "value": "19.97°"
+        },
+        {
+          "label": "Reference audit",
+          "value": "300 frames · Passed"
+        }
+      ],
+      "findings": [
+        "The run reused the frozen Tripo mesh.",
+        "The archived request specified kling-4.0-flash, 720p and 10 seconds."
+      ]
+    }
+  },
+  "batch": {
+    "total": 11,
+    "conditions": [
+      {
+        "label": "Fixed baseline",
+        "count": 3
+      },
+      {
+        "label": "Astra",
+        "count": 3
+      },
+      {
+        "label": "DeepSeek",
+        "count": 3
+      },
+      {
+        "label": "GLM",
+        "count": 2
+      }
+    ],
+    "blind_scoring": "Blind review is complete for 0 of 11 clips in the archived scorecard.",
+    "seed_note": "Both runs carry the pipeline label 4207. The archived Kling requests leave the video generation seed unspecified."
+  }
+}

@@ -41,5 +41,5 @@ def ensure_budget(projected_usd: float, ledger_path: Path, max_usd: float) -> No
     current = spent_usd(ledger_path)
     if current + projected_usd > max_usd:
         raise BudgetExceeded(
-            f"预算拦截：已花费 ${current:.2f} + 本次预计 ${projected_usd:.2f} "
-            f"超过总预算 ${max_usd:.2f}")
+            f"Adding this estimate of USD {projected_usd:.2f} to the USD {current:.2f} already spent "
+            f"exceeds the USD {max_usd:.2f} budget.")

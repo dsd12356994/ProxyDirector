@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1968" height="932" viewBox="0 0 1968 932" font-family="Avenir Next, Helvetica Neue, Arial, sans-serif"><defs><marker id="arrow_536C7D" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#536C7D"/></marker><marker id="arrow_225D9A" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#225D9A"/></marker><marker id="arrow_06725E" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#06725E"/></marker></defs><rect x="4" y="4" width="1960" height="924" fill="#FFFFFF" stroke="#D4D4D4" stroke-width="2"/><rect x="0" y="0" width="1968" height="932" fill="white"/>
+<title>ProxyDirector Agent Control Loop</title><desc>In a chat turn the language model calls scoped Pydantic AI tools. Blender measures geometry and returns a report summary to the next model turn. The full report can be requested via latest_framing_status. A failing plan can be revised, and a passing audit unlocks the prompt builder. Dry-run requests stay local. Live generation needs explicit human authorization and sufficient credits. The team visually reviews the generated clip separately. The example measurements come from archived run 20261116_150621_astra_agent_s4207.</desc>
+<text x="43" y="64" font-size="48" font-weight="700" fill="#172E40" text-anchor="start">ProxyDirector agent control loop</text>
+<text x="44" y="103" font-size="25" font-weight="500" fill="#405B6C" text-anchor="start">How the director uses a measured observation to choose its next action</text>
+<g transform="translate(0 116)">
+<g id="agent-region">
+<rect x="12" y="12" width="1101" height="791" rx="21" fill="#F6F8FA" stroke="#D7E1E7" stroke-width="2"/>
+</g>
+<g id="handoff-region">
+<rect x="1140" y="12" width="816" height="791" rx="21" fill="#F8FAF9" stroke="#D5E3DE" stroke-width="2"/>
+</g>
+<g id="agent-region-title">
+<text x="44" y="56" font-size="31" font-weight="700" fill="#172E40" text-anchor="start">Agent decision loop</text>
+</g>
+<g id="handoff-region-title">
+<text x="1175" y="56" font-size="31" font-weight="700" fill="#06725E" text-anchor="start">After a passing audit</text>
+</g>
+<g id="context">
+<rect x="45" y="92" width="401" height="151" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="context-title">
+<text x="68" y="137" font-size="34" font-weight="690" fill="#172E40" text-anchor="start">Director context</text>
+</g>
+<g id="context-line-0">
+<text x="68" y="178" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">System rules + entire static wiki</text>
+</g>
+<g id="context-line-1">
+<text x="68" y="209" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">User request + session history</text>
+</g>
+<g id="context-to-llm">
+<path d="M446 165 H571" fill="none" stroke="#536C7D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_536C7D)"/>
+</g>
+<g id="director">
+<rect x="584" y="92" width="469" height="151" rx="18" fill="#172E40" stroke="#172E40" stroke-width="2"/>
+</g>
+<g id="director-title">
+<text x="613" y="147" font-size="44" font-weight="700" fill="#FFFFFF" text-anchor="start">LLM director</text>
+</g>
+<g id="director-text">
+<text x="613" y="197" font-size="26" font-weight="530" fill="#DFE9F0" text-anchor="start">Choose the next tool + arguments</text>
+</g>
+<g id="propose-plan">
+<path d="M664 245 V277 Q664 295 646 295 H250 Q231 295 231 314 V332" fill="none" stroke="#536C7D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_536C7D)"/>
+</g>
+<g id="typed-call-label">
+<text x="321" y="284" font-size="27" font-weight="650" fill="#172E40" text-anchor="start">plan_orbit(ShotPlan)</text>
+</g>
+<g id="dispatcher">
+<rect x="45" y="344" width="465" height="119" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="dispatcher-title">
+<text x="68" y="389" font-size="34" font-weight="690" fill="#172E40" text-anchor="start">Pydantic AI dispatcher</text>
+</g>
+<g id="dispatcher-line-0">
+<text x="68" y="430" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Six fixed tools, run sequentially</text>
+</g>
+<g id="dispatch-to-render">
+<path d="M232 465 V553" fill="none" stroke="#536C7D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_536C7D)"/>
+</g>
+<g id="validated-plan">
+<text x="252" y="523" font-size="24" font-weight="560" fill="#405B6C" text-anchor="start">Validated shot parameters</text>
+</g>
+<g id="blender">
+<rect x="45" y="563" width="465" height="152" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="blender-title">
+<text x="68" y="608" font-size="34" font-weight="690" fill="#172E40" text-anchor="start">Blender framing audit</text>
+</g>
+<g id="blender-line-0">
+<text x="68" y="649" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Render the cached Tripo mesh</text>
+</g>
+<g id="blender-line-1">
+<text x="68" y="680" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Audit all vertices at 301 poses</text>
+</g>
+<g id="render-to-report">
+<path d="M512 636 H590" fill="none" stroke="#536C7D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_536C7D)"/>
+</g>
+<g id="report">
+<rect x="603" y="563" width="452" height="152" rx="15" fill="#EFF5FC" stroke="#A8C3DC" stroke-width="2"/>
+</g>
+<g id="report-title">
+<text x="626" y="608" font-size="34" font-weight="690" fill="#225D9A" text-anchor="start">FramingReport</text>
+</g>
+<g id="report-line-0">
+<text x="626" y="649" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Pass flag, four side clearances,</text>
+</g>
+<g id="report-line-1">
+<text x="626" y="680" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">view order and any violations</text>
+</g>
+<g id="return-observation">
+<path d="M999 560 V257" fill="none" stroke="#225D9A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_225D9A)"/>
+</g>
+<g id="observation-title">
+<text x="598" y="374" font-size="31" font-weight="700" fill="#225D9A" text-anchor="start">Observation → next turn</text>
+</g>
+<g id="observation-detail">
+<text x="598" y="411" font-size="24" font-weight="500" fill="#405B6C" text-anchor="start">The report summary returns</text>
+</g>
+<g id="observation-detail2">
+<text x="598" y="442" font-size="24" font-weight="500" fill="#405B6C" text-anchor="start">in the message history.</text>
+</g>
+<g id="failure-detail">
+<text x="598" y="488" font-size="25" font-weight="650" fill="#225D9A" text-anchor="start">Fail → revise the plan or stop.</text>
+</g>
+<g id="attempt-limit">
+<text x="598" y="520" font-size="24" font-weight="500" fill="#405B6C" text-anchor="start">Up to four renders per turn.</text>
+</g>
+<g id="actual-trace">
+<text x="45" y="768" font-size="25" font-weight="700" fill="#172E40" text-anchor="start">Recorded Astra run</text>
+</g>
+<g id="trace-values">
+<text x="312" y="768" font-size="26" font-weight="550" fill="#405B6C" text-anchor="start">49,530 vertices   ·   5.01% minimum clearance</text>
+</g>
+<g id="passed-report-next-call">
+<path d="M1055 165 H1173" fill="none" stroke="#06725E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_06725E)"/>
+</g>
+<g id="passed-label">
+<text x="1071" y="148" font-size="24" font-weight="690" fill="#06725E" text-anchor="start">Pass</text>
+</g>
+<g id="prompt-tool">
+<rect x="1185" y="92" width="729" height="151" rx="15" fill="#F0F8F5" stroke="#A9CBBD" stroke-width="2"/>
+</g>
+<g id="prompt-tool-title">
+<text x="1208" y="137" font-size="34" font-weight="690" fill="#06725E" text-anchor="start">build_seedance_prompt</text>
+</g>
+<g id="prompt-tool-line-0">
+<text x="1208" y="178" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Fixed template + clearance, elevation, view order, duration</text>
+</g>
+<g id="prompt-tool-line-1">
+<text x="1208" y="209" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Optional style notes add appearance details</text>
+</g>
+<g id="next-tool-call">
+<path d="M1548 245 V314" fill="none" stroke="#06725E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_06725E)"/>
+</g>
+<g id="prompt-result-label">
+<text x="1570" y="289" font-size="23" font-weight="530" fill="#405B6C" text-anchor="start">Prompt returns to the director</text>
+</g>
+<g id="submit-tool">
+<rect x="1185" y="326" width="729" height="114" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="submit-tool-title">
+<text x="1208" y="371" font-size="34" font-weight="690" fill="#06725E" text-anchor="start">submit_seedance</text>
+</g>
+<g id="submit-tool-line-0">
+<text x="1208" y="412" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Request uses the prompt, four photos and the audited orbit</text>
+</g>
+<g id="branch-trunk">
+<path d="M1549 441 V462" fill="none" stroke="#536C7D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="dry-run-branch">
+<path d="M1549 462 H1366 Q1353 462 1353 475 V491" fill="none" stroke="#536C7D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_536C7D)"/>
+</g>
+<g id="paid-branch">
+<path d="M1549 462 H1723 Q1736 462 1736 475 V491" fill="none" stroke="#06725E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_06725E)"/>
+</g>
+<g id="dry-run">
+<rect x="1185" y="502" width="338" height="115" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="dry-run-title">
+<text x="1208" y="547" font-size="34" font-weight="690" fill="#172E40" text-anchor="start">Dry run</text>
+</g>
+<g id="dry-run-line-0">
+<text x="1208" y="588" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Freeze request locally</text>
+</g>
+<g id="approved">
+<rect x="1554" y="502" width="360" height="115" rx="15" fill="#F0F8F5" stroke="#A9CBBD" stroke-width="2"/>
+</g>
+<g id="approved-title">
+<text x="1577" y="547" font-size="34" font-weight="690" fill="#06725E" text-anchor="start">Human approval</text>
+</g>
+<g id="approved-line-0">
+<text x="1577" y="588" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Check available credits</text>
+</g>
+<g id="approved-cloud">
+<path d="M1735 618 V675" fill="none" stroke="#06725E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_06725E)"/>
+</g>
+<g id="kling">
+<rect x="1554" y="686" width="360" height="103" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="kling-title">
+<text x="1577" y="731" font-size="34" font-weight="690" fill="#06725E" text-anchor="start">Kling video API</text>
+</g>
+<g id="kling-line-0">
+<text x="1577" y="772" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Return task ID, then clip</text>
+</g>
+<g id="review">
+<rect x="1185" y="686" width="328" height="103" rx="15" fill="white" stroke="#BCCAD1" stroke-width="2"/>
+</g>
+<g id="review-title">
+<text x="1208" y="731" font-size="34" font-weight="690" fill="#172E40" text-anchor="start">Team review</text>
+</g>
+<g id="review-line-0">
+<text x="1208" y="772" font-size="25" font-weight="510" fill="#405B6C" text-anchor="start">Inspect the finished clip</text>
+</g>
+<g id="clip-to-human">
+<path d="M1551 741 H1523" fill="none" stroke="#06725E" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow_06725E)"/>
+</g>
+<g id="context-doc">
+<path d="M387 117h19l8 8v22h-27z m19 0v9h8 m-20 7h13m-13 7h9" fill="none" stroke="#536C7D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="model-graph">
+<path d="M939 129l21-12 21 15-18 16-24-19m21-12 3 31" fill="none" stroke="#93B4C8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="model-weight-0">
+<path d="M936 129a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" fill="#CADCE8" stroke="#CADCE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="model-weight-1">
+<path d="M957 117a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" fill="#CADCE8" stroke="#CADCE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="model-weight-2">
+<path d="M978 132a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" fill="#CADCE8" stroke="#CADCE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="model-weight-3">
+<path d="M960 148a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" fill="#CADCE8" stroke="#CADCE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="report-frame">
+<path d="M984 598v-8h13m30 0h8v8m0 13v8h-10m-30 0h-11v-8" fill="none" stroke="#225D9A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="report-bounds">
+<path d="M997 598h25v12h-25Z" fill="none" stroke="#225D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g></svg>

@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Iterable
 
-from pydantic_ai import Agent, RunUsage
+from pydantic_ai import Agent, RunUsage, Tool
 from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart, TextPart
 from pydantic_ai.models.function import FunctionModel
 from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModel
@@ -52,7 +52,7 @@ def build_model(backend_cfg: dict):
     if kind == "openai_compatible":
         key = api_key(backend_cfg["api_key_env"])
         if not key:
-            raise RuntimeError(f".env 缺少 {backend_cfg['api_key_env']}（后端 {backend_cfg.get('_name')}）")
+            raise RuntimeError(f"Configure {backend_cfg['api_key_env']} for the {backend_cfg.get('_name')} backend.")
         client_provider = OpenAIProvider(base_url=backend_cfg["base_url"], api_key=key)
         return OpenAIChatModel(backend_cfg["model"], provider=client_provider)
     if kind == "openai_responses":
@@ -60,44 +60,78 @@ def build_model(backend_cfg: dict):
         # OpenAI 官方建议这类模型走 /v1/responses（pydantic-ai 的 OpenAIResponsesModel）
         key = api_key(backend_cfg["api_key_env"])
         if not key:
-            raise RuntimeError(f".env 缺少 {backend_cfg['api_key_env']}（后端 {backend_cfg.get('_name')}）")
+            raise RuntimeError(f"Configure {backend_cfg['api_key_env']} for the {backend_cfg.get('_name')} backend.")
         client_provider = OpenAIProvider(base_url=backend_cfg["base_url"], api_key=key)
         return OpenAIResponsesModel(backend_cfg["model"], provider=client_provider)
-    raise ValueError(f"未知后端类型：{kind}")
+    raise ValueError(f"Unknown backend type: {kind}")
 
 
 async def mock_director(messages: list[ModelMessage], info) -> ModelResponse:
-    """脚本化决策：上下文 -> 好方案 -> （若失败则调整一次）-> 提示词 -> 480p 提交。"""
+    """当前回合的离线预设导演。每轮从用户输入起算，工具结果只在本轮生效。"""
     last_tool = None
+    prompt = None
     for msg in reversed(messages):
-        for part in getattr(msg, "parts", []):
-            if part.part_kind == "tool-return":
-                last_tool = part
+        for part in reversed(msg.parts):
+            if part.part_kind == "user-prompt":
+                prompt = str(part.content).strip().lower()
                 break
-        if last_tool:
+            if part.part_kind == "tool-return" and last_tool is None:
+                last_tool = part
+        if prompt is not None:
             break
+
+    normalized = "".join((prompt or "").split())
+    if normalized in {"标准", "标准环绕", "标准模式", "运行标准环绕", "运行一次标准环绕演练",
+                      "标准环绕演练", "执行标准环绕", "标准镜头", "standard", "standardorbit",
+                      "executethemouseorbitpipeline.startwithget_run_context."}:
+        preset = "standard"
+    elif normalized in {"35°", "35度", "35°俯角", "35度俯角", "35°俯角环绕", "35°环绕",
+                        "拍一条35°俯角、更紧凑的环绕", "35°低机位", "35°低角度环绕", "35°elevation", "35°orbit", "35degreesorbit",
+                        "low-angleorbit", "35°lowangle", "lowangleorbit", "35°angle"}:
+        preset = "low"
+    elif normalized in {"逆时针", "逆时针环绕", "逆时针环绕一圈", "换成逆时针", "逆时针方向",
+                        "换逆时针方向再来一条", "反向环绕", "counterclockwise", "counterclockwiseorbit", "counter-clockwiseorbit",
+                        "reverseorbit", "ccw"}:
+        preset = "reverse"
+    else:
+        return ModelResponse(parts=[TextPart(content=(
+            "Choose Standard orbit, 35° elevation, or Counterclockwise orbit. Each preset renders a reference video "
+            "and checks its framing. Select a configured language model to describe a custom shot."
+        ))])
+
     name = last_tool.tool_name if last_tool else None
     content = str(last_tool.content) if last_tool else ""
-    if name == "submit_seedance" or name == "stop":
-        return ModelResponse(parts=[TextPart(content="mock 流程完成：渲染、取景审计、提示词与提交全部走通。")])
+    if name is None:
+        return ModelResponse(parts=[ToolCallPart(tool_name="get_run_context", args="{}")])
+    if name == "stop":
+        return ModelResponse(parts=[TextPart(content=content)])
+    if name == "submit_seedance":
+        if content.startswith("[dry-run]"):
+            content = "The reference video passed the framing audit. The generation request is saved locally. No video service was called."
+        return ModelResponse(parts=[TextPart(content=content)])
     if name == "build_seedance_prompt":
         return ModelResponse(parts=[ToolCallPart(tool_name="submit_seedance",
                                                  args=json.dumps({"quality": "480p", "confirm": True}))])
     if name == "plan_orbit":
-        if "未通过" not in content and "通过" in content:
+        if content.startswith("Framing passed.") or ("未通过" not in content and "通过" in content):
             return ModelResponse(parts=[ToolCallPart(tool_name="build_seedance_prompt", args="{}")])
-        if "迭代上限" in content:
+        if content.startswith("Render limit reached.") or "迭代上限" in content:
             return ModelResponse(parts=[ToolCallPart(
-                tool_name="stop", args=json.dumps({"reason": "mock：本地渲染迭代用尽仍未通过取景"}))])
+                tool_name="stop", args=json.dumps({"reason": "The framing check still fails after the maximum number of local renders."}))])
         # 审计未通过：按典型修复方向调参重试一次
         plan = {"elevation_degrees": 45.0, "radius": 8.0, "start_degrees": 0.0,
                 "direction": "cw", "margin": 0.06}
         return ModelResponse(parts=[ToolCallPart(tool_name="plan_orbit", args=json.dumps({"plan": plan}))])
     if name == "latest_framing_status":
         return ModelResponse(parts=[ToolCallPart(tool_name="build_seedance_prompt", args="{}")])
-    # 开局或 get_run_context
-    plan = {"elevation_degrees": 50.0, "radius": 6.0, "start_degrees": 0.0,
-            "direction": "cw", "margin": 0.05}
+    context = json.loads(content)
+    plan = dict(context["baseline_plan"])
+    if preset != "standard" and context.get("current_plan"):
+        plan.update(context["current_plan"])
+    if preset == "low":
+        plan.update(elevation_degrees=35.0, radius=6.5)
+    if preset == "reverse":
+        plan["direction"] = "ccw"
     return ModelResponse(parts=[ToolCallPart(tool_name="plan_orbit", args=json.dumps({"plan": plan}))])
 
 
@@ -106,7 +140,7 @@ def run_agent(ctx: ToolContext, backend_name: str) -> tuple[str, RunUsage | None
     tools = make_tools(ctx)
     backend_cfg = dict(ctx.cfg["backends"][backend_name], _name=backend_name)
     model = build_model(backend_cfg)
-    agent = Agent(model=model, tools=list(tools.values()),
+    agent = Agent(model=model, tools=[Tool(fn, sequential=True) for fn in tools.values()],
                   system_prompt=SYSTEM_PROMPT + _load_wiki(), retries=1)
     model_settings = backend_cfg.get("model_settings") or None
     result = agent.run_sync("Execute the mouse orbit pipeline. Start with get_run_context.",

@@ -1,166 +1,169 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ProxyDirector · Director Console</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>ProxyDirector · Camera Studio</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
 <div class="app">
-  <!-- ── 侧栏：产品铬件 ─────────────────── -->
-  <aside class="side">
-    <div class="brand">
-      <span class="mark"></span>
-      <div><b>ProxyDirector</b><i>director console</i></div>
-    </div>
-
-    <nav class="nav">
-      <button class="navbtn active" id="nav-chat"><span class="ico">◈</span>导演对话</button>
-      <button class="navbtn" id="nav-runs"><span class="ico">☰</span>运行记录</button>
+  <aside class="side" id="sidebar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">◉</span><strong>ProxyDirector</strong></div>
+    <button class="newchat" id="btn-newchat"><span aria-hidden="true">＋</span> New chat</button>
+    <nav class="nav" aria-label="Workspace">
+      <button class="navbtn active" id="nav-chat" data-icon="chat">Director Chat</button>
+      <button class="navbtn" id="nav-lab" data-icon="frame">Framing Lab</button>
+      <button class="navbtn" id="nav-evidence" data-icon="film">Case Replay</button>
+      <button class="navbtn" id="nav-runs" data-icon="history">Run History</button>
     </nav>
-
-    <div class="side-sec">
-      <h3>会话</h3>
-      <button class="btn wide ghost" id="btn-newchat">＋ 新对话</button>
-      <div class="sessions" id="sessions"></div>
-    </div>
-
-    <div class="side-sec">
-      <h3>服务状态</h3>
-      <div class="statline" id="key-status"></div>
-      <div class="statline mono" id="budget-pill"></div>
-      <div class="statline mono" id="glb-pill"></div>
-    </div>
-
-    <div class="side-sec inputs">
-      <h3>冻结输入</h3>
-      <div class="mini-contact">
-        <img src="/api/views/view_1.png" alt="front"><img src="/api/views/view_2.png" alt="right">
-        <img src="/api/views/view_3.png" alt="back"><img src="/api/views/view_4.png" alt="left">
-      </div>
-      <div class="mono cap">4 视图 · FRONT/RIGHT/BACK/LEFT</div>
-    </div>
+    <section class="recents"><h2>Recent chats</h2><div id="sessions"></div></section>
+    <a class="guide-link" href="/user-guide" download="ProxyDirector User Guide.docx">User guide <span>DOCX ↓</span></a>
+    <details class="service"><summary><i class="status-lamp"></i> Local workspace</summary>
+      <div id="key-status"></div><p id="budget-pill"></p><p id="glb-pill"></p>
+    </details>
   </aside>
-
-  <!-- ── 主区 ─────────────────────────────── -->
+  <button class="scrim" id="scrim" aria-label="Close navigation"></button>
   <main class="main">
-    <!-- 对话视图 -->
+    <header class="topbar">
+      <button class="iconbtn mobile-menu" id="menu" aria-label="Open navigation" data-icon="menu"></button>
+      <div class="crumb"><span>Workspace</span><i>/</i><strong id="page-title">Director Chat</strong></div>
+      <button id="info-toggle" class="textbtn" data-icon="panel" aria-expanded="false">Shot details</button>
+    </header>
     <section class="view" id="view-chat">
       <div class="chatwrap">
-        <div class="chatlog" id="chatlog">
-          <div class="chat-hero" id="chat-hero">
-            <h2>对导演说一句话，它来拍</h2>
-            <p>LLM 只做镜头决策：规划环绕 → 本地渲染审计 → 过闸门 → 生成成片。镜头永远受取景闸门约束。</p>
-            <div class="chips">
-              <button class="chip">拍一条 35° 俯角、更紧凑的环绕</button>
-              <button class="chip">换逆时针方向再来一条</button>
-              <button class="chip">俯角高一点，物体再小一点</button>
+        <div class="chatlog" id="chatlog"></div>
+        <div class="composewrap">
+          <div class="composer">
+            <label class="sr-only" for="c-input">Shot request</label>
+            <textarea id="c-input" rows="2" placeholder="Describe a camera move or try a local preset…"></textarea>
+            <div class="composefoot">
+              <label class="modelpick"><span data-icon="aperture"></span><select id="c-backend" aria-label="Director model"><option value="mock">Local presets</option></select></label>
+              <details id="chat-settings" class="settings"><summary class="iconbtn" title="Shot settings" aria-label="Shot settings" data-icon="sliders"></summary>
+                <div class="settings-pop">
+                  <label>Run label <input type="number" id="c-seed" value="4207"></label>
+                  <label class="check"><input type="checkbox" id="c-dry" checked> Freeze video request</label>
+                  <label class="check"><input type="checkbox" id="c-ack" disabled> Authorize paid generation</label>
+                </div>
+              </details>
+              <span id="compose-mode">Local director · Preview</span>
+              <button class="send" id="btn-send" aria-label="Send shot request" data-icon="send"><span id="senddot"></span></button>
             </div>
           </div>
         </div>
-        <div class="composer">
-          <div class="c-controls">
-            <label>导演 <select id="c-backend"></select></label>
-            <label>seed <input type="number" id="c-seed" value="4207" style="width:74px"></label>
-            <label class="check inline"><input type="checkbox" id="c-dry" checked> dry-run</label>
-            <label class="check inline danger"><input type="checkbox" id="c-ack"> 授权付费</label>
-            <span class="spacer"></span>
-            <span class="runid mono" id="c-runid"></span>
-          </div>
-          <div class="c-row">
-            <textarea id="c-input" rows="2" placeholder="例如：拍一条俯角 35°、构图紧凑的 10 秒环绕"></textarea>
-            <button class="btn primary" id="btn-send">发送<div class="senddot" id="senddot"></div></button>
-          </div>
-        </div>
       </div>
-
-      <aside class="rail">
-        <div class="railcard">
-          <h3>当前运行</h3>
-          <div class="runlink mono" id="rail-runid">—</div>
-          <div class="monitor small"><span class="corners"></span>
-            <video id="rail-video" controls preload="metadata" style="display:none"></video>
-            <div class="rail-empty" id="rail-empty">本轮结束后，参考视频与取景读数出现在这里</div>
-          </div>
-          <div class="rail-stats mono" id="rail-stats"></div>
-          <button class="btn wide ghost" id="rail-open" style="display:none">在运行记录中查看</button>
+      <aside class="rail" id="rail" hidden>
+        <div class="railtop"><h2>Shot details</h2><button class="iconbtn" id="close-info" data-icon="close" aria-label="Close shot details"></button></div>
+        <h3>Reference photos</h3>
+        <div class="mini-contact">
+          <img src="/api/views/view_1.png" alt="Front view"><img src="/api/views/view_2.png" alt="Right view">
+          <img src="/api/views/view_3.png" alt="Back view"><img src="/api/views/view_4.png" alt="Left view">
         </div>
-        <div class="railcard">
-          <h3>本轮模式</h3>
-          <div class="modeline" id="rail-mode"><span class="badge b-info">dry-run</span> 不触网不扣费</div>
-        </div>
+        <h3>Current run</h3><div class="runlink mono" id="rail-runid">No run yet</div>
+        <video id="rail-video" controls playsinline preload="metadata" style="display:none"></video>
+        <div class="rail-empty" id="rail-empty">Your reference clip and measured margins will appear here after a render.</div>
+        <div class="rail-stats mono" id="rail-stats"></div>
+        <button class="btn ghost" id="rail-open" style="display:none">Open run details</button>
+        <h3>Generation mode</h3><div id="rail-mode">Preview</div>
       </aside>
     </section>
-
-    <!-- 运行记录视图 -->
+    <section class="view study" id="view-lab" style="display:none">
+      <div class="study-body">
+        <div class="study-heading"><h1>Framing Lab</h1><p>Zoom in on the recorded orbit to find where the mouse or its cable leaves the frame.</p></div>
+        <div class="lab-layout">
+          <div>
+            <div class="stage" id="lab-stage">
+              <video id="lab-video" playsinline muted preload="auto"></video>
+              <div class="safe-line" id="safe-line"></div><div id="bounds" class="bbox"></div>
+            </div>
+            <div class="transport"><button class="iconbtn" id="lab-play" aria-label="Play reference clip" data-icon="play"></button>
+              <input type="range" id="lab-frame" min="0" max="300" step="1" value="0" aria-label="Camera pose"><output id="lab-time">0.00 s</output></div>
+            <div class="legend"><span><i class="legend-line"></i> Subject bounds</span><span><i class="legend-dash"></i> Safety guide</span></div>
+          </div>
+          <div class="lab-settings"><h2>Frame controls</h2>
+            <label class="slab" for="lab-zoom">Center zoom <output id="zoom-value">1.00×</output></label>
+            <input type="range" id="lab-zoom" min="1" max="1.5" step=".01" value="1">
+            <label class="slab" for="lab-margin">Safety margin <output id="margin-value">5%</output></label>
+            <input type="range" id="lab-margin" min="0" max=".2" step=".01" value=".05">
+            <div class="presets"><button id="lab-reset" class="btn ghost">Original</button><button id="lab-buffer" class="btn ghost">Zoom 1.08×</button><button id="lab-push" class="btn">Zoom 1.15×</button></div>
+            <div class="audit" aria-live="polite"><strong id="lab-verdict">Loading framing data…</strong><p id="lab-result"></p></div>
+            <button id="first-crop" class="textbtn" hidden>First clipped pose</button> <button id="worst" class="textbtn" disabled>Smallest margin</button>
+          </div>
+        </div>
+        <p class="source-note" id="lab-source">This recording uses the hand-built proxy from the compact framing experiment. Zoom changes the center crop of this reference clip.</p>
+      </div>
+    </section>
+    <section class="view study" id="view-evidence" style="display:none"><div class="study-body">
+      <div class="study-heading"><h1>Case Replay</h1><p>Compare the planned orbit with generated footage to see where framing and appearance change.</p></div>
+      <div class="case-tabs" id="case-tabs" aria-label="Recorded experiments"></div>
+      <div id="case-detail" aria-live="polite"></div>
+    </div></section>
+    <!-- Run history view -->
     <section class="view" id="view-runs" style="display:none">
       <div class="col narrow">
         <details class="quickrun card">
-          <summary>表单模式新建运行（baseline / 携带风格）</summary>
+          <summary>New comparison run</summary>
           <div class="card-b">
-            <div class="form-row"><label>后端</label><select id="f-backend"></select></div>
-            <div class="form-row"><label>条件</label>
+            <div class="form-row"><label for="f-backend">Director</label><select id="f-backend"></select></div>
+            <div class="form-row"><label for="f-condition">Condition</label>
               <select id="f-condition">
-                <option value="agent">agent · LLM 决策</option>
-                <option value="baseline">baseline · 固定方案</option>
+                <option value="agent">Agent-directed plan</option>
+                <option value="baseline">Fixed baseline</option>
               </select>
             </div>
-            <div class="form-row"><label>Seed</label><input type="number" id="f-seed" value="4207"></div>
-            <div class="form-row"><label>风格</label>
+            <div class="form-row"><label for="f-seed">Run label</label><input type="number" id="f-seed" value="4207"></div>
+            <div class="form-row"><label for="f-style">Style</label>
               <div class="style-row">
-                <input type="text" id="f-style" placeholder="一句外观想法，如：深色科技感">
-                <button class="btn ghost" id="btn-expand">AI 扩写</button>
+                <input type="text" id="f-style" placeholder="For example, a dark studio with cool lighting">
+                <button class="btn ghost" id="btn-expand">Expand with AI</button>
               </div>
             </div>
             <div class="expand-box" id="expand-box" style="display:none">
               <div class="mono" id="expand-result" style="font-size:11.5px; white-space:pre-wrap"></div>
               <label class="check" style="margin-top:8px"><input type="checkbox" id="f-use-style" checked>
-                附加该风格块（只影响外观，不影响镜头）</label>
+                Apply these appearance settings</label>
             </div>
             <label class="check"><input type="checkbox" id="f-dry" checked>
-              dry-run（不触网不扣费，成片请求只冻结）</label>
+              Freeze video request. Cloud directors and style expansion can still incur model fees.</label>
             <div class="warnbox" id="paid-warn">
-              关闭 dry-run 将<b>真实调用付费 API</b>（成片 8 积分/条，Tripo 缓存未命中时 $0.20）。
+              Live generation uses paid services. Review the estimate before confirming.
             </div>
-            <button class="btn primary wide" id="btn-run">开拍</button>
+            <button class="btn primary wide" id="btn-run">Start run</button>
           </div>
         </details>
         <div class="card">
-          <div class="card-h"><h2>Take log</h2><span class="badge b-mut mono" id="runs-count"></span></div>
+          <div class="card-h"><h2>Run History</h2><span class="badge b-mut mono" id="runs-count"></span></div>
           <div class="runlist" id="runlist"></div>
         </div>
       </div>
       <div class="col wide">
         <div class="card">
-          <div class="card-h"><h2>管线 · 免费循环 + 付费闸门</h2><span id="flow-note" class="mono"></span></div>
+          <div class="card-h"><h2>Run stages</h2><span id="flow-note" class="mono"></span></div>
           <div class="card-b"><div class="flow" id="flow"></div></div>
         </div>
-        <div id="detail"><div class="empty">从左侧 take log 选一条</div></div>
+        <div id="detail"><div class="empty">Select a run to inspect its results.</div></div>
       </div>
     </section>
   </main>
 </div>
 
-<!-- 付费确认（tally 红） -->
+<!-- Paid generation dialog -->
 <div class="overlay" id="pay-overlay">
   <div class="modal">
-    <h3>确认真实扣费</h3>
-    <div class="desc">本轮将真实调用付费 API。这是人工闸门，确认后等同命令行输入 yes。</div>
+    <h3>Confirm paid generation</h3>
+    <div class="desc">This run will send a request to a paid video service. Review the estimate below.</div>
     <div class="quote" id="pay-quote"></div>
-    <label class="check"><input type="checkbox" id="pay-ack"> 我已核对单价与预算，授权本次扣费</label>
+    <label class="check"><input type="checkbox" id="pay-ack"> I have reviewed the estimate and authorize this run.</label>
     <div class="modal-actions">
-      <button class="btn ghost" id="pay-cancel">取消</button>
-      <button class="btn rec" id="pay-go" disabled>确认开拍</button>
+      <button class="btn ghost" id="pay-cancel">Cancel</button>
+      <button class="btn rec" id="pay-go" disabled>Confirm and start</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+<script src="/static/workspace.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

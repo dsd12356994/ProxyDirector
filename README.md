@@ -48,86 +48,78 @@ photos ─▶ Tripo multiview ─▶ GLB checks ─▶ Blender orbit render ─�
 
 ```bash
 python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp .env.example .env            # fill API keys (optional: everything below runs keyless)
+# For cloud directors, create .env from .env.example and set the corresponding key.
 
-.venv/bin/python run.py check                  # environment self-check
-.venv/bin/python run.py seed-tripo-cache       # seed the frozen GLB cache (once)
-.venv/bin/python run.py --backend mock --dry-run         # full pipeline rehearsal, $0
-.venv/bin/python run.py --condition baseline --dry-run   # manual-baseline condition
-.venv/bin/python run.py --backend deepseek --dry-run \
-  --style "深色科技感，冷色调"                   # 提示词扩写：LLM 扩成非镜头风格块
+.venv/bin/python run.py check
+.venv/bin/python run.py seed-tripo-cache
+.venv/bin/python run.py --backend mock --dry-run
+.venv/bin/python run.py --condition baseline --dry-run
 ```
 
-Console UI（推荐，双击 `启动控制台.command` 或）：
+On macOS, double-click **Launch ProxyDirector.command**. The launcher opens the studio in your browser and selects another port if port 4217 is in use. To start the server manually, run `.venv/bin/python ui/server.py` and open <http://localhost:4217>. Blender and FFmpeg are required for new orbit renders. The Framing Lab and Case Replay read local files.
 
-```bash
-.venv/bin/python ui/server.py     # → http://localhost:4207
-```
+Download the [English user guide](<ProxyDirector User Guide.docx>) or select **User guide** in the studio sidebar.
 
-控制台功能：8 步管线流程条随运行实时点亮；取景指标（FOV / 四边边距 / 侧面顺序）；
-参考视频在线播放；提示词全文；每次运行的账本明细；页面上直接发起新运行——
-**取消 dry-run 会弹出报价确认框，勾选授权才真实提交，这个弹窗就是人工闸门**。
+The [class presentation materials](docs/presentation/) include the final English deck, the three-minute agent architecture talk, the editable control-loop diagram and the paired demo video.
 
-## Experimental conditions（三组对比）
+- **Director Chat** accepts three local presets. Select **Standard orbit**, **35° elevation**, or **Counterclockwise orbit**, then send the request. Expand a tool entry to inspect its arguments and result. A counterclockwise follow-up keeps the current elevation. For free-form direction, select a configured cloud model. Freezing the video request still allows a cloud director or style expansion to call an LLM.
+- **Framing Lab** recalculates a centered crop of the recorded compact orbit. The audit covers 300 encoded frames and one closure pose. With a 5% margin and 1.15× zoom, the smallest margin occurs at 3.60 s.
+- **Case Replay** plays the fixed baseline and DeepSeek clips side by side. Each case pairs its Blender reference with its generated output. The repository includes the classroom clips and their evaluation summary for offline playback. The studio can also use the original experiment archives when they are available.
+- **Run History** shows camera parameters, audit results, prompts, saved requests, cost entries, and available videos. Live generation requires approval. To try cloud style expansion from the CLI, use `.venv/bin/python run.py --backend deepseek --dry-run --style "Cool studio lighting"`; this calls the cloud director.
 
-| 条件 | 谁决定相机与提示词 | 命令 |
+## Experimental conditions
+
+| Condition | Camera and prompt | Command |
 | --- | --- | --- |
-| ① Manual baseline | 固定方案 + 冻结模板（无 LLM） | `run.py --condition baseline` |
-| ② Agent + GPT 系 | 配置的 LLM 后端 | `run.py --backend astra` |
-| ③ Agent + 其他 LLM | 如 DeepSeek | `run.py --backend deepseek` |
+| Fixed baseline | Fixed camera plan and prompt template | `run.py --condition baseline` |
+| Agent with Astra | Configured GPT director | `run.py --backend astra` |
+| Agent with another LLM | Configured DeepSeek or GLM director | `run.py --backend deepseek` or `--backend glm` |
 
-三组共用同一冻结 GLB（相同 SHA-256，自参考批次预置）、同一组白底四图、同一提示词模板、
-配对 seed。填 key：`cp .env.example .env`，只改 `.env` 与 `config.yaml`，不改代码。
+The conditions share one frozen Tripo GLB, four reference photographs and a prompt template. The seed is recorded as a pipeline run label. The archived Kling requests did not specify a video generation seed.
 
 ## Layout
 
 ```
-run.py                  CLI 入口（check / seed-cache / 三种条件运行）
-config.yaml             后端注册 + 管线参数 + 预算（可插拔的关键文件）
+run.py                  CLI for environment checks, cache setup, and runs
+config.yaml             Backend registry, camera defaults, and budgets
 pipeline/
-  models.py             ShotPlan（LLM 唯一可改的参数）与检查报告
-  director.py           Pydantic AI agent + 脚本化 mock 后端
-  tools.py              工具层：渲染 / 审计 / 提示词 / 付费闸门
-  tripo.py              Tripo 客户端（显式槽位、哈希缓存、防重复提交）
-  blender_step.py       宿主侧 Blender/ffmpeg 编排
-  worker_render.py      无头 Blender 工人（解析紧凑取景 + 逐帧审计）
-  runway.py             Runway Seedance 客户端（audio:false、状态文件、账本）
-  kling.py              Kling 全能参考客户端（api-beijing、积分计费、素材发布 GitHub release）
-  prompt_template.py    冻结提示词模板（数字由审计结果填充；Kling 版仅替换素材 @id 指代）
-ui/                     FastAPI 控制台（server.py + static/）
-assets/                 冻结输入：四张白底图 + 种子 GLB（勿改动）
-data/                   运行产物 / 缓存 / 账本（已 gitignore）
+  models.py             Camera plan and framing report schemas
+  director.py           Pydantic AI director and local preset controller
+  tools.py              Camera planning, render, audit, prompt, and submission tools
+  tripo.py              Multiview reconstruction, view slots, and geometry cache
+  blender_step.py       Blender execution and FFmpeg encoding
+  worker_render.py      Headless Blender render and per-pose projection audit
+  runway.py             Seedance generation, state files, and cost entries
+  kling.py              Kling reference uploads, generation, and credit tracking
+  prompt_template.py    Frozen prompt with slots for measured framing
+ui/                     FastAPI service, offline experiments, and web client
+assets/                 Frozen photos, seed GLB, and Framing Lab recording
+data/                   Run artifacts, cache, and cost log (excluded from Git)
 ```
 
-## Built-in guards
+## Runtime checks
 
-- API key 只从 `.env` 读取；绝不打印、不写日志、不入库。
-- Tripo 视图按显式槽位（front/right/back/left）传入，避开位置参数左右互换不报错的坑；
-  `model_version` 显式指定；轮询带超时。
-- Runway 显式 `audio: false`、`duration: 10`；提交前检查参考视频是否超 5 MiB data-URI 上限。
-- Kling 全能参考：`feature_video` 只收公网 URL → 参考视频与冻结视图发布到本仓库 GitHub
-  release（gh CLI；上传后回验 200）；`audio: original` 配静音参考视频实现无声输出；
-  计费按积分（输入 10s + 输出 10s = 20s × 0.4 = 8 积分/条，Flash 720p），失败任务实测不扣积分。
-- 付费提交先写状态文件；恢复只轮询原任务 ID，绝不重发 POST；预算闸门拦截超支调用。
-- **Blender 5.x 脚本崩溃时退出码是 0** —— 失败靠产物缺失 + Traceback 判定，不能信退出码（实测踩过）。
-- 紧凑取景算法移植自已验证实验（对拍：FOV 19.97° vs 20.03°、上下最小边距 5.01% vs 5.01%），
-  且每帧用真实相机矩阵独立审计。
+- Credentials come from the environment or the local `.env` file. The studio reports whether a key is configured.
+- Tripo receives explicitly named front, right, back, and left views, a model version, and a polling timeout.
+- The Runway request specifies ten seconds with audio disabled. The adapter checks the 5 MiB data URI limit for the reference clip.
+- In live Kling mode, the adapter publishes the reference clip and photographs as GitHub release assets using the configured repository, then checks their public URLs. The silent reference supplies the audio track. At the recorded Flash 720p rate, a ten-second input and ten-second output had an estimated cost of 8 credits.
+- Paid jobs save provider state. A known task ID lets the adapter resume polling. If submission was interrupted before an ID was saved, reconcile the original request before retrying.
+- The render worker checks Blender output for tracebacks and expected files. In tests, a Blender 5.x script error could return exit code zero.
+- The compact reference experiments measured vertical fields of view of 19.97° and 20.03°. Both had a smallest vertical margin of approximately 5.01%. The audit uses the camera matrices for each sampled pose.
 
-## Status
+## November 2026 evaluation batch
 
-**2026-11-16 实验批次已全部完成：11 条成片，11/11 通过完整环绕目检（构图合规、部件全程在画、无水印）。**
+The team reviewed 11 archived clips of one wired mouse. All 11 passed the team's visual orbit check for framing, visible parts, and watermarks. The independent rating sheet remains unfilled.
 
-| 条件 | 条数 | 命令 |
-| --- | --- | --- |
-| ① Manual baseline（mock=固定基线方案） | 3 | `run.py --condition baseline` |
-| ② Agent + GPT 系（gpt-6-astra） | 3 | `run.py --backend astra` |
-| ③ Agent + 其他 LLM（deepseek×3 + glm×2） | 5 | `run.py --backend deepseek / glm` |
+| Director | Finished clips |
+| --- | ---: |
+| Fixed baseline | 3 |
+| Astra | 3 |
+| DeepSeek | 3 |
+| GLM | 2 |
 
-- 视频层：Kling 4.0 Flash 全能参考（720p/10s/无声），8.03 积分/条，共 11 条 = 88.33 积分
-  （两个 ¥50 试用包 112 积分，剩 23.67；失败任务与中断恢复均未重复计费，已逐笔对账）
-- LLM 层：累计 $0.19（deepseek <0.2¢/次、glm ≈0.2¢/次、astra ≈4.5¢/次）
-- Tripo：冻结 GLB 缓存命中，$0
-- 观察：本批全部 LLM 后端独立收敛到与基线相同的相机方案（50°/r6.0/cw）；
-  同日早些 dry-run 中 deepseek 曾选 35°/r6.5 且一次通过——闸门保证任意选择皆合规
-- 盲评包：`data/eval/videos/`（eval_01..11 匿名）+ `data/eval/评分表.md`；
-  映射表 `key.json` 盲评结束后公开。生成命令：`.venv/bin/python -m pipeline.eval_pack`
+The batch used Kling 4.0 Flash at 720p with a silent ten-second request. The team's historical reconciliation recorded 8.03 credits per clip, or 88.33 credits from 112 available, leaving 23.67. The model ledger recorded approximately $0.19 overall. Cached Tripo geometry incurred no new reconstruction charge. The recorded LLM estimates were under 0.2 cents per DeepSeek run, about 0.2 cents per GLM run, and about 4.5 cents per Astra run.
+
+The recorded director plans matched the fixed camera settings of 50° elevation, radius 6, and clockwise motion. In an earlier dry run, DeepSeek chose 35° and radius 6.5 and passed the audit on the first attempt.
+
+The anonymized evaluation package is stored in `data/eval/`, including the clips under `videos/`, the rating sheet, and a separate `key.json` lookup. To rebuild the package, run `.venv/bin/python -m pipeline.eval_pack`.

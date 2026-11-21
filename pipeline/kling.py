@@ -36,7 +36,7 @@ def packs(cfg: dict) -> list[dict]:
     """GET /account/costs（免费，QPS≤1）：返回生效中的视频资源包。"""
     key = api_key(cfg["kling"]["api_key_env"])
     if not key:
-        raise RuntimeError(f".env 缺少 {cfg['kling']['api_key_env']}")
+        raise RuntimeError(f"Configure {cfg['kling']['api_key_env']} before querying Kling.")
     base = cfg["kling"]["base_url"].rstrip("/")
     now_ms = int(time.time() * 1000)
     with httpx.Client(timeout=30) as client:
@@ -47,7 +47,7 @@ def packs(cfg: dict) -> list[dict]:
         r.raise_for_status()
         body = r.json()
     if body.get("code") != 0:
-        raise RuntimeError(f"资源包查询失败：{body.get('code')} {body.get('message')}")
+        raise RuntimeError(f"Kling could not return the credit balance (code {body.get('code')}).")
     infos = body.get("data", {}).get("resource_pack_subscribe_infos", [])
     return [p for p in infos if p.get("status") == "online"]
 
@@ -71,7 +71,7 @@ def estimate_credits(cfg: dict, input_duration_s: float, output_duration_s: int)
 def _gh(repo: str, *args: str) -> str:
     proc = subprocess.run(["gh", *args, "--repo", repo], capture_output=True, text=True)
     if proc.returncode != 0:
-        raise RuntimeError(f"gh {' '.join(args)} 失败：{proc.stderr.strip()[:300]}")
+        raise RuntimeError(f"GitHub asset operation failed (exit code {proc.returncode}). Check the release and your gh login.")
     return proc.stdout.strip()
 
 
@@ -89,7 +89,7 @@ def _ensure_release(cfg: dict) -> None:
         pass                                          # 不存在才创建；其他错误会在 create 处暴露
     _gh(k["gh_asset_repo"], "release", "create", k["gh_asset_tag"], "--title",
         f"pipeline assets {k['gh_asset_tag']}", "--notes",
-        "管线素材公网托管（Kling 全能参考需 URL）：冻结视图 + 各 run 的参考视频", "--latest=false")
+        "Frozen appearance views and rendered reference videos for Kling image and video conditioning.", "--latest=false")
 
 
 def publish_asset(cfg: dict, path: Path, filename: str) -> str:
@@ -115,7 +115,7 @@ def publish_asset(cfg: dict, path: Path, filename: str) -> str:
             if r is not None and r.status_code == 200 and len(r.content) == path.stat().st_size:
                 return url
             time.sleep(10)
-    raise RuntimeError(f"素材发布后回验失败 {getattr(r, 'status_code', 'ERR')}：{url}")
+    raise RuntimeError(f"Could not verify the published reference asset (HTTP {getattr(r, 'status_code', 'error')}).")
 
 
 VIEW_ASSET_NAMES = {"view_1.png", "view_2.png", "view_3.png", "view_4.png"}
@@ -184,7 +184,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
 
     key = api_key(k["api_key_env"])
     if not key:
-        raise RuntimeError(f".env 缺少 {k['api_key_env']}")
+        raise RuntimeError(f"Configure {k['api_key_env']} before submitting to Kling.")
     base = k["base_url"].rstrip("/")
     t0 = time.time()
     est = record["estimated_kling_credits"]
@@ -196,7 +196,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
             # 预算闸门（积分版）：资源包余量须覆盖本次预估（余量统计有 12h 延迟）
             remaining = credits_remaining(cfg)
             if remaining < est:
-                raise ValueError(f"Kling 资源包余量不足：{remaining} < {est} 积分")
+                raise ValueError(f"Kling has {remaining} credits available. The estimate is {est} credits.")
             state_path.write_text(json.dumps(
                 {"status": "submitting", "credits_before": remaining,
                  "request_sha256": record["request_sha256"]}), encoding="utf-8")
@@ -206,8 +206,8 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                                                       encoding="utf-8")
             task_id = resp.get("data", {}).get("id") if resp.get("code") == 0 else None
             if not task_id:
-                raise RuntimeError(f"提交未返回任务ID（code={resp.get('code')} "
-                                   f"{resp.get('message')}）：禁止重发 POST，请到控制台核对")
+                raise RuntimeError(f"Kling returned no task ID (code {resp.get('code')}). "
+                                   f"Check the Kling dashboard before attempting another submission.")
             state = {"status": "submitted", "task_id": task_id,
                      "credits_before": remaining, "request_sha256": record["request_sha256"]}
             state_path.write_text(json.dumps(state), encoding="utf-8")
@@ -217,7 +217,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                         "latency_s": round(time.time() - t0, 1)}, ledger_path)
         state = json.loads(state_path.read_text(encoding="utf-8"))
         if state.get("request_sha256") != record["request_sha256"]:
-            raise ValueError("请求要素与已提交任务不一致；如需新请求请换新 run 目录")
+            raise ValueError("This request differs from the submitted task. Use a new run for a different request.")
         task_id = state["task_id"]                     # 恢复路径：只轮询原任务
         deadline = time.time() + k["poll_timeout_s"]
         while True:
@@ -234,17 +234,17 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                 ledger.log({"run_id": run_id, "stage": "seedance", "provider": "kling",
                             "status": "terminal_failed", "task_id": task_id,
                             "failure": str(failure), "cost_usd": 0.0, "mock": False}, ledger_path)
-                raise RuntimeError(f"任务失败（{failure}）。不自动付费重试；"
-                                   f"重试请新建 run 目录（原任务不会重复计费）")
+                raise RuntimeError(f"Kling reported that the video task failed. "
+                                   f"Review the recorded failure before authorizing a new run.")
             if time.time() > deadline:
-                raise RuntimeError(f"轮询超时 {k['poll_timeout_s']}s；任务 {task_id} 仍在 {status}，"
-                                   f"稍后用同目录重跑恢复（只轮询不重发）")
+                raise RuntimeError(f"Polling timed out after {k['poll_timeout_s']}s. Task {task_id} is still {status}. "
+                                   f"Resume the same run to check the existing task.")
             time.sleep(k["poll_interval_s"])
         outputs = (task or {}).get("outputs") or []
         video_out = next((o for o in outputs if o.get("type") == "video"), None)
         url = (video_out or {}).get("url", "")
         if not str(url).startswith("https://"):
-            raise ValueError("输出 URL 异常")
+            raise ValueError("Kling returned an invalid video URL.")
         video = out / "video.mp4"
         if not video.exists():                         # 防盗链 URL 有有效期，先到先存
             last_err = None
@@ -257,7 +257,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                     last_err = e
                     time.sleep(5)
             if last_err is not None:
-                raise RuntimeError(f"成片下载失败（任务已成功，重跑同目录即恢复）：{last_err}")
+                raise RuntimeError(f"The video task succeeded, but the download failed. Resume the same run to download the existing output.")
         state.update(status="succeeded")
         state_path.write_text(json.dumps(state), encoding="utf-8")
         usage = task.get("usage") or {}

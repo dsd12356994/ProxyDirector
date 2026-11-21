@@ -25,11 +25,11 @@ CAMERA_TERMS = [
 
 class PromptSpec(BaseModel):
     """结构化风格块：每个字段都是非镜头维度，空字段不渲染。"""
-    visual_style: str = Field(default="", description="整体视觉风格，如 dark tech / clean e-commerce")
-    lighting: str = Field(default="", description="灯光质感，如 soft studio / dramatic rim light")
-    background: str = Field(default="", description="背景与台面材质，如 matte black gradient")
-    mood: str = Field(default="", description="氛围情绪，如 premium / playful")
-    extra_notes: list[str] = Field(default_factory=list, description="其他外观要点，0-3 条")
+    visual_style: str = Field(default="", description="Overall visual style, such as dark tech or clean e-commerce")
+    lighting: str = Field(default="", description="Lighting, such as soft studio or dramatic rim light")
+    background: str = Field(default="", description="Background and surface, such as a matte black gradient")
+    mood: str = Field(default="", description="Mood, such as premium or playful")
+    extra_notes: list[str] = Field(default_factory=list, description="Up to three other appearance details")
 
 
 EXPANDER_PROMPT = """You expand a user's rough idea into structured NON-CAMERA style notes
@@ -85,7 +85,7 @@ def _parse_spec(text: str) -> PromptSpec:
         cleaned = cleaned.strip()
     start, end = cleaned.find("{"), cleaned.rfind("}")
     if start < 0 or end <= start:
-        raise ValueError("扩写输出不是 JSON")
+        raise ValueError("The style model returned an invalid JSON response.")
     return PromptSpec(**json.loads(cleaned[start:end + 1]))
 
 
@@ -99,8 +99,8 @@ def expand(idea: str, cfg: dict, backend_name: str | None = None,
     # 入口预检：用户想法本身就是镜头需求 → 明确拒绝，而不是让 LLM 静默吞掉
     idea_bad = [t for t in CAMERA_TERMS if t in idea.lower()]
     if idea_bad:
-        raise ValueError(f"风格想法含镜头词汇 {idea_bad}：镜头行为由相机方案通道决定，"
-                         f"风格扩写只处理外观/灯光/背景/氛围")
+        raise ValueError("Use the shot planner for camera settings. "
+                         "Style details can describe appearance, lighting, background or mood.")
 
     backend = backend_name or cfg.get("prompt_expand", {}).get("backend", "deepseek")
     backend_cfg = dict(cfg["backends"][backend], _name=backend)
@@ -108,7 +108,7 @@ def expand(idea: str, cfg: dict, backend_name: str | None = None,
         backend = cfg.get("prompt_expand", {}).get("backend", "deepseek")
         backend_cfg = dict(cfg["backends"][backend], _name=backend)
     if not api_key(backend_cfg.get("api_key_env", "")) and backend_cfg.get("kind") != "mock":
-        raise RuntimeError(f"扩写后端 {backend} 未配置密钥（.env 缺 {backend_cfg.get('api_key_env')}）")
+        raise RuntimeError(f"Configure {backend_cfg.get('api_key_env')} to use the {backend} style model.")
 
     agent = Agent(model=build_model(backend_cfg),
                   system_prompt=EXPANDER_PROMPT, retries=1)
@@ -127,7 +127,7 @@ def expand(idea: str, cfg: dict, backend_name: str | None = None,
         feedback = (f"Previous answer rejected: {violations}. Reply again with ONLY the JSON "
                     "object, no camera/movement/framing words.")
     if spec is None or violations:
-        raise ValueError(f"提示词扩写多次重试仍不合规 {violations}；已放弃（红线不可越）")
+        raise ValueError("The style model could not produce a valid appearance-only prompt. Try a shorter style description.")
     if ledger_path is not None:
         usage = result.usage
         ledger.log({"run_id": run_id, "stage": "style_expand", "provider": "llm",

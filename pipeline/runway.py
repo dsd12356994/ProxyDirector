@@ -23,8 +23,8 @@ def _data_uri(path: Path, mime: str, limit: int) -> str:
     raw = path.read_bytes()
     uri = "data:" + mime + ";base64," + base64.b64encode(raw).decode()
     if len(uri) > limit:
-        raise ValueError(f"{path.name} 超过 {limit // 1048576}MiB data-URI 上限；"
-                         f"请降低参考视频码率（当前 {len(raw) // 1024}KB）。不要静默重压缩冻结输入")
+        raise ValueError(f"{path.name} exceeds the {limit // 1048576} MiB data URI limit. "
+                         f"The file is {len(raw) // 1024} kB. Prepare a lower-bitrate reference.")
     return uri
 
 
@@ -73,7 +73,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
 
     key = api_key("RUNWAYML_API_SECRET")
     if not key:
-        raise RuntimeError(".env 缺少 RUNWAYML_API_SECRET")
+        raise RuntimeError("Configure RUNWAYML_API_SECRET before submitting to Runway.")
     base = cfg["runway"]["base_url"].rstrip("/")
     ledger.ensure_budget(record["estimated_usd"], ledger_path, cfg["budget"]["max_usd"])
     t0 = time.time()
@@ -84,7 +84,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                                                      encoding="utf-8")
             balance = client.get(f"{base}/organization", headers=_headers(key, cfg)).json()["creditBalance"]
             if balance < record["estimated_credits"]:
-                raise ValueError(f"Runway 余额不足：{balance} < {record['estimated_credits']} 积分")
+                raise ValueError(f"Runway has {balance} credits available. The estimate is {record['estimated_credits']} credits.")
             state_path.write_text(json.dumps({"status": "submitting", "balance_before": balance}),
                                   encoding="utf-8")
             resp = client.post(f"{base}/video_to_video", headers=_headers(key, cfg), json=body).json()
@@ -92,8 +92,8 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                                                       encoding="utf-8")
             task_id = resp.get("id")
             if not task_id:
-                raise RuntimeError("提交未返回任务ID（提交状态不确定）：禁止重发 POST，"
-                                   "请到 Runway 控制台核对后再决定")
+                raise RuntimeError("Runway returned no task ID. The submission state is uncertain. "
+                                   "Check the Runway dashboard before attempting another submission.")
             state = {"status": "submitted", "task_id": task_id, "balance_before": balance,
                      "request_sha256": record["request_sha256"]}
             state_path.write_text(json.dumps(state), encoding="utf-8")
@@ -104,7 +104,7 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                         "latency_s": round(time.time() - t0, 1)}, ledger_path)
         state = json.loads(state_path.read_text(encoding="utf-8"))
         if state.get("request_sha256") != record["request_sha256"]:
-            raise ValueError("请求要素与已提交任务不一致；如需新请求请换新 run 目录")
+            raise ValueError("This request differs from the submitted task. Use a new run for a different request.")
         task_id = state["task_id"]                     # 恢复路径：只轮询原任务
         while True:
             resp = client.get(f"{base}/tasks/{task_id}", headers=_headers(key, cfg)).json()
@@ -118,12 +118,12 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                 ledger.log({"run_id": run_id, "stage": "seedance", "provider": "runway",
                             "status": f"terminal_{status}", "task_id": task_id,
                             "failure": str(failure), "cost_usd": 0.0, "mock": False}, ledger_path)
-                raise RuntimeError(f"任务终态 {status}（{failure}）。按失败码人工决定是否重试，"
-                                   f"本项目不自动付费重试；重试请新建 run 目录")
+                raise RuntimeError(f"Runway task ended with status {status}. "
+                                   f"Review the recorded failure before authorizing a new run.")
             time.sleep(10)
         url = resp["output"][0]
         if not str(url).startswith("https://"):
-            raise ValueError("输出 URL 异常")
+            raise ValueError("The output did not include a valid HTTPS video URL.")
         video = out / "video.mp4"
         if not video.exists():
             video.write_bytes(client.get(url).content)
