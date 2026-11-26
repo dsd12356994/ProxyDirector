@@ -1,0 +1,57 @@
+backend,model,brief,family,rep,outcome,success,success_strict,render_count,first_try,passing_compliant_radius,optimal_radius,requests,input_tokens,output_tokens,cost_usd,validation_retries,stop_called,elapsed_s,attempts,error
+deepseek,deepseek-flash,S1_search_e20,search,1,optimal,True,True,4,False,6.5,6.5,,,,,0,False,81.4,1,True
+glm,glm-5.3-flash,C1_fixed_e60_ccw_back,fixed,2,pass,True,True,1,True,6.0,,2,3140,1185,0.0010635,0,False,43.8,1,False
+deepseek,deepseek-flash,S3_search_e50_m10,search,2,no_pass,False,False,4,False,,,8,49293,9374,0.012526812,0,True,127.5,1,False
+deepseek,deepseek-flash,S3_search_e50_m10,search,3,optimal,True,True,4,False,7.0,7.0,9,81337,14482,0.018936876,0,True,150.0,1,False
+deepseek,deepseek-flash,L2_lang_top_back,language,1,no_pass,False,False,1,False,,,5,9868,729,0.001426752,0,True,24.6,1,False
+deepseek,deepseek-flash,L2_lang_top_back,language,2,no_pass,False,False,1,False,,,5,9781,675,0.001260588,0,True,27.0,1,False
+glm,glm-5.3-flash,S1_search_e20,search,3,optimal,True,True,4,False,6.5,6.5,6,21372,5603,0.0048553,0,False,192.5,1,False
+glm,glm-5.3-flash,C1_fixed_e60_ccw_back,fixed,1,pass,True,True,1,True,6.0,,2,3348,1110,0.0010572,0,False,46.0,1,False
+deepseek,deepseek-flash,I1_infeasible_e20_r4,infeasible,1,no_pass_within_cap,True,True,3,False,,,6,14606,1872,0.002902632,0,True,75.9,1,False
+deepseek,deepseek-flash,L2_lang_top_back,language,3,no_pass,False,False,1,False,,,5,9802,666,0.001256088,0,True,23.6,1,False
+glm,glm-5.3-flash,S1_search_e20,search,1,no_pass,False,False,4,False,,,6,39252,8555,0.00810706,0,True,236.4,1,False
+deepseek,deepseek-flash,I1_infeasible_e20_r4,infeasible,3,no_pass_within_cap,True,True,2,False,,,6,19951,3253,0.004733316,0,True,58.0,1,False
+deepseek,deepseek-flash,L1_lang_low_tight,language,3,pass_suboptimal,True,False,3,False,7.0,6.5,7,18291,1573,0.0026709,0,True,62.1,1,False
+glm,glm-5.3-flash,S3_search_e50_m10,search,1,no_pass,False,False,4,False,,,7,21719,3898,0.00453101,0,True,147.6,1,False
+glm,glm-5.3-flash,S3_search_e50_m10,search,2,no_pass,False,False,4,False,,,7,28374,5669,0.00538564,0,True,178.0,1,False
+glm,glm-5.3-flash,L1_lang_low_tight,language,2,pass_suboptimal,True,False,4,False,7.2,6.5,8,48565,7662,0.00868119,0,True,224.5,1,False
+glm,glm-5.3-flash,L1_lang_low_tight,language,1,no_pass,False,False,4,False,,,7,35210,8671,0.00844196,0,True,253.0,1,False
+glm,glm-5.3-flash,I1_infeasible_e20_r4,infeasible,3,no_pass_within_cap,True,True,3,False,,,5,14155,4899,0.00457275,0,False,161.1,2,False
+glm,glm-5.3-flash,L2_lang_top_back,language,3,pass,True,True,1,True,6.0,,4,6915,1016,0.00154525,0,False,46.0,1,False
+deepseek,deepseek-flash,L1_lang_low_tight,language,1,no_pass,False,False,4,False,,,8,39049,7663,0.010298076,0,True,106.8,1,False
+glm,glm-5.3-flash,C2_fixed_e85_ccw_90,fixed,1,pass,True,True,1,True,6.0,,4,6780,1010,0.001522,0,True,50.0,1,False
+glm,glm-5.3-flash,C1_fixed_e60_ccw_back,fixed,3,pass,True,True,1,True,6.0,,4,6292,617,0.0012523,0,False,43.9,1,False
+deepseek,deepseek-flash,C1_fixed_e60_ccw_back,fixed,3,pass,True,True,1,True,6.0,,4,6807,463,0.001017156,0,False,23.6,1,False
+glm,glm-5.3-flash,L2_lang_top_back,language,2,pass,True,True,1,True,5.5,,4,6429,687,0.00130785,0,False,42.4,1,False
+deepseek,deepseek-flash,S3_search_e50_m10,search,1,optimal,True,True,4,False,7.0,7.0,7,23229,3812,0.00533382,0,False,89.9,1,False
+glm,glm-5.3-flash,S2_search_e70,search,1,optimal,True,True,4,True,4.0,4.0,7,26875,3174,0.00495009,0,False,140.1,1,False
+glm,glm-5.3-flash,I1_infeasible_e20_r4,infeasible,1,no_pass_within_cap,True,True,2,False,,,5,28234,12924,0.00961422,0,True,293.9,1,False
+deepseek,deepseek-flash,C2_fixed_e85_ccw_90,fixed,3,pass,True,True,1,True,6.0,,4,6746,436,0.000891192,0,False,16.8,1,False
+deepseek,deepseek-flash,C1_fixed_e60_ccw_back,fixed,1,pass,True,True,1,True,6.0,,4,7103,727,0.001272228,0,False,21.7,1,False
+glm,glm-5.3-flash,C2_fixed_e85_ccw_90,fixed,3,pass,True,True,1,True,6.0,,4,6311,688,0.00129065,0,False,40.3,1,False
+deepseek,deepseek-flash,C2_fixed_e85_ccw_90,fixed,1,pass,True,True,1,True,6.0,,5,9485,644,0.001209852,0,True,20.8,1,False
+deepseek,deepseek-flash,S2_search_e70,search,3,optimal,True,True,3,False,4.0,4.0,6,14880,1742,0.0027912,0,False,57.8,1,False
+deepseek,deepseek-flash,S2_search_e70,search,2,optimal,True,True,3,False,4.0,4.0,7,17046,1201,0.002152056,0,True,56.1,1,False
+glm,glm-5.3-flash,L2_lang_top_back,language,1,pass,True,True,1,True,6.0,,3,4324,1382,0.0013396,0,False,48.7,1,False
+deepseek,deepseek-flash,C1_fixed_e60_ccw_back,fixed,2,pass,True,True,1,True,6.0,,4,6774,452,0.000918792,0,False,16.3,1,False
+glm,glm-5.3-flash,S2_search_e70,search,3,pass_suboptimal,True,False,3,False,4.5,4.0,6,23211,5966,0.00545857,0,False,204.5,1,False
+deepseek,deepseek-flash,I1_infeasible_e20_r4,infeasible,2,no_pass_within_cap,True,True,3,False,,,6,21845,4188,0.005633244,0,True,74.7,1,False
+glm,glm-5.3-flash,S1_search_e20,search,2,optimal,True,True,4,False,6.5,6.5,6,46915,9766,0.00880217,0,False,258.3,1,False
+glm,glm-5.3-flash,C2_fixed_e85_ccw_90,fixed,2,pass,True,True,1,True,6.0,,3,5648,892,0.00117032,0,False,38.4,1,False
+glm,glm-5.3-flash,S3_search_e50_m10,search,3,no_pass,False,False,4,False,,,7,25609,4806,0.00496947,0,True,171.2,1,False
+glm,glm-5.3-flash,S2_search_e70,search,2,optimal,True,True,3,True,4.0,4.0,5,9092,1138,0.0019328,0,False,76.9,1,False
+glm,glm-5.3-flash,L1_lang_low_tight,language,3,pass_suboptimal,True,False,2,False,7.0,6.5,5,26658,9764,0.00760582,0,False,248.9,1,False
+deepseek,deepseek-flash,S1_search_e20,search,3,optimal,True,True,3,False,6.5,6.5,6,13414,1121,0.001944888,0,False,62.0,1,False
+deepseek,deepseek-flash,C2_fixed_e85_ccw_90,fixed,2,pass,True,True,1,True,6.0,,4,6842,495,0.000990792,0,False,24.3,1,False
+deepseek,deepseek-flash,S1_search_e20,search,2,optimal,True,True,4,False,6.5,6.5,7,24565,3222,0.004612668,0,False,94.8,1,False
+deepseek,deepseek-flash,S2_search_e70,search,1,optimal,True,True,4,False,4.0,4.0,7,18413,2194,0.003302172,0,False,88.7,1,False
+deepseek,deepseek-flash,L1_lang_low_tight,language,2,pass_suboptimal,True,False,3,False,6.8,6.5,6,15504,2106,0.003114144,0,False,66.7,1,False
+glm,glm-5.3-flash,I1_infeasible_e20_r4,infeasible,2,no_pass_within_cap,True,True,3,False,,,6,24791,5978,0.00517933,0,True,186.8,1,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",S1_search_e20,search,1,optimal,True,True,4,False,6.5,6.5,0,0,0,0.0,0,True,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",S2_search_e70,search,1,pass_suboptimal,True,False,4,True,4.5,4.0,0,0,0,0.0,0,True,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",S3_search_e50_m10,search,1,optimal,True,True,3,False,7.0,7.0,0,0,0,0.0,0,True,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",C1_fixed_e60_ccw_back,fixed,1,pass,True,True,1,True,6.0,,0,0,0,0.0,0,True,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",C2_fixed_e85_ccw_90,fixed,1,pass,True,True,1,True,6.0,,0,0,0,0.0,0,True,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",L1_lang_low_tight,language,1,not_attempted,False,False,,,,,0,0,0,0.0,0,False,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",L2_lang_top_back,language,1,not_attempted,False,False,,,,,0,0,0,0.0,0,False,,,False
+scripted,"fixed policy (radius 6, widen 1.0, tighten 0.5)",I1_infeasible_e20_r4,infeasible,1,no_pass_within_cap,True,True,1,False,,,0,0,0,0.0,0,True,,,False

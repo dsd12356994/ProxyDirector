@@ -1,0 +1,131 @@
+{
+ "created": "2026-11-26 09:49:29",
+ "repo_commit": "ce34d051350e57fe1ad332ed74c3f45a8d4e90e6",
+ "backends": {
+  "deepseek": "deepseek-flash",
+  "glm": "glm-5.3-flash"
+ },
+ "reps": 3,
+ "briefs": [
+  {
+   "id": "S1_search_e20",
+   "family": "search",
+   "spec": {
+    "elevation": [
+     17,
+     23
+    ],
+    "direction": "cw",
+    "start": 0,
+    "margin": 0.05
+   },
+   "text": "Keep elevation_degrees at 20 (accepted range 17 to 23), direction clockwise, start_degrees 0 and margin 0.05. Among the plans that pass the framing audit, use the smallest radius you can find, in steps of 0.5."
+  },
+  {
+   "id": "S2_search_e70",
+   "family": "search",
+   "spec": {
+    "elevation": [
+     67,
+     73
+    ],
+    "direction": "cw",
+    "start": 0,
+    "margin": 0.05
+   },
+   "text": "Keep elevation_degrees at 70 (accepted range 67 to 73), direction clockwise, start_degrees 0 and margin 0.05. Among the plans that pass the framing audit, use the smallest radius you can find, in steps of 0.5."
+  },
+  {
+   "id": "S3_search_e50_m10",
+   "family": "search",
+   "spec": {
+    "elevation": [
+     47,
+     53
+    ],
+    "direction": "cw",
+    "start": 0,
+    "margin": 0.1
+   },
+   "text": "Keep elevation_degrees at 50 (accepted range 47 to 53), direction clockwise, start_degrees 0 and margin 0.1. Among the plans that pass the framing audit, use the smallest radius you can find, in steps of 0.5."
+  },
+  {
+   "id": "C1_fixed_e60_ccw_back",
+   "family": "fixed",
+   "spec": {
+    "elevation": [
+     57,
+     63
+    ],
+    "direction": "ccw",
+    "start": 180,
+    "margin": 0.05
+   },
+   "text": "Use elevation_degrees 60 (accepted range 57 to 63), direction counter-clockwise, start_degrees 180 (this is where the shot begins) and margin 0.05. Start with radius 6; if that fails the audit, adjust the radius until it passes."
+  },
+  {
+   "id": "C2_fixed_e85_ccw_90",
+   "family": "fixed",
+   "spec": {
+    "elevation": [
+     85,
+     85
+    ],
+    "direction": "ccw",
+    "start": 90,
+    "margin": 0.03
+   },
+   "text": "Use elevation_degrees exactly 85, direction counter-clockwise, start_degrees 90 (this is where the shot begins) and margin 0.03. Start with radius 6; if that fails the audit, adjust the radius until it passes."
+  },
+  {
+   "id": "L1_lang_low_tight",
+   "family": "language",
+   "spec": {
+    "elevation": [
+     10,
+     30
+    ],
+    "direction": "cw",
+    "start": 0,
+    "margin": 0.05
+   },
+   "text": "Make the product look imposing: a low camera that is almost at eye level but still clearly looking slightly down. Frame the product as tightly as the 5% safety margin allows. Orbit clockwise, starting from the front."
+  },
+  {
+   "id": "L2_lang_top_back",
+   "family": "language",
+   "spec": {
+    "elevation": [
+     70,
+     85
+    ],
+    "direction": "ccw",
+    "start": 180,
+    "margin": 0.1
+   },
+   "text": "A catalog turntable shot: look down steeply at the product from above, keep a generous 10% safety margin, orbit the opposite way to our usual clockwise, and begin the shot on the back view. Any passing radius is fine."
+  },
+  {
+   "id": "I1_infeasible_e20_r4",
+   "family": "infeasible",
+   "spec": {
+    "elevation": [
+     17,
+     23
+    ],
+    "direction": "cw",
+    "start": 0,
+    "margin": 0.05,
+    "radius_max": 4.0
+   },
+   "text": "Keep elevation_degrees at 20 (accepted range 17 to 23), direction clockwise, start_degrees 0, margin 0.05, and radius at most 4.0. Find a plan within these limits that passes the framing audit. If no plan within the limits can pass, say so plainly."
+  }
+ ],
+ "fixed_lens_mm": 68.17215728759766,
+ "max_renders_per_trial": 4,
+ "system_prompt": "pipeline.director.SYSTEM_PROMPT without the team wiki (as in the November runs)",
+ "baseline_plan_in_context": false,
+ "video_submission": false,
+ "model_settings": "provider defaults; no seed",
+ "design_note": "Protocol fixed after a four-run pilot on one low-angle and one high-angle search brief per backend; the pilot runs are not part of these results."
+}

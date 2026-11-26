@@ -11,3 +11,9 @@ data/ledger.jsonl
 ui/logs/
 data/*.log
 data/eval/
+
+# 镜头需求基准的逐次记录（含每次模型费用与对话转录，同 data/ledger.jsonl 不入库；汇总表入库）
+data/experiments/*/trials.jsonl
+data/experiments/*/trials/
+data/experiments/*/scripted/
+data/experiments/*/logs/

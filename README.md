@@ -94,7 +94,8 @@ pipeline/
   prompt_template.py    Frozen prompt with slots for measured framing
 ui/                     FastAPI service, offline experiments, and web client
 assets/                 Frozen photos, seed GLB, and Framing Lab recording
-data/                   Run artifacts, cache, and cost log (excluded from Git)
+experiments/            Camera-plan benchmark with a fixed lens; see experiments/shot_briefs/README.md
+data/                   Run artifacts, cache, and cost log (excluded from Git), plus the benchmark tables in data/experiments/
 ```
 
 ## Runtime checks
@@ -123,3 +124,21 @@ The batch used Kling 4.0 Flash at 720p with a silent ten-second request. The tea
 The recorded director plans matched the fixed camera settings of 50° elevation, radius 6, and clockwise motion. In an earlier dry run, DeepSeek chose 35° and radius 6.5 and passed the audit on the first attempt.
 
 The anonymized evaluation package is stored in `data/eval/`, including the clips under `videos/`, the rating sheet, and a separate `key.json` lookup. To rebuild the package, run `.venv/bin/python -m pipeline.eval_pack`.
+
+## Shot-brief benchmark (November 26)
+
+The framing audit above fits the lens to every plan, so any schema-valid plan passes it. The benchmark in `experiments/shot_briefs/` runs the director with a fixed lens, so plans can fail, on eight briefs instead of one fixed message. It evaluates camera planning only and imports the production pipeline unchanged. Each LLM cell below is three repetitions per brief.
+
+| Director | Trials | Success | Strict success | Search trials solved optimally |
+| --- | ---: | ---: | ---: | ---: |
+| Scripted policy, no LLM | 6 | 6 | 5 | 2 of 3 (one run per brief) |
+| DeepSeek | 24 | 19 | 17 | 8 of 9 |
+| GLM | 24 | 19 | 16 | 4 of 9 |
+
+- The scripted policy cannot attempt the two natural-language briefs. On the three search briefs it was optimal twice and ran out of its four renders once. DeepSeek was optimal on all three runs of that brief; GLM failed all three runs of another.
+- No model produced an invalid camera plan in 48 trials. On the infeasible brief, all six LLM runs kept to the radius cap and reported that no plan passes.
+- Of the two natural-language briefs, GLM passed five of six trials and DeepSeek two of six. All three of DeepSeek's failures on the turntable brief depend on the cut-off used for the word "steeply"; `summary.md` reports that next to the result.
+- One DeepSeek trial ended with an agent error after it had already rendered a passing plan.
+- Astra was not run: the OpenAI API returned 403 on the experiment network. Model calls for the batch cost about USD 0.20.
+
+The tables are in `data/experiments/shot_briefs/summary.md` and `results.csv`. The protocol, the production issues the benchmark exposed, and its limits are in `experiments/shot_briefs/README.md`.
