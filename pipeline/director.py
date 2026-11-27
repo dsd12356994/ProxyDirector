@@ -15,7 +15,7 @@ from pydantic_ai.providers.openai import OpenAIProvider
 
 from . import ledger
 from .config import api_key
-from .tools import ToolContext, make_tools
+from .tools import REFUSED, ToolContext, make_tools
 
 SYSTEM_PROMPT = """You are the camera director of a product-video agent pipeline.
 Your job: turn shot requirements into ONE camera plan, verify it locally for free,
@@ -105,6 +105,9 @@ async def mock_director(messages: list[ModelMessage], info) -> ModelResponse:
         return ModelResponse(parts=[ToolCallPart(tool_name="get_run_context", args="{}")])
     if name == "stop":
         return ModelResponse(parts=[TextPart(content=content)])
+    if content.startswith(REFUSED):                # rule 4: if the gate refuses, call stop with the reason
+        return ModelResponse(parts=[ToolCallPart(
+            tool_name="stop", args=json.dumps({"reason": content[len(REFUSED):]}))])
     if name == "submit_seedance":
         if content.startswith("[dry-run]"):
             content = "The reference video passed the framing audit. The generation request is saved locally. No video service was called."
@@ -135,6 +138,17 @@ async def mock_director(messages: list[ModelMessage], info) -> ModelResponse:
     return ModelResponse(parts=[ToolCallPart(tool_name="plan_orbit", args=json.dumps({"plan": plan}))])
 
 
+def usage_entry(run_id: str, backend_name: str, model_name: str, usage, status: str) -> dict:
+    """The ledger row for the model calls of one agent run or chat turn."""
+    cost = getattr(usage, "cost", None)
+    return {"run_id": run_id, "stage": "llm", "provider": "llm",
+            "backend": backend_name, "model": model_name, "status": status,
+            "requests": getattr(usage, "requests", None),
+            "input_tokens": getattr(usage, "input_tokens", None),
+            "output_tokens": getattr(usage, "output_tokens", None),
+            "cost_usd": float(cost) if cost is not None else 0.0, "mock": backend_name == "mock"}
+
+
 def run_agent(ctx: ToolContext, backend_name: str) -> tuple[str, RunUsage | None]:
     """跑一次完整 agent 循环，返回最终文本与用量。"""
     tools = make_tools(ctx)
@@ -143,18 +157,13 @@ def run_agent(ctx: ToolContext, backend_name: str) -> tuple[str, RunUsage | None
     agent = Agent(model=model, tools=[Tool(fn, sequential=True) for fn in tools.values()],
                   system_prompt=SYSTEM_PROMPT + _load_wiki(), retries=1)
     model_settings = backend_cfg.get("model_settings") or None
-    result = agent.run_sync("Execute the mouse orbit pipeline. Start with get_run_context.",
-                            model_settings=model_settings)
-    usage = result.usage
-    llm_cost = None
-    if usage and getattr(usage, "cost", None) is not None:
-        llm_cost = float(usage.cost)
-    ledger.log({"run_id": ctx.run_id, "stage": "llm", "provider": "llm",
-                "backend": backend_name, "model": ctx.cfg["backends"][backend_name].get("model", "mock"),
-                "status": "finished",
-                "requests": getattr(usage, "requests", None),
-                "input_tokens": getattr(usage, "input_tokens", None),
-                "output_tokens": getattr(usage, "output_tokens", None),
-                "cost_usd": llm_cost or 0.0, "mock": backend_name == "mock"},
-               ctx.ledger_path)
+    usage = RunUsage()           # filled in place, so the calls of a run that breaks are still on record
+    status = "failed"
+    try:
+        result = agent.run_sync("Execute the mouse orbit pipeline. Start with get_run_context.",
+                                model_settings=model_settings, usage=usage)
+        status = "finished"
+    finally:
+        ledger.log(usage_entry(ctx.run_id, backend_name, backend_cfg.get("model", "mock"), usage, status),
+                   ctx.ledger_path)
     return result.output, usage
