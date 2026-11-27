@@ -22,7 +22,7 @@ never writing geometry or executing generated code.
   framing-failure fixes, API pitfalls, money rules. Edit the file to teach the agent;
   no vector DB, no retrieval infrastructure (by design).
 - **Money-safe by construction** — free local loop for camera iteration, a machine framing
-  audit + human confirmation gate before any paid call, a JSONL ledger as the single source
+  audit + human confirmation gate before any paid video submission, a JSONL ledger as the single source
   of cost truth, and no-resubmit state files for paid tasks.
 
 DSAI4207 course project (Type D: Evaluation & Analysis) — ZHUANG Shixin, LIU Yubo, Xu Wancheng.
@@ -46,17 +46,34 @@ photos ─▶ Tripo multiview ─▶ GLB checks ─▶ Blender orbit render ─�
 
 ## Quickstart
 
+macOS / Linux (Python 3.12+):
+
 ```bash
-python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
-# For cloud directors, create .env from .env.example and set the corresponding key.
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+# For cloud directors or live video generation, copy .env.example to .env and set the keys you need.
 
 .venv/bin/python run.py check
 .venv/bin/python run.py seed-tripo-cache
 .venv/bin/python run.py --backend mock --dry-run
 .venv/bin/python run.py --condition baseline --dry-run
+.venv/bin/python -m unittest
 ```
 
-On macOS, double-click **Launch ProxyDirector.command**. The launcher opens the studio in your browser and selects another port if port 4217 is in use. To start the server manually, run `.venv/bin/python ui/server.py` and open <http://localhost:4217>. Blender and FFmpeg are required for new orbit renders. The Framing Lab and Case Replay read local files.
+Windows (PowerShell):
+
+```powershell
+py -3 -m venv .venv; .\.venv\Scripts\pip.exe install -r requirements.txt
+
+.\.venv\Scripts\python.exe run.py check
+.\.venv\Scripts\python.exe run.py seed-tripo-cache
+.\.venv\Scripts\python.exe run.py --backend mock --dry-run
+.\.venv\Scripts\python.exe run.py --condition baseline --dry-run
+.\.venv\Scripts\python.exe -m unittest
+```
+
+`run.py check` auto-detects **Blender 4.4+** (tested with 5.x; `worker_render.py` uses the Blender 4.4+ layered `Action` channelbags API) and **FFmpeg** on `PATH` and in standard macOS, Windows, and Linux install locations. Set `PROXYDIRECTOR_BLENDER` or `PROXYDIRECTOR_FFMPEG` in the environment or `.env` to pin custom binary paths. The offline `unittest` suite runs without Blender, FFmpeg, or network access.
+
+On macOS, double-click **Launch ProxyDirector.command**. The launcher opens the studio in your browser and selects another port if port 4217 is in use. To start the server manually, run `.venv/bin/python ui/server.py` (Windows: `.\.venv\Scripts\python.exe ui/server.py`) and open <http://localhost:4217>. Blender and FFmpeg are required for new orbit renders. The Framing Lab and Case Replay read local files.
 
 Download the [English user guide](<ProxyDirector User Guide.docx>) or select **User guide** in the studio sidebar.
 
@@ -71,11 +88,11 @@ The [class presentation materials](docs/presentation/) include the final English
 
 | Condition | Camera and prompt | Command |
 | --- | --- | --- |
-| Fixed baseline | Fixed camera plan and prompt template | `run.py --condition baseline` |
+| Fixed baseline | Fixed `50° / r=6 / cw` camera plan and frozen prompt template | `run.py --condition baseline` (Nov 2026 batch: `run.py --backend mock`) |
 | Agent with Astra | Configured GPT director | `run.py --backend astra` |
 | Agent with another LLM | Configured DeepSeek or GLM director | `run.py --backend deepseek` or `--backend glm` |
 
-The conditions share one frozen Tripo GLB, four reference photographs and a prompt template. The seed is recorded as a pipeline run label. The archived Kling requests did not specify a video generation seed.
+The conditions share one frozen Tripo GLB, four reference photographs, and one frozen prompt template (`--condition baseline` now applies the same Kling `@video_1` / `@image_1..4` reference bindings as the agent path whenever `video_backend: kling` is active; the archived baseline clips in the November batch came from the scripted preset director `--backend mock` at `50° / r=6 / cw`, which already used the Kling prompt path). The seed is recorded as a pipeline run label. The archived Kling requests did not specify a video generation seed.
 
 ## Layout
 
@@ -93,9 +110,9 @@ pipeline/
   kling.py              Kling reference uploads, generation, and credit tracking
   prompt_template.py    Frozen prompt with slots for measured framing
 ui/                     FastAPI service, offline experiments, and web client
-assets/                 Frozen photos, seed GLB, and Framing Lab recording
+assets/                 Frozen photos, seed GLB, Framing Lab recording, and Case Replay snapshots
 experiments/            Camera-plan benchmark with a fixed lens; see experiments/shot_briefs/README.md
-data/                   Run artifacts, cache, and cost log (excluded from Git), plus the benchmark tables in data/experiments/
+data/                   Local runtime artifacts (runs/, eval/, cache/, ledger.jsonl; excluded from Git), plus committed benchmark tables in data/experiments/
 ```
 
 ## Runtime checks
@@ -123,11 +140,11 @@ The batch used Kling 4.0 Flash at 720p with a silent ten-second request. The tea
 
 The recorded director plans matched the fixed camera settings of 50° elevation, radius 6, and clockwise motion. In an earlier dry run, DeepSeek chose 35° and radius 6.5 and passed the audit on the first attempt.
 
-The anonymized evaluation package is stored in `data/eval/`, including the clips under `videos/`, the rating sheet, and a separate `key.json` lookup. To rebuild the package, run `.venv/bin/python -m pipeline.eval_pack`.
+`data/runs/` and the anonymized blind-review package in `data/eval/` (`videos/`, the rating sheet, and `key.json`) are local-only runtime archives excluded from Git. On a machine with the archived `data/runs/` clips, run `.venv/bin/python -m pipeline.eval_pack` (Windows: `.\.venv\Scripts\python.exe -m pipeline.eval_pack`) to build `data/eval/`; in a clean checkout, Studio's Case Replay uses the committed `assets/case_replay/` snapshots and evaluation summary.
 
 ## Shot-brief benchmark (November 26)
 
-The framing audit above fits the lens to every plan, so any schema-valid plan passes it. The benchmark in `experiments/shot_briefs/` runs the director with a fixed lens, so plans can fail, on eight briefs instead of one fixed message. It evaluates camera planning only and imports the production pipeline unchanged. Each LLM cell below is three repetitions per brief.
+The framing audit above fits the lens to every plan, so any schema-valid plan passes it. The benchmark in `experiments/shot_briefs/` runs the director with a fixed lens, so plans can fail, on eight briefs instead of one fixed message. It evaluates camera planning only and imports the production pipeline unchanged. The published results below (`48` LLM + `6` scripted trials; protocol `repo_commit ce34d05`, benchmark committed in `cc32d17`) were recorded before the post-benchmark pipeline fixes on this branch. Each LLM cell is three repetitions per brief.
 
 | Director | Trials | Success | Strict success | Search trials solved optimally |
 | --- | ---: | ---: | ---: | ---: |
@@ -136,9 +153,9 @@ The framing audit above fits the lens to every plan, so any schema-valid plan pa
 | GLM | 24 | 19 | 16 | 4 of 9 |
 
 - The scripted policy cannot attempt the two natural-language briefs. On the three search briefs it was optimal twice and ran out of its four renders once. DeepSeek was optimal on all three runs of that brief; GLM failed all three runs of another.
-- No model produced an invalid camera plan in 48 trials. On the infeasible brief, all six LLM runs kept to the radius cap and reported that no plan passes.
-- Of the two natural-language briefs, GLM passed five of six trials and DeepSeek two of six. All three of DeepSeek's failures on the turntable brief depend on the cut-off used for the word "steeply"; `summary.md` reports that next to the result.
-- One DeepSeek trial ended with an agent error after it had already rendered a passing plan.
-- Astra was not run: the OpenAI API returned 403 on the experiment network. Model calls for the batch cost about USD 0.20.
+- No schema-invalid camera plan was recorded in the 47 completed transcripts (or in the renders of the errored run). On the infeasible brief (`I1`), all six LLM runs scored `no_pass_within_cap` (automatic grading checks that every render respected the radius cap and no compliant plan passed, without parsing prose replies — denoted "no pass claimed" in `summary.md`).
+- Of the two natural-language briefs, GLM passed five of six trials and DeepSeek two of six. All three of DeepSeek's failures on the `L2` turntable brief depend on the 70° cut-off used for "steeply"; `summary.md` reports that sensitivity next to the result.
+- One DeepSeek trial (`S1` rep 1) ended in `GateRefused` after it had already rendered an optimal passing plan; because usage was logged only on normal completion at `ce34d05` (since fixed in the production director), DeepSeek's mean requests/cost and the `~$0.20` (`USD 0.1958`) total reflect the 23 of 24 DeepSeek runs with logged usage.
+- Astra was not run: the OpenAI API returned 403 on the experiment network.
 
-The tables are in `data/experiments/shot_briefs/summary.md` and `results.csv`. The protocol, the production issues the benchmark exposed, and its limits are in `experiments/shot_briefs/README.md`.
+The tables are in `data/experiments/shot_briefs/summary.md` and `results.csv`. The protocol, the production issues the benchmark exposed (and how they are now fixed), and its limits are in `experiments/shot_briefs/README.md`.

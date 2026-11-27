@@ -52,7 +52,7 @@ pipeline:
   height: 720                   # Kling feature_video 要求宽高均 ≥700px；取景数学与分辨率无关
   fps: 30
   frames: 300                # 10 秒整圈
-  audit_samples: 301         # 取景机器检查逐帧+首末（41k 顶点 × 301 位姿在 numpy 里秒级）
+  # Framing audit always checks all frames + 1 poses (301 poses at frames: 300; see worker_render.py).
   normalize_horizontal: 3.0  # 最长水平尺寸归一（与 04 批次一致）
   render_timeout_s: 900
   max_orbit_iterations: 4    # 免费段 LLM 最多调参重渲次数
@@ -84,7 +84,7 @@ runway:
   duration: 10
   seed: 4207
   audio: false                               # 显式关音频：默认开启会按 30 秒计费
-  data_uri_limit_bytes: 5242880              # 5MiB，超限走 ephemeral upload
+  data_uri_limit_bytes: 5242880              # 5MiB limit for inline data URI (raises ValueError above 5MiB)
   qualities:
     480p: { ratio: "854:480", credits: 300, usd: 3.00 }   # 调研表：480p 10 秒 $3.00（待线上核实）
     720p: { ratio: "1280:720", credits: 450, usd: 4.50 }  # 720p 10s 实测 450 积分
