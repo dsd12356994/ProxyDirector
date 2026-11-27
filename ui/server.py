@@ -65,6 +65,8 @@ def ledger_index(path: Path, stamp) -> dict:
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if not isinstance(row, dict):
+            continue
         grouped.setdefault(row.get("run_id"), []).append(row)
     return grouped
 
@@ -88,16 +90,58 @@ def glb_digest(path: Path, stamp):
     return tripo.digest(path)[:16] if stamp else None
 
 
-def run_status(exit_code, worker_running, session, stages, has_output):
+_SUCCEEDED_STAGE_STATUS = {
+    "blender_render": {"passed"},
+    "prompt": {"built"},
+    "seedance": {"dry_run_frozen", "submitted", "downloaded"},
+}
+
+
+def _is_terminal_video(status) -> bool:
+    return str(status or "").lower().startswith("terminal")
+
+
+def _has_active_stop(rows: list[dict] | None, stages: dict) -> bool:
+    """Return True when a stop or declined gate is still the active state of the run."""
+    if rows is None:
+        video_stage = stages.get("seedance", {}).get("status")
+        return "stop" in stages or video_stage == "gate_declined_by_human"
+    stop_idx = -1
+    for idx, r in enumerate(rows):
+        stage = r.get("stage")
+        if stage == "stop" or (stage == "seedance" and r.get("status") == "gate_declined_by_human"):
+            stop_idx = idx
+    if stop_idx < 0:
+        return False
+    after = rows[stop_idx + 1:]
+    for r in after:
+        stage = r.get("stage")
+        if stage in _SUCCEEDED_STAGE_STATUS and r.get("status") in _SUCCEEDED_STAGE_STATUS[stage]:
+            return False
+    # Every agent turn logs one trailing llm row in finally after stop() or a declined gate;
+    # a second llm row ending in chat_turn / finished means a later turn ran and succeeded.
+    llm_rows_after = [r for r in after if r.get("stage") == "llm"]
+    if len(llm_rows_after) >= 2 and llm_rows_after[-1].get("status") in ("chat_turn", "finished"):
+        return False
+    return True
+
+
+def sum_cost_usd(rows) -> float:
+    """Sum non-mock USD costs using the pipeline ledger's task_id deduplication rule."""
+    return ledger.sum_usd(rows)
+
+
+def run_status(exit_code, worker_running, session, stages, has_output, *, stopped: bool | None = None):
     if worker_running or (session and session["busy"]):
         return "running"
     events = session["events"] if session else []
     if exit_code not in (0, None) or (events and events[-1]["kind"] == "error"):
         return "failed"
     video_stage = stages.get("seedance", {}).get("status")
-    if video_stage == "terminal_failed":
+    if _is_terminal_video(video_stage):
         return "failed"
-    if "stop" in stages or video_stage == "gate_declined_by_human":
+    is_stopped = ("stop" in stages or video_stage == "gate_declined_by_human") if stopped is None else stopped
+    if is_stopped:
         return "stopped"
     if has_output:
         return "ready"
@@ -135,7 +179,7 @@ def parse_run(run_dir: Path, rows=None) -> dict:
     proc = PROCS.get(rid)
     rc = proc.poll() if proc else None
     session = next((s for s in CHAT_SESSIONS.copy().values() if s["run_id"] == rid), None)
-    cost = round(sum(r.get("cost_usd") or 0 for r in rows if not r.get("mock")), 6)
+    cost = round(sum_cost_usd(rows), 6)
     render = latest_render(run_dir)
     framing = None
     video = None
@@ -145,13 +189,14 @@ def parse_run(run_dir: Path, rows=None) -> dict:
         if (render / "reference.mp4").is_file():
             video = f"/api/media/{rid}/{render.name}/reference.mp4"
     video_status = stages.get("seedance", {}).get("status")
-    if backend == "mock" and video_status in ("submitted", "downloaded", "terminal_failed"):
+    if backend == "mock" and (video_status in ("submitted", "downloaded") or _is_terminal_video(video_status)):
         condition = "baseline"
     output = run_dir / "commercial/video.mp4"
     output_video = None
     if video_status == "downloaded" and output.is_file() and output.stat().st_size:
         output_video = f"/api/media/{rid}/commercial/video.mp4"
-    status = run_status(rc, bool(proc and rc is None), session, stages, bool(output_video))
+    stopped = _has_active_stop(rows, stages)
+    status = run_status(rc, bool(proc and rc is None), session, stages, bool(output_video), stopped=stopped)
     prompt_file = run_dir / "seedance_prompt.txt"
     return {"id": rid, "backend": backend, "condition": condition, "seed": seed,
             "mtime": max(run_dir.stat().st_mtime, rows[-1].get("ts", 0) if rows else 0),
@@ -170,7 +215,7 @@ def overview():
             backends[name] = {"model": "scripted", "has_key": True}
     runs_total = sum(p.is_dir() for p in RUNS_DIR.glob("*"))
     grouped = ledger_index(LEDGER, file_stamp(LEDGER))
-    spent = sum(r.get("cost_usd") or 0 for rows in grouped.values() for r in rows if not r.get("mock"))
+    spent = sum_cost_usd(r for rows in grouped.values() for r in rows)
     glb = ROOT / CFG["pipeline"]["seed_glb"]
     k = CFG.get("kling")
     kling_info = None
@@ -305,6 +350,7 @@ class RunSpec(BaseModel):
     dry_run: bool = True
     ack_paid: bool = False
     style: str = ""            # 提示词扩写：一句风格想法（空=完全走原冻结模板）
+    style_block: str = ""      # 已预扩写的风格块（非空时直接使用，不重复调风格 LLM）
 
 
 class ExpandSpec(BaseModel):
@@ -331,6 +377,14 @@ def expand_prompt(spec: ExpandSpec):
     return {"spec": ps.model_dump(), "style_block": block}
 
 
+def _cleanup_empty_dir(path: Path) -> None:
+    try:
+        if path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
+    except OSError:
+        pass
+
+
 @app.post("/api/runs")
 def launch(spec: RunSpec):
     if spec.backend not in CFG["backends"]:
@@ -341,23 +395,43 @@ def launch(spec: RunSpec):
         raise HTTPException(400, "Rehearsal mode cannot authorize a paid submission.")
     if not spec.dry_run and not spec.ack_paid:
         raise HTTPException(400, "Confirm the cost before submitting a paid run.")
-    from run import new_run_dir
-    run_id = new_run_dir(CFG, spec.backend, spec.condition, spec.seed).name
+    from run import new_run_dir, validate_style_block
+    clean_style_block = ""
+    if spec.style_block.strip():
+        try:
+            clean_style_block = validate_style_block(spec.style_block)
+        except ValueError as e:
+            raise HTTPException(422, studio_error(e)) from e
+    run_dir = new_run_dir(CFG, spec.backend, spec.condition, spec.seed)
+    run_id = run_dir.name
     # The interpreter that runs the Studio also runs the pipeline: .venv/bin/python on macOS and
     # Linux, .venv\Scripts\python.exe on Windows.
     cmd = [sys.executable, "run.py", "--backend", spec.backend,
            "--condition", spec.condition, "--seed", str(spec.seed), "--run-id", run_id]
     if spec.style.strip():
         cmd += ["--style", spec.style.strip()]
+    if clean_style_block:
+        cmd += ["--style-block", clean_style_block]
     if spec.dry_run:
         cmd.append("--dry-run")
     elif spec.ack_paid:
         cmd.append("--auto-approve")        # UI 弹窗即人工闸门
     log = UI_LOGS / f"{run_id}.log"
     child_env = {**os.environ, "PYTHONIOENCODING": "utf-8"}     # the log is read back as UTF-8
-    with log.open("w", encoding="utf-8") as stream:
-        PROCS[run_id] = subprocess.Popen(cmd, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=stream,
-                                         stderr=subprocess.STDOUT, env=child_env)
+    try:
+        with log.open("w", encoding="utf-8") as stream:
+            PROCS[run_id] = subprocess.Popen(cmd, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=stream,
+                                             stderr=subprocess.STDOUT, env=child_env)
+    except Exception as e:
+        try:
+            if log.is_file() and log.stat().st_size == 0:
+                log.unlink()
+        except OSError:
+            pass
+        _cleanup_empty_dir(run_dir)
+        if isinstance(e, (OSError, RuntimeError, ValueError)):
+            raise HTTPException(500, studio_error(e)) from e
+        raise
     return {"run_id": run_id, "dry_run": spec.dry_run,
             "note": "Paid video generation authorized." if not spec.dry_run else "The video request will be saved locally."}
 
@@ -467,7 +541,8 @@ def chat_new(spec: ChatNew):
     ledger_path = LEDGER
     try:
         glb = tripo.ensure_glb(CFG, run_dir, ledger_path, run_id, dry_run=True)
-    except (OSError, RuntimeError) as e:
+    except Exception as e:
+        _cleanup_empty_dir(run_dir)
         raise HTTPException(503, studio_error(e)) from e
     ctx = ToolContext(cfg=CFG, run_dir=run_dir, run_id=run_id,
                       dry_run=True, auto_approve=False, glb=glb, chat_session=True)

@@ -9,19 +9,30 @@
 """
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from pipeline import director, ledger, tripo  # noqa: E402
-from pipeline.blender_step import render_orbit  # noqa: E402
+from pipeline import blender_step, director, ledger, tripo  # noqa: E402
+from pipeline.camera_words import camera_terms  # noqa: E402
 from pipeline.config import (BLENDER_ENV, FFMPEG_ENV, api_key, blender_bin, ffmpeg_bin,  # noqa: E402
                              find_program, load_config, resolve)
 from pipeline.models import ShotPlan  # noqa: E402
 from pipeline.prompt_template import render_prompt  # noqa: E402
 from pipeline.tools import ToolContext  # noqa: E402
+
+STYLE_BLOCK_PREFIX = (
+    "Visual style notes (these affect APPEARANCE AND MOOD ONLY - they never change "
+    "camera behavior, framing, orbit path, timing or object identity): "
+)
+_WINDOWS_RESERVED = {
+    "CON", "PRN", "AUX", "NUL",
+    *(f"COM{i}" for i in range(1, 10)),
+    *(f"LPT{i}" for i in range(1, 10)),
+}
 
 
 def utf8_console() -> None:
@@ -157,6 +168,36 @@ def submit_request(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
         rw.submit(cfg, run_dir, ledger_path, run_id, body, record, dry_run=dry_run)
 
 
+def validate_run_id(run_id: str, runs_base: Path) -> Path:
+    """Validate --run-id so '.', '..', path separators and reserved names cannot escape data/runs/."""
+    if (not re.fullmatch(r"[0-9A-Za-z][0-9A-Za-z_.-]*", run_id)
+            or run_id.endswith(".")
+            or run_id.split(".", 1)[0].upper() in _WINDOWS_RESERVED):
+        raise SystemExit(
+            f"Invalid --run-id {run_id!r}: must start with an ASCII letter or digit, "
+            "contain only letters, digits, '_', '-', or '.', and not end with '.'."
+        )
+    base_resolved = runs_base.resolve()
+    target_resolved = (base_resolved / run_id).resolve()
+    if target_resolved.parent != base_resolved:
+        raise SystemExit(f"Invalid --run-id {run_id!r}: must stay inside data/runs/.")
+    return runs_base / run_id
+
+
+def validate_style_block(style_block: str) -> str:
+    """Validate a pre-expanded style block against the camera-vocabulary filter."""
+    block = (style_block or "").strip()
+    if not block:
+        return ""
+    body = block[len(STYLE_BLOCK_PREFIX):].strip() if block.startswith(STYLE_BLOCK_PREFIX) else block
+    if not body:
+        return ""
+    if camera_terms(body):
+        raise ValueError("Use the shot planner for camera settings. "
+                         "Style details can describe appearance, lighting, background or mood.")
+    return block
+
+
 def expand_style(cfg: dict, run_dir: Path, run_id: str, idea: str,
                  backend: str | None) -> str:
     """提示词扩写：一句想法 → 结构化风格块。产物与账目落 run 目录，风格块供两条条件路径共用。"""
@@ -176,13 +217,19 @@ def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_appr
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
     glb = tripo.ensure_glb(cfg, run_dir, ledger_path, run_id, dry_run)
     plan = ShotPlan(**cfg["pipeline"]["baseline_plan"])
-    fr = render_orbit(cfg, run_dir, ledger_path, run_id, glb, plan, "baseline")
+    fr = blender_step.render_orbit(cfg, run_dir, ledger_path, run_id, glb, plan, "baseline")
     print("Baseline shot:", fr.summary())
     if not fr.passed:
         print("Baseline framing failed. Revise the fixed camera plan before retrying.")
         return
-    prompt = render_prompt(fr, video_duration(cfg), style_block=style_block)
-    (run_dir / "seedance_prompt.txt").write_text(prompt, encoding="utf-8")
+    prompt_path = run_dir / "seedance_prompt.txt"
+    has_paid_state = any((run_dir / "commercial" / n).is_file() for n in ("kling_state.json", "state.json"))
+    if has_paid_state and prompt_path.is_file():
+        prompt = prompt_path.read_text(encoding="utf-8")
+    else:
+        is_kling = cfg.get("video_backend") == "kling"
+        prompt = render_prompt(fr, video_duration(cfg), kling=is_kling, style_block=style_block)
+        prompt_path.write_text(prompt, encoding="utf-8")
     if dry_run:
         submit_request(cfg, run_dir, ledger_path, run_id, fr, prompt, dry_run=True)
         print("[dry-run] Baseline request saved to commercial/frozen_request.json.")
@@ -197,7 +244,7 @@ def run_baseline(cfg: dict, run_dir: Path, run_id: str, dry_run: bool, auto_appr
     print("Baseline output saved to commercial/video.mp4.")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--backend", default="mock", help="Backend key from config.yaml, such as mock, astra, or deepseek")
     p.add_argument("--condition", choices=["agent", "baseline"], default="agent")
@@ -207,9 +254,11 @@ def main() -> int:
     p.add_argument("--run-id", default=None, help="Use this run directory name for a new or resumed run")
     p.add_argument("--style", default=None,
                    help="An appearance idea for the style model, such as matte black studio lighting")
+    p.add_argument("--style-block", default=None,
+                   help="Pre-expanded appearance style block (skips calling the style model again)")
     p.add_argument("--expand-backend", default=None,
                    help="Style backend (defaults to the active model or the configured style backend in mock mode)")
-    args, extra = p.parse_known_args()
+    args, extra = p.parse_known_args(argv)
     utf8_console()
     if extra[1:] or (extra and extra[0] not in ("check", "seed-tripo-cache")):
         # A misspelt flag must not be dropped silently: "--dryrun" would otherwise start a live run.
@@ -232,12 +281,16 @@ def main() -> int:
         print(f"Unknown backend {args.backend}. Available backends: {list(cfg['backends'])}")
         return 2
 
+    pre_expanded_style = ""
+    if args.style_block is not None and args.style_block.strip():
+        try:
+            pre_expanded_style = validate_style_block(args.style_block)
+        except ValueError as e:
+            raise SystemExit(str(e)) from e
+
     runs_base = Path(cfg["_root"]) / "data" / "runs"
-    if args.run_id:
-        import re as _re
-        if not _re.fullmatch(r"[0-9A-Za-z_.-]+", args.run_id):
-            raise SystemExit("Invalid characters in --run-id.")
-        run_dir = runs_base / args.run_id
+    if args.run_id is not None:
+        run_dir = validate_run_id(args.run_id, runs_base)
         run_dir.mkdir(parents=True, exist_ok=True)   # 允许同目录恢复：付费任务只轮询不重发
     else:
         run_dir = new_run_dir(cfg, args.backend, args.condition, args.seed)
@@ -245,7 +298,13 @@ def main() -> int:
     print(f"Run directory: data/runs/{run_id}")
 
     style_block = ""
-    if args.style:
+    if pre_expanded_style:
+        style_block = pre_expanded_style
+        (run_dir / "style_expansion.json").write_text(
+            json.dumps({"idea": args.style or "", "spec": None, "style_block": style_block},
+                       ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"Style saved to style_expansion.json. {style_block[:120]}…")
+    elif args.style and args.style.strip():
         style_block = expand_style(cfg, run_dir, run_id, args.style,
                                    args.expand_backend or args.backend)
 
@@ -268,6 +327,8 @@ def main() -> int:
         try:
             row = json.loads(line)
         except json.JSONDecodeError:                     # a half-written line must not fail a finished run
+            continue
+        if not isinstance(row, dict):
             continue
         if row.get("run_id") == run_id:
             rows.append(row)

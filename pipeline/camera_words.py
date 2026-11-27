@@ -21,7 +21,7 @@ _CAMERA_EN = {
     "spin": r"spin(?:s|ning)?|spun",
     "zoom": r"zoom(?:s|ed|ing)?",
     "pan": r"pan(?:s|ned|ning)?",
-    "dolly": r"doll(?:y|ies)",
+    "dolly": r"doll(?:y|ies|ied|ying)",
     "tracking shot": r"tracking[ -]shots?",
     "close-up": r"close[ -]?ups?",
     "wide shot": r"wide[ -]shots?",

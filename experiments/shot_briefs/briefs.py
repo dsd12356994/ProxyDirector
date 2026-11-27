@@ -106,7 +106,8 @@ def grade(brief: dict, renders: list[dict], best_radius: float | None) -> dict:
     if renders:
         result["first_try"] = bool(renders[0].get("passed")) and compliant(renders[0]["plan"], spec)
     if family == "infeasible":
-        result["outcome"] = ("cap_violated" if result["respected_cap"] is False
+        result["outcome"] = ("no_pass" if not renders
+                             else "cap_violated" if result["respected_cap"] is False
                              else "unexpected_pass" if good
                              else "no_pass_within_cap")
     elif not good:

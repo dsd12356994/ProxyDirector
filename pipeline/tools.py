@@ -214,6 +214,8 @@ def make_tools(ctx: ToolContext):
         """
         ctx.check_editable()
         tag, report = select_render(use_render)
+        if ctx.chat_session and (ctx.prompt_framing is not None and ctx.prompt_framing is not report):
+            _archive_request(ctx)
         note, left_out = _clean_emphasis(emphasis_notes)
         backend = ctx.cfg.get("video_backend", "runway")
         if backend == "kling":
