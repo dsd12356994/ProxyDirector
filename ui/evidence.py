@@ -158,7 +158,7 @@ def blind_scoring():
     path = ROOT / "data/eval/评分表.md"
     if not path.is_file():
         return SNAPSHOT.get("batch", {}).get("blind_scoring", "The archive has no blind-review scorecard.")
-    entries = [line.strip().strip("|").split("|") for line in path.read_text().splitlines()
+    entries = [line.strip().strip("|").split("|") for line in path.read_text(encoding="utf-8").splitlines()
                if line.startswith("| eval_")]
     completed = sum(len(row) >= 9 and all(cell.strip() for cell in row[1:9]) for row in entries)
     return f"Blind review is complete for {completed} of {len(entries)} clips in the archived scorecard."

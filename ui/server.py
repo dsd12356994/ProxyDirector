@@ -206,7 +206,7 @@ def studio_error(error: Exception) -> str:
         return f"The provider returned HTTP {status}. Review the run before retrying."
     if isinstance(error, (TimeoutError, subprocess.TimeoutExpired)):
         return "The operation timed out. Check the run status before retrying."
-    message = str(error).replace(str(ROOT) + "/", "")
+    message = str(error).replace(str(ROOT) + os.sep, "").replace(ROOT.as_posix() + "/", "")
     if isinstance(error, OSError):
         return error.strerror or "Could not access a required local file or program."
     if re.search(r"[\u3400-\u9fff]", message):
@@ -343,7 +343,9 @@ def launch(spec: RunSpec):
         raise HTTPException(400, "Confirm the cost before submitting a paid run.")
     from run import new_run_dir
     run_id = new_run_dir(CFG, spec.backend, spec.condition, spec.seed).name
-    cmd = [str(ROOT / ".venv/bin/python"), "run.py", "--backend", spec.backend,
+    # The interpreter that runs the Studio also runs the pipeline: .venv/bin/python on macOS and
+    # Linux, .venv\Scripts\python.exe on Windows.
+    cmd = [sys.executable, "run.py", "--backend", spec.backend,
            "--condition", spec.condition, "--seed", str(spec.seed), "--run-id", run_id]
     if spec.style.strip():
         cmd += ["--style", spec.style.strip()]
@@ -352,9 +354,10 @@ def launch(spec: RunSpec):
     elif spec.ack_paid:
         cmd.append("--auto-approve")        # UI 弹窗即人工闸门
     log = UI_LOGS / f"{run_id}.log"
+    child_env = {**os.environ, "PYTHONIOENCODING": "utf-8"}     # the log is read back as UTF-8
     with log.open("w", encoding="utf-8") as stream:
         PROCS[run_id] = subprocess.Popen(cmd, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=stream,
-                                         stderr=subprocess.STDOUT)
+                                         stderr=subprocess.STDOUT, env=child_env)
     return {"run_id": run_id, "dry_run": spec.dry_run,
             "note": "Paid video generation authorized." if not spec.dry_run else "The video request will be saved locally."}
 
@@ -399,9 +402,9 @@ def _emit(sess: dict, kind: str, **kw) -> None:
 async def _run_turn(sess: dict, text: str) -> None:
     """跑一轮 agent：事件（文本/工具调用/结果）实时进 sess['events']。
     工具事件由包装层发出（对 mock/真实后端统一），不依赖模型层流式能力。"""
-    from pydantic_ai import Agent, Tool
+    from pydantic_ai import Agent, RunUsage, Tool
     from pipeline import director
-    from pipeline.tools import make_tools
+    from pipeline.tools import REFUSED, make_tools
 
     ctx = sess["ctx"]
     ctx.dry_run = sess["pending_dry_run"]
@@ -422,10 +425,11 @@ async def _run_turn(sess: dict, text: str) -> None:
                 _emit(sess, "tool_call", tool=name, args=args)
                 try:
                     out = fn(*a, **k)
-                except Exception as e:                        # noqa: BLE001 —— 闸门拒绝等也入流
-                    _emit(sess, "tool_result", tool=name, output=studio_error(e), ok=False)
+                except Exception as e:                        # noqa: BLE001 —— a broken step also enters the stream
+                    _emit(sess, "tool_result", tool=name, output=studio_error(e), ok=False, refused=False)
                     raise
-                _emit(sess, "tool_result", tool=name, output=str(out)[:600], ok=True)
+                refused = str(out).startswith(REFUSED)        # the gate said no; the director can still act
+                _emit(sess, "tool_result", tool=name, output=str(out)[:600], ok=not refused, refused=refused)
                 return out
             return wrapped
 
@@ -435,13 +439,15 @@ async def _run_turn(sess: dict, text: str) -> None:
                       system_prompt=director.SYSTEM_PROMPT + director._load_wiki()
                       + "\nWrite all user-facing studio replies in English.",
                       retries=1)
-        result = await agent.run(text, message_history=sess["history"])
+        usage = RunUsage()       # filled in place, so the calls of a turn that breaks are still on record
+        status = "chat_turn_failed"
+        try:
+            result = await agent.run(text, message_history=sess["history"], usage=usage)
+            status = "chat_turn"
+        finally:
+            ledger.log(director.usage_entry(sess["run_id"], sess["backend"], backend_cfg.get("model", "mock"),
+                                            usage, status), LEDGER)
         sess["history"] = result.all_messages()
-        usage = result.usage
-        ledger.log({"run_id": sess["run_id"], "stage": "llm", "provider": "llm",
-                    "backend": sess["backend"], "status": "chat_turn",
-                    "cost_usd": float(getattr(usage, "cost", None) or 0.0),
-                    "mock": sess["backend"] == "mock"}, LEDGER)
         _emit(sess, "done", output=result.output)
     except Exception as e:                                    # noqa: BLE001 —— 会话不死，错误入流
         _emit(sess, "error", message=studio_error(e))
