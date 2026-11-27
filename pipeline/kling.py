@@ -10,6 +10,7 @@
 """
 import hashlib
 import json
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -139,6 +140,8 @@ def build_request(cfg: dict, run_id: str, reference_mp4: Path, view_files: dict[
         reference_url = _asset_url(cfg, f"{run_id}_reference.mp4")
         view_urls = {n: _asset_url(cfg, n) for n in sorted(view_files)}
     else:
+        if not api_key(k["api_key_env"]):
+            raise RuntimeError(f"Configure {k['api_key_env']} before submitting to Kling.")
         reference_url = publish_asset(cfg, reference_mp4, f"{run_id}_reference.mp4")
         view_urls = ensure_views_published(cfg, view_files)
     contents = [{"type": "prompt", "text": prompt_text},
@@ -216,9 +219,14 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                         "kling_credits": est, "mock": False,
                         "latency_s": round(time.time() - t0, 1)}, ledger_path)
         state = json.loads(state_path.read_text(encoding="utf-8"))
+        task_id = state.get("task_id")
+        if state.get("status") == "submitting" or not task_id:
+            raise RuntimeError(
+                "Kling submission status is uncertain (no task_id recorded). "
+                "Check the Kling dashboard before retrying."
+            )
         if state.get("request_sha256") != record["request_sha256"]:
             raise ValueError("This request differs from the submitted task. Use a new run for a different request.")
-        task_id = state["task_id"]                     # 恢复路径：只轮询原任务
         deadline = time.time() + k["poll_timeout_s"]
         while True:
             resp = client.get(f"{base}/tasks", params={"task_ids": task_id},
@@ -246,18 +254,30 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
         if not str(url).startswith("https://"):
             raise ValueError("Kling returned an invalid video URL.")
         video = out / "video.mp4"
-        if not video.exists():                         # 防盗链 URL 有有效期，先到先存
+        if not (video.is_file() and video.stat().st_size > 0):  # 防盗链 URL 有有效期；忽略 0 字节占位
+            part = video.with_suffix(".mp4.part")
             last_err = None
-            for _ in range(4):                         # 下载偶发被 CDN 掐断，重试
+            for attempt in range(4):                   # 下载偶发被 CDN 掐断，重试
                 try:
-                    video.write_bytes(client.get(url, timeout=120).content)
+                    dl = client.get(url, follow_redirects=True, timeout=120)
+                    dl.raise_for_status()
+                    data = dl.content
+                    if not data or b"ftyp" not in data[:32]:
+                        raise ValueError("Downloaded payload is not a valid MP4 video.")
+                    part.write_bytes(data)
+                    os.replace(part, video)
                     last_err = None
                     break
-                except httpx.HTTPError as e:
+                except (httpx.HTTPError, ValueError) as e:
                     last_err = e
-                    time.sleep(5)
+                    if attempt < 3:
+                        time.sleep(5)
             if last_err is not None:
-                raise RuntimeError(f"The video task succeeded, but the download failed. Resume the same run to download the existing output.")
+                part.unlink(missing_ok=True)
+                raise RuntimeError(
+                    "The video task succeeded, but the download failed. "
+                    "Resume the same run to download the existing output."
+                ) from last_err
         state.update(status="succeeded")
         state_path.write_text(json.dumps(state), encoding="utf-8")
         usage = task.get("usage") or {}

@@ -95,35 +95,55 @@ def ensure_glb(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, dry_run
         raise RuntimeError(f"Configure {key_env} before submitting a modeling task.")
     auth = {"Authorization": f"Bearer {token}"}
     base = cfg["tripo"]["base_url"].rstrip("/")
+    usd_per_credit = cfg["tripo"].get("usd_per_credit", 0.01)
     t0 = time.time()
-    ensure_budget_call(cfg, ledger_path)
 
     state_path = cache_dir / "task_state.json"
-    cache_dir.mkdir(parents=True, exist_ok=True)
     with httpx.Client(timeout=180) as client:
         if not state_path.exists():                    # 只允许首次提交；之后只轮询
+            ensure_budget_call(cfg, ledger_path)
+            cache_dir.mkdir(parents=True, exist_ok=True)
             inputs = []
             for name, slot in SLOT_OF_VIEW.items():
-                up = client.post(f"{base}/files", headers=auth,
-                                 files={"file": (name, open(view_files[name], "rb"), "image/png")}).json()
+                with view_files[name].open("rb") as fh:
+                    up = client.post(f"{base}/files", headers=auth,
+                                     files={"file": (name, fh, "image/png")}).json()
                 if up.get("code") != 0:
                     raise RuntimeError(f"Tripo rejected the {slot} view (code {up.get('code')}).")
                 inputs.append({slot: up["data"]["file_token"]})
             body = {**params, "inputs": inputs}
-            r = client.post(f"{base}/generation/multiview-to-model", headers=auth, json=body).json()
+            state_path.write_text(json.dumps({"status": "submitting"}), encoding="utf-8")
+            resp = client.post(f"{base}/generation/multiview-to-model", headers=auth, json=body)
+            r = resp.json()
             (cache_dir / "submit_response.json").write_text(json.dumps(r, ensure_ascii=False, indent=2),
                                                             encoding="utf-8")
-            if r.get("code") != 0:
+            if resp.status_code < 500 and isinstance(r, dict) and r.get("code") is not None and r.get("code") != 0:
+                state_path.unlink(missing_ok=True)
                 raise RuntimeError(f"Tripo rejected the modeling request (code {r.get('code')}).")
-            task_id = r["data"]["task_id"]
+            if r.get("code") != 0:
+                raise RuntimeError(
+                    f"Tripo returned an uncertain response (HTTP {resp.status_code}, code {r.get('code')}). "
+                    "Check the Tripo dashboard before retrying."
+                )
+            task_id = (r.get("data") or {}).get("task_id")
+            if not task_id:
+                raise RuntimeError(
+                    "Tripo returned no task ID. Submission status is uncertain; "
+                    "check the Tripo dashboard before retrying."
+                )
             state_path.write_text(json.dumps({"task_id": task_id, "status": "submitted"}), encoding="utf-8")
             ledger.log({"run_id": run_id, "stage": "tripo_model", "provider": "tripo",
                         "status": "submitted", "task_id": task_id,
-                        "cost_usd": cfg["tripo"]["credits_per_task"] * cfg["tripo"]["usd_per_credit"],
+                        "cost_usd": round(cfg["tripo"]["credits_per_task"] * usd_per_credit, 6),
                         "credits": cfg["tripo"]["credits_per_task"], "mock": False,
                         "latency_s": round(time.time() - t0, 1)}, ledger_path)
         state = json.loads(state_path.read_text(encoding="utf-8"))
-        task_id = state["task_id"]                     # 恢复路径：绝不重复提交，只轮询原任务
+        task_id = state.get("task_id")
+        if state.get("status") == "submitting" or not task_id:
+            raise RuntimeError(
+                "Tripo submission status is uncertain (no task_id recorded). "
+                "Check the Tripo dashboard before retrying."
+            )
         deadline = time.time() + cfg["tripo"]["poll_timeout_s"]
         while True:
             q = client.get(f"{base}/tasks/{task_id}", headers=auth).json()
@@ -137,7 +157,7 @@ def ensure_glb(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, dry_run
                                    f"Resume the same run to check the existing task.")
             time.sleep(cfg["tripo"]["poll_interval_s"])
         url = q["data"]["output"]["model_url"]
-        data = client.get(url).content
+        data = client.get(url, follow_redirects=True).content
         if data[:4] != b"glTF":
             raise ValueError("Tripo returned a file that is not a GLB mesh.")
         glb.write_bytes(data)
@@ -148,12 +168,14 @@ def ensure_glb(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, dry_run
             "model_sha256": digest(glb), "credits_consumed": credits,
             "finished_ts": time.time()}, ensure_ascii=False, indent=2), encoding="utf-8")
         ledger.log({"run_id": run_id, "stage": "tripo_model", "provider": "tripo",
-                    "status": "downloaded", "task_id": task_id, "cost_usd": credits * 0.01,
+                    "status": "downloaded", "task_id": task_id,
+                    "cost_usd": round(credits * usd_per_credit, 6),
                     "credits": credits, "model_sha256": digest(glb), "mock": False,
                     "latency_s": round(time.time() - t0, 1)}, ledger_path)
         return glb
 
 
 def ensure_budget_call(cfg: dict, ledger_path: Path) -> None:
-    ledger.ensure_budget(cfg["tripo"]["credits_per_task"] * cfg["tripo"]["usd_per_credit"],
+    usd_per_credit = cfg["tripo"].get("usd_per_credit", 0.01)
+    ledger.ensure_budget(cfg["tripo"]["credits_per_task"] * usd_per_credit,
                          ledger_path, cfg["budget"]["max_usd"])

@@ -20,20 +20,53 @@ def log(entry: dict, ledger_path: Path) -> dict:
     return row
 
 
+def sum_usd(rows) -> float:
+    """汇总非 mock 账本行的美元开销；带 task_id 的任务按 (provider, task_id) 去重，
+    优先取最新 downloaded 行的实付金额，否则回退到 submitted 预估。"""
+    total = 0.0
+    by_task: dict[tuple, dict[str, float | None]] = {}
+    for row in rows:
+        if not isinstance(row, dict) or row.get("mock"):
+            continue
+        cost = float(row.get("cost_usd") or 0.0)
+        task_id = row.get("task_id")
+        if not task_id:
+            total += cost
+            continue
+        key = (row.get("provider"), task_id)
+        slot = by_task.setdefault(key, {"downloaded": None, "submitted": None, "other": 0.0})
+        status = row.get("status")
+        if status == "downloaded":
+            slot["downloaded"] = cost
+        elif status == "submitted":
+            slot["submitted"] = cost
+        else:
+            slot["other"] = cost
+    for slot in by_task.values():
+        if slot["downloaded"] is not None:
+            total += slot["downloaded"]
+        elif slot["submitted"] is not None:
+            total += slot["submitted"]
+        else:
+            total += slot["other"]
+    return round(total, 6)
+
+
 def spent_usd(ledger_path: Path, run_id: str | None = None) -> float:
     if not ledger_path.exists():
         return 0.0
-    total = 0.0
+    rows = []
     for line in ledger_path.read_text(encoding="utf-8").splitlines():
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if not isinstance(row, dict):
+            continue
         if run_id and row.get("run_id") != run_id:
             continue
-        if not row.get("mock"):
-            total += float(row.get("cost_usd") or 0.0)
-    return round(total, 4)
+        rows.append(row)
+    return round(sum_usd(rows), 4)
 
 
 def ensure_budget(projected_usd: float, ledger_path: Path, max_usd: float) -> None:

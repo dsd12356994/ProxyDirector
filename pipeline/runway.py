@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import json
+import os
 import time
 from pathlib import Path
 
@@ -75,11 +76,11 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
     if not key:
         raise RuntimeError("Configure RUNWAYML_API_SECRET before submitting to Runway.")
     base = cfg["runway"]["base_url"].rstrip("/")
-    ledger.ensure_budget(record["estimated_usd"], ledger_path, cfg["budget"]["max_usd"])
     t0 = time.time()
 
     with httpx.Client(timeout=180) as client:
         if not state_path.exists():                    # 首次提交
+            ledger.ensure_budget(record["estimated_usd"], ledger_path, cfg["budget"]["max_usd"])
             (out / "frozen_request.json").write_text(json.dumps(record, ensure_ascii=False, indent=2),
                                                      encoding="utf-8")
             balance = client.get(f"{base}/organization", headers=_headers(key, cfg)).json()["creditBalance"]
@@ -103,14 +104,22 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                         "credits": record["estimated_credits"], "mock": False,
                         "latency_s": round(time.time() - t0, 1)}, ledger_path)
         state = json.loads(state_path.read_text(encoding="utf-8"))
+        task_id = state.get("task_id")
+        if state.get("status") == "submitting" or not task_id:
+            raise RuntimeError(
+                "Runway submission status is uncertain (no task_id recorded). "
+                "Check the Runway dashboard before retrying."
+            )
         if state.get("request_sha256") != record["request_sha256"]:
             raise ValueError("This request differs from the submitted task. Use a new run for a different request.")
-        task_id = state["task_id"]                     # 恢复路径：只轮询原任务
+        poll_timeout_s = cfg["runway"].get("poll_timeout_s", 900)
+        poll_interval_s = cfg["runway"].get("poll_interval_s", 10)
+        deadline = time.time() + poll_timeout_s
         while True:
             resp = client.get(f"{base}/tasks/{task_id}", headers=_headers(key, cfg)).json()
             (out / "query_response.json").write_text(json.dumps(resp, ensure_ascii=False, indent=2),
                                                      encoding="utf-8")
-            status = resp["status"]
+            status = resp.get("status") if isinstance(resp, dict) else None
             if status == "SUCCEEDED":
                 break
             if status in ("FAILED", "CANCELLED"):
@@ -120,20 +129,53 @@ def submit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str, body: dict,
                             "failure": str(failure), "cost_usd": 0.0, "mock": False}, ledger_path)
                 raise RuntimeError(f"Runway task ended with status {status}. "
                                    f"Review the recorded failure before authorizing a new run.")
-            time.sleep(10)
-        url = resp["output"][0]
+            if time.time() > deadline:
+                raise RuntimeError(
+                    f"Polling timed out after {poll_timeout_s}s. Task {task_id} is still {status or 'unknown'}. "
+                    f"Resume the same run to check the existing task."
+                )
+            time.sleep(poll_interval_s)
+        outputs = resp.get("output") or []
+        url = outputs[0] if outputs else ""
         if not str(url).startswith("https://"):
             raise ValueError("The output did not include a valid HTTPS video URL.")
         video = out / "video.mp4"
-        if not video.exists():
-            video.write_bytes(client.get(url).content)
+        if not (video.is_file() and video.stat().st_size > 0):
+            part = video.with_suffix(".mp4.part")
+            last_err = None
+            for attempt in range(4):
+                try:
+                    dl = client.get(url, follow_redirects=True, timeout=120)
+                    dl.raise_for_status()
+                    data = dl.content
+                    if not data or b"ftyp" not in data[:32]:
+                        raise ValueError("Downloaded payload is not a valid MP4 video.")
+                    part.write_bytes(data)
+                    os.replace(part, video)
+                    last_err = None
+                    break
+                except (httpx.HTTPError, ValueError) as e:
+                    last_err = e
+                    if attempt < 3:
+                        time.sleep(5)
+            if last_err is not None:
+                part.unlink(missing_ok=True)
+                raise RuntimeError(
+                    "The video task succeeded, but the download failed. "
+                    "Resume the same run to download the existing output."
+                ) from last_err
         state.update(status="SUCCEEDED")
         state_path.write_text(json.dumps(state), encoding="utf-8")
         balance_after = client.get(f"{base}/organization", headers=_headers(key, cfg)).json()["creditBalance"]
         credits_used = state["balance_before"] - balance_after
+        if credits_used > 0:
+            actual_usd = round(credits_used * 0.01, 2)
+        else:
+            credits_used = record["estimated_credits"]
+            actual_usd = record["estimated_usd"]
         ledger.log({"run_id": run_id, "stage": "seedance", "provider": "runway",
                     "status": "downloaded", "task_id": task_id,
-                    "cost_usd": round(credits_used * 0.01, 2), "credits": credits_used,
+                    "cost_usd": actual_usd, "credits": credits_used,
                     "video_sha256": digest(video), "mock": False,
                     "latency_s": round(time.time() - t0, 1)}, ledger_path)
         return video
