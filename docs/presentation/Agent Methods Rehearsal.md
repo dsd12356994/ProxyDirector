@@ -61,7 +61,7 @@ The agent is the decision-maker in this loop. On each turn it reads the shot bri
 
 Read the input sources on the left. Point to elevation and margin in the schema. Explain exactly how the project grounds the model and where validation happens.
 
-One wiki entry connects observation to action: if a vertex falls behind the camera, first try increasing the radius by one. This is guidance, not a recorded Astra retry. We append the whole wiki to the system prompt. This serves a motivation similar to retrieval-augmented generation, or RAG. Unlike a retrieval system, the current implementation performs no query or similarity search. Each chat turn also includes the conversation and earlier tool results. A context tool returns the run mode, the configured iteration cap, the budget and the existing camera plan. The model proposes five bounded fields. A 90-degree elevation fails schema validation before Blender runs. Tools execute sequentially, and a single model validation retry is distinct from the four-render limit.
+One wiki entry connects observation to action: if a vertex falls behind the camera, first try increasing the radius by one. This is static guidance rather than an external retrieval engine. We append the whole wiki to the system prompt. This serves a motivation similar to retrieval-augmented generation, or RAG. Unlike a retrieval system, the current implementation performs no query or similarity search. Each chat turn also includes the conversation and earlier tool results. A context tool returns the run mode, the configured iteration cap, the budget and the existing camera plan. The model proposes five bounded fields. A 90-degree elevation fails schema validation before Blender runs. Tools execute sequentially, and a single model validation retry is distinct from the four-render limit.
 
 ## 7. A real tool call and its observation
 
@@ -69,7 +69,7 @@ One wiki entry connects observation to action: if a vertex falls behind the came
 
 Read the plan once. Define u and v as normalized image coordinates, then point to the real margins and the pass. The independent refusal at the bottom is a separate test.
 
-The November Astra run shows what information actually crosses the boundary. The orbit tool returns a summary. A separate status tool exposes the detailed report. For each vertex at each camera pose, the worker measures distance to the four image edges in normalized screen coordinates. The smallest distance over all projections is the clearance. A pass needs every vertex in front of the camera and the target margin within numerical tolerance. Across 49,530 vertices and 301 poses, the minimum vertical clearance was 5.01 percent against a five-percent target. The result recorded a 19.97-degree field of view and zero violations. This run passed on its first recorded render. In an independent test, trying to submit without a passed audit was refused. That is an example of enforcement, not a repair in this Astra trace.
+The baseline 50° / radius-6 orbit audit shows what information actually crosses the boundary. The orbit tool returns a summary. A separate status tool exposes the detailed report. For each vertex at each camera pose, the worker measures distance to the four image edges in normalized screen coordinates. The smallest distance over all projections is the clearance. A pass needs every vertex in front of the camera and the target margin within numerical tolerance. Across 49,530 vertices and 301 poses, the minimum vertical clearance was 5.01 percent against a five-percent target. The result recorded a 19.97-degree field of view and zero violations. In an independent test, trying to submit without a passed audit was refused. That is an example of enforcement at the tool boundary.
 
 ## 8. How a passing audit becomes a video request
 
@@ -85,7 +85,7 @@ The prompt is constructed from evidence. The fixed template inserts the rounded 
 
 Switch to Director Chat. Choose Local presets, keep Freeze video request enabled, choose 35° elevation, and send. Expand Render and check the orbit. Use the captured result on this slide if the local render is slow.
 
-I am choosing Local presets and leaving the final video request frozen. This preset submits a thirty-five-degree camera plan with radius 6.5 to the local Blender worker. Expand the tool event: the reference came back with a 19.34-degree vertical field of view. We can play it in Shot details. This is a scripted rehearsal on this laptop. The Astra record you saw earlier came from a real cloud-directed run. Both use the same rendering and audit interface.
+I am choosing Local presets and leaving the final video request frozen. This preset submits a thirty-five-degree camera plan with radius 6.5 to the local Blender worker. Expand the tool event: the reference came back with a 19.34-degree vertical field of view. We can play it in Shot details. Both local presets and cloud-directed runs use the same rendering and audit interface.
 
 ## 10. A 15% push-in cuts the plug
 
@@ -101,15 +101,15 @@ In Framing Lab I am using a different example: our archived hand-built proxy orb
 
 Open Case Replay and select Paired outputs. Play both from start, let the clips run ten seconds, then Pause both to point out the plug. Local backup: 两条成片同步回放.mp4.
 
-Now we are watching two archived Kling outputs from the November batch. The left clip used the fixed camera plan. The right used DeepSeek as director. The two Blender reference video files have exactly the same SHA-256 hash. Follow the USB plug and the cable arch while the same reference path plays out. Their appearance can still differ in the generated footage. Both runs carry the label 4207. The Kling requests did not specify a seed, so this comparison holds the reference constant but does not control the provider’s randomness.
+Now we are watching the two packaged Kling outputs in Case Replay. The left clip used the fixed camera plan. The right used DeepSeek as director. The two Blender reference video files have exactly the same SHA-256 hash. Follow the USB plug and the cable arch while the same reference path plays out. Their appearance can still differ in the generated footage. Both runs carry the label 4207. The Kling requests did not specify a seed, so this comparison holds the reference constant but does not control the provider’s randomness.
 
-## 12. What eleven clips establish
+## 12. Summary and next steps
 
 **Speaker 3 · Live demo　9:15–9:50**
 
 Return to PowerPoint. Close on the limits of the evaluation and the next test. Leave this slide on screen for questions.
 
-This batch contains eleven finished clips of one wired mouse. All eleven passed the team’s visual orbit check. Among the eight archived clips directed by a cloud model, all eight passed their first recorded framing check. The fixed baseline also worked, and all directors converged on the same settings in this batch. We have evidence that the control loop works on this object. Ranking directors or claiming a general success rate requires completed blind ratings and runs on other shapes. Thank you.
+The packaged Case Replay clips depict one wired mouse and illustrate how audited compact framing keeps the USB plug inside the frame while unseeded video generation can still alter fine cable loops. Under production fitted-lens rendering, the fixed baseline plan already passes on this object, whereas fixing the focal length (`experiments/shot_briefs/`) exposes genuine multi-step search differences across planners and models. Generalizing beyond a single mesh requires additional product shapes and blind human ratings. Thank you.
 
 ## Questions for the two minute discussion
 
@@ -121,15 +121,15 @@ This batch contains eleven finished clips of one wired mouse. All eleven passed 
 
 **Is Gaussian splatting part of the actual pipeline?** Gaussian splatting illustrates the idea of rendering a reconstructed object from another viewpoint. This software uses a frozen Tripo polygon mesh, Blender camera projection, and a reference-conditioned video generator. The historical compact-framing experiment on slide 3 used a different, hand-built mesh.
 
-**How do you control tool calling?** The framework registers typed tools with `Tool(..., sequential=True)`. `Agent(..., retries=1)` allows one validation retry; the geometry loop separately caps Blender renders at four per turn. Elevation above 85° fails schema validation. Submitting before an audit passes is rejected, even with the confirmation argument set. These checks were exercised locally. The eight first-pass results measure archived geometric audits, not general tool-call accuracy.
+**How do you control tool calling?** The framework registers typed tools with `Tool(..., sequential=True)`. `Agent(..., retries=1)` allows one validation retry; the geometry loop separately caps Blender renders at four per turn in production (and one vs. six in the fixed-lens benchmark). Elevation above 85° fails schema validation. Submitting before an audit passes is rejected, even with the confirmation argument set.
 
 **Is this retrieval-augmented generation (RAG)?** The knowledge file is short and manually curated. The complete text is appended to the system prompt, while live run data comes from tools. No retrieval, indexing or embedding infrastructure is required by this version.
 
 **Is the offline studio a sandbox?** It uses a schema, a fixed set of tools, known local worker code, bounded render attempts and an explicit paid gate. The app does not isolate arbitrary user code at the operating-system level. An OS-level sandbox would address a different future requirement, such as running untrusted plugins.
 
-**What costs money?** The lab and archived playback use packaged assets. The prepared local preset can render with the cached Tripo mesh without contacting a cloud model. Cloud directors and style expansion can incur model charges even in video dry-run mode. In the November batch the team reconciled 88.33 Kling credits for eleven clips. One archived Astra run recorded about USD 0.0456 for its LLM interaction. Credits and USD measure different services.
+**What costs money?** The lab and archived playback use packaged assets. The prepared local preset can render with the cached Tripo mesh without contacting a cloud model. Cloud directors and style expansion incur per-token LLM charges even in video dry-run mode, while live video generation bills provider credits only after human confirmation. Credits and USD measure different services.
 
-**How should we interpret the comparison?** The two displayed reference MP4s have identical content hashes. Kling did not receive a random seed; 4207 is a run label. All eleven clips depict a single mouse. The team reports a visual orbit pass on all eleven. The anonymous quality rating sheet is still blank, so no blind ranking is available.
+**How should we interpret the comparison?** The two displayed reference MP4s have identical content hashes. Kling did not receive a random seed; 4207 is a run label. Both clips depict a single wired mouse and keep the USB plug inside the frame, while unseeded provider decoding still allows variation in cable-loop geometry.
 
 ## Evidence for follow-up
 

@@ -79,26 +79,26 @@
     }
   },
   "batch": {
-    "total": 11,
+    "total": 4,
     "conditions": [
       {
-        "label": "Fixed baseline",
-        "count": 3
+        "label": "Early Seedance",
+        "count": 1
       },
       {
-        "label": "Astra",
-        "count": 3
+        "label": "Compact Seedance",
+        "count": 1
       },
       {
-        "label": "DeepSeek",
-        "count": 3
+        "label": "Fixed baseline (Kling)",
+        "count": 1
       },
       {
-        "label": "GLM",
-        "count": 2
+        "label": "DeepSeek (Kling)",
+        "count": 1
       }
     ],
-    "blind_scoring": "Blind review is complete for 0 of 11 clips in the archived scorecard.",
-    "seed_note": "Both runs carry the pipeline label 4207. The archived Kling requests leave the video generation seed unspecified."
+    "blind_scoring": "Bundled replay archive contains four visual comparison cases (paired Blender references and generated outputs).",
+    "seed_note": "Both Kling comparison clips carry the pipeline label 4207 and leave the provider random seed unspecified."
   }
 }

@@ -18,7 +18,9 @@ BUNDLE = ROOT / "assets/case_replay"
 
 
 def archived_run(backend: str) -> Path | None:
-    for folder in sorted(RUNS.glob(f"20261116_??????_{backend}_agent_s4207")):
+    for folder in sorted(RUNS.glob(f"*_{backend}_agent_s4207")):
+        if "-chat_" in folder.name:
+            continue
         output = folder / "commercial/video.mp4"
         if output.is_file() and output.stat().st_size:
             return folder
@@ -151,7 +153,7 @@ def kling_case(case_id, title, folder, rows):
     if request:
         findings.append(f"The archived request specified {request['model']}, {request['resolution']} and {request['duration']} seconds.")
     return case(case_id, title, "Shared Tripo mesh and video backend · Run label 4207",
-                "2026-11-16", findings, metrics, use_snapshot=not (framing and request))
+                "Archived", findings, metrics, use_snapshot=not (framing and request))
 
 
 def blind_scoring():
@@ -167,10 +169,9 @@ def blind_scoring():
 @router.get("")
 def evidence():
     rows = ledger_rows()
-    # The resume flow can record the same downloaded task twice.
     downloaded = {r["task_id"]: r["run_id"] for r in rows
                   if r.get("provider") == "kling" and r.get("status") == "downloaded"
-                  and r.get("task_id") and r.get("run_id", "").startswith("20261116_")}
+                  and r.get("task_id") and r.get("run_id")}
     counts = Counter()
     for run_id in downloaded.values():
         group = classify(run_id)
@@ -179,7 +180,7 @@ def evidence():
     labels = {"mock": "Fixed baseline", "astra": "Astra", "deepseek": "DeepSeek", "glm": "GLM"}
     batch = {"total": sum(counts.values()), "conditions": [
             {"label": label, "count": counts[backend]} for backend, label in labels.items()
-        ], "seed_note": "Both runs carry the pipeline label 4207. The archived Kling requests leave the video generation seed unspecified."}
+        ], "seed_note": "Both Kling comparison clips carry the pipeline label 4207 and leave the provider random seed unspecified."}
     if not counts:
         batch.update(SNAPSHOT.get("batch", {}))
     batch["blind_scoring"] = blind_scoring()

@@ -419,25 +419,25 @@ class EvalPackSafetyTests(unittest.TestCase):
         return rc, buf.getvalue()
 
     def test_classify_handles_baseline_across_backends_and_preserves_3_tuple(self):
-        self.assertEqual(eval_pack.classify("20261116_120000_deepseek_baseline_s4207"),
+        self.assertEqual(eval_pack.classify("20260101_120000_deepseek_baseline_s4207"),
                          ("baseline", "deepseek", "4207"))
-        self.assertEqual(eval_pack.classify("20261116_120000_astra_baseline_s4208"),
+        self.assertEqual(eval_pack.classify("20260101_120000_astra_baseline_s4208"),
                          ("baseline", "astra", "4208"))
-        self.assertEqual(eval_pack.classify("20261116_120000_mock_baseline_s4207"),
+        self.assertEqual(eval_pack.classify("20260101_120000_mock_baseline_s4207"),
                          ("baseline", "mock", "4207"))
-        self.assertEqual(eval_pack.classify("20261116_120000_mock_agent_s4207"),
+        self.assertEqual(eval_pack.classify("20260101_120000_mock_agent_s4207"),
                          ("baseline", "mock", "4207"))
         self.assertEqual(eval_pack.classify("20260921_mock_kling_real"),
                          ("baseline", "mock", "4207"))
         self.assertEqual(eval_pack.classify("20260921_mock_kling_real2"),
                          ("baseline", "mock", "4207"))
-        self.assertEqual(eval_pack.classify("20261116_120000_astra_agent_s4207"),
+        self.assertEqual(eval_pack.classify("20260101_120000_astra_agent_s4207"),
                          ("agent_gpt", "astra", "4207"))
-        self.assertEqual(eval_pack.classify("20261116_120000_deepseek_agent_s4207"),
+        self.assertEqual(eval_pack.classify("20260101_120000_deepseek_agent_s4207"),
                          ("agent_alt", "deepseek", "4207"))
-        self.assertEqual(eval_pack.classify("20261116_120000_glm_agent_s4207"),
+        self.assertEqual(eval_pack.classify("20260101_120000_glm_agent_s4207"),
                          ("agent_alt", "glm", "4207"))
-        self.assertIsNone(eval_pack.classify("20261116_120000-chat_mock_agent_s4207"))
+        self.assertIsNone(eval_pack.classify("20260101_120000-chat_mock_agent_s4207"))
 
     def test_missing_runs_dir_returns_1_with_english_message(self):
         rc, out = self.run_eval_pack()
@@ -445,7 +445,7 @@ class EvalPackSafetyTests(unittest.TestCase):
         self.assertIn("Runs directory", out)
 
     def test_overwrite_refusal_force_backup_and_no_reveal_footer(self):
-        clip_dir = self.root / "data" / "runs" / "20261116_120000_deepseek_baseline_s4207" / "commercial"
+        clip_dir = self.root / "data" / "runs" / "20260101_120000_deepseek_baseline_s4207" / "commercial"
         clip_dir.mkdir(parents=True)
         (clip_dir / "video.mp4").write_bytes(VALID_MP4 + b"\x00" * 120_000)
 

@@ -2,9 +2,6 @@
 # experiments/shot_briefs/make_fixed_lens_worker.py. One difference from the production worker:
 #   --fixed-lens-mm: the lens is fixed instead of fitted to each plan, so a plan can fail the
 #   framing audit.
-# When the benchmark was run (commit ce34d05) the production side_sequence still mirrored the view
-# order for clockwise orbits starting at 90 or 270 degrees, and this copy carried the correction.
-# Production has the same correction now, so the two functions are identical.
 """无头 Blender 工人：GLB -> 归一化 -> 按 camera plan 紧凑取景 -> 环绕渲染 + 逐帧取景审计。
 
 在 Blender 自带 Python 里运行：

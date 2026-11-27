@@ -161,12 +161,13 @@ class FramingLab(StudioCase):
 
 class CaseReplay(StudioCase):
     def test_bundled_cases_and_batch_counts(self):
-        """README: 11 archived clips, 3 baseline, 3 Astra, 3 DeepSeek, 2 GLM."""
+        """Bundled Case Replay serves the four packaged visual comparison cases."""
         evidence = self.client.get("/api/evidence").json()
         self.assertEqual([case["id"] for case in evidence["cases"]], ["early-tripo", "compact", "baseline", "deepseek"])
-        self.assertEqual(evidence["batch"]["total"], 11)
+        self.assertEqual(evidence["batch"]["total"], 4)
         self.assertEqual({c["label"]: c["count"] for c in evidence["batch"]["conditions"]},
-                         {"Fixed baseline": 3, "Astra": 3, "DeepSeek": 3, "GLM": 2})
+                         {"Early Seedance": 1, "Compact Seedance": 1,
+                          "Fixed baseline (Kling)": 1, "DeepSeek (Kling)": 1})
         for case in evidence["cases"]:
             for kind in ("reference", "output"):
                 with self.subTest(case=case["id"], kind=kind):

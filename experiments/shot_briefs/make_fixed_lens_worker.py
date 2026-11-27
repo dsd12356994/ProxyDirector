@@ -19,9 +19,6 @@ HEADER = """# Benchmark copy of pipeline/worker_render.py. Do not edit by hand; 
 # experiments/shot_briefs/make_fixed_lens_worker.py. One difference from the production worker:
 #   --fixed-lens-mm: the lens is fixed instead of fitted to each plan, so a plan can fail the
 #   framing audit.
-# When the benchmark was run (commit ce34d05) the production side_sequence still mirrored the view
-# order for clockwise orbits starting at 90 or 270 degrees, and this copy carried the correction.
-# Production has the same correction now, so the two functions are identical.
 """
 
 EDITS = [

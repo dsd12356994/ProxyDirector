@@ -78,13 +78,13 @@ class PresetDirectorHandlesRefusals(SandboxCase):
 
 class SystemPrompt(unittest.TestCase):
     def test_system_prompt_is_the_one_the_experiments_used(self):
-        """The benchmark protocol records 'pipeline.director.SYSTEM_PROMPT without the team wiki'."""
+        """The benchmark protocol records the exact frozen pipeline.director.SYSTEM_PROMPT."""
         import hashlib
         self.assertEqual(hashlib.sha256(director.SYSTEM_PROMPT.encode("utf-8")).hexdigest(),
                          SYSTEM_PROMPT_SHA256)
 
 
-# SHA-256 of director.SYSTEM_PROMPT at commit ce34d05 (see tests/test_prompt_template.py).
+# SHA-256 of director.SYSTEM_PROMPT (guards prompt stability across benchmark runs).
 SYSTEM_PROMPT_SHA256 = "5262642a7448136e9417e47131525482bed0414957a47ccb6f418a4a8cf26cb9"
 
 

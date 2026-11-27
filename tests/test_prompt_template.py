@@ -6,9 +6,8 @@ from tests.support import FakeRenderer, plan
 
 from pipeline.prompt_template import TEMPLATE, render_prompt, to_kling
 
-# SHA-256 of TEMPLATE at commit ce34d05, the commit that produced the November batch and the
-# shot-brief benchmark. Changing the template breaks comparability with those results: do it only
-# on purpose, and record the new hash together with the reason.
+# SHA-256 of the frozen production prompt template. Changing the template breaks comparability
+# across runs: do it only on purpose, and record the new hash together with the reason.
 FROZEN_TEMPLATE_SHA256 = "ae66b74c10c93f84402ce34609eb93718f156988d736e6741fd69dc9c3e134d0"
 FROZEN_KLING_TEMPLATE_SHA256 = "4ad306fb8de91a3221226e307d763fb2605f343852c8ccfc1e2563b9d413a1f1"
 
