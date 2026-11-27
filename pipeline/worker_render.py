@@ -46,6 +46,8 @@ def side_sequence(start: float, direction: str) -> list[str]:
     """环绕依次呈现的面（方位角->面名的约定：0°=front，逆时针 azimuth 递增为 right->back->left）。"""
     order = ["front", "left", "back", "right"] if direction == "cw" else ["front", "right", "back", "left"]
     k = round(((start % 360) / 90)) % 4
+    if direction == "cw":                      # the azimuth decreases along a clockwise orbit
+        k = (-k) % 4
     return order[k:] + order[:k]
 
 
