@@ -9,7 +9,7 @@ from __future__ import annotations
 
 START_TOLERANCE_DEG = 5.0
 MARGIN_TOLERANCE = 0.005
-OPTIMAL_RADIUS_TOLERANCE = 0.26      # one 0.5 step, plus numerical slack
+OPTIMAL_RADIUS_TOLERANCE = 0.26      # half of one 0.5 step, plus slack: "optimal" means the best radius itself
 
 RENDER_NOTE = ("The lens is FIXED, so some camera plans fail the framing audit; the tool reports the "
                "measured edge clearance. You have at most {n} local renders. This experiment evaluates "

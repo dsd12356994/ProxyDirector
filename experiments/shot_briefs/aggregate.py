@@ -1,10 +1,15 @@
 """Build results.csv and summary.md from every indexed trial (LLM directors and the scripted policy).
 
-  .venv/bin/python experiments/shot_briefs/aggregate.py
+  python experiments/shot_briefs/aggregate.py
 
 Trials are re-graded here with the measured ground truth, so a trial's grade does not depend on
 whether ground_truth.json already existed when that trial finished.
+
+The LLM trials live in trials.jsonl, which is kept out of Git, while the two tables are committed.
+On a fresh clone only the scripted baseline is present, so the script refuses to replace existing
+tables with fewer trials than they list. --allow-fewer-trials overrides that.
 """
+import argparse
 import csv
 import json
 import re
@@ -76,12 +81,37 @@ def cell(outcomes: list[str]) -> str:
     return " · ".join(f"{n} {name}" for name, n in counts.most_common()) if counts else "not run"
 
 
-def main() -> int:
+def trials_in_table(path: Path) -> int:
+    """How many trials a results.csv on disk lists (0 when there is none or it cannot be read)."""
+    if not path.exists():
+        return 0
+    try:
+        with path.open(encoding="utf-8", newline="") as handle:
+            return sum(1 for _ in csv.DictReader(handle))
+    except (OSError, UnicodeError, csv.Error):
+        return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Build results.csv and summary.md from the recorded trials.")
+    parser.add_argument("--allow-fewer-trials", action="store_true",
+                        help="replace existing tables even though this run has fewer trials than they list")
+    args = parser.parse_args(argv)
+
     truth_path = OUT / "ground_truth.json"
     truth = json.loads(truth_path.read_text(encoding="utf-8")).get("ground_truth", {}) if truth_path.exists() else {}
     trials = [regrade(t, truth) for t in load_trials()]
     if not trials:
         raise SystemExit("No trials indexed yet.")
+    listed = trials_in_table(OUT / "results.csv")
+    if len(trials) < listed and not args.allow_fewer_trials:
+        reason = ("" if (OUT / "trials.jsonl").exists() else
+                  " trials.jsonl is not in this folder: it holds the LLM trials and is kept out of Git, so a "
+                  "fresh clone only has the scripted baseline.")
+        raise SystemExit(f"Not writing: {OUT / 'results.csv'} lists {listed} trials and this run has only "
+                         f"{len(trials)}, so the tables would lose results.{reason} Copy the per-trial records "
+                         "from the machine that ran the batch, or pass --allow-fewer-trials to replace the "
+                         "tables anyway.")
     backends = [b for b in BACKEND_ORDER if any(t["backend"] == b for t in trials)]
     backends += sorted({t["backend"] for t in trials} - set(BACKEND_ORDER))
 
