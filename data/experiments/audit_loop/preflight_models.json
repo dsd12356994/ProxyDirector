@@ -1,0 +1,90 @@
+{
+  "backends": {
+    "deepseek": {
+      "backend": "deepseek",
+      "configured_base_url": "https://api.deepseek.com/v1",
+      "base_url": "https://api.deepseek.com/v1",
+      "configured_model": "deepseek-flash",
+      "resolved_model": "deepseek-flash",
+      "selection_note": "configured model 'deepseek-flash' confirmed in /models",
+      "endpoint_notes": [],
+      "available_chat_models": [
+        "deepseek-flash",
+        "deepseek-v4-pro"
+      ],
+      "all_listed_models_count": 2,
+      "rate_input_per_1m_usd": 0.15,
+      "rate_output_per_1m_usd": 0.6,
+      "rate_source": "genai_prices:deepseek/deepseek-flash",
+      "price_within_cap": true,
+      "verified_at": "2026-11-27 12:58:22",
+      "preflight_brief": "C2_fixed_e85_ccw_90",
+      "provider_reported_model": "deepseek-flash",
+      "render_count": 1,
+      "outcome": "pass",
+      "requests": 4,
+      "input_tokens": 10737,
+      "output_tokens": 1110,
+      "cost_usd": 0.00088417,
+      "cost_source": "pydantic_ai",
+      "checks": {
+        "one_recorded_passing_audit": true,
+        "usage_and_provider_model_present": true,
+        "input_tokens_under_20k": true,
+        "price_within_0_30_in_1_20_out_per_1m": true,
+        "no_agent_error": true
+      },
+      "preflight_passed": true,
+      "error": null
+    },
+    "glm": {
+      "backend": "glm",
+      "configured_base_url": "https://api.z.ai/api/paas/v4",
+      "base_url": "https://api.z.ai/api/paas/v4",
+      "configured_model": "glm-5.3-flash",
+      "resolved_model": "glm-4.5-flash",
+      "selection_note": "explicit override 'glm-4.5-flash' (not listed in /models)",
+      "endpoint_notes": [],
+      "available_chat_models": [
+        "glm-4.5",
+        "glm-4.5-air",
+        "glm-4.6",
+        "glm-4.7",
+        "glm-5",
+        "glm-5-turbo",
+        "glm-5.1",
+        "glm-5.2",
+        "glm-5.3",
+        "glm-5.3-flash",
+        "glm-5.3-flashx",
+        "glm-5.3-flashx-legal",
+        "glm-5.4"
+      ],
+      "all_listed_models_count": 13,
+      "rate_input_per_1m_usd": 0.1,
+      "rate_output_per_1m_usd": 0.4,
+      "rate_source": "fallback_per_1m:0.1/0.4",
+      "price_within_cap": true,
+      "verified_at": "2026-11-27 12:58:36",
+      "preflight_brief": "C2_fixed_e85_ccw_90",
+      "provider_reported_model": "glm-4.5-flash",
+      "render_count": 1,
+      "outcome": "pass",
+      "requests": 4,
+      "input_tokens": 8952,
+      "output_tokens": 531,
+      "cost_usd": 0.0011076,
+      "cost_source": "fallback_per_1m:0.1/0.4",
+      "checks": {
+        "one_recorded_passing_audit": true,
+        "usage_and_provider_model_present": true,
+        "input_tokens_under_20k": true,
+        "price_within_0_30_in_1_20_out_per_1m": true,
+        "no_agent_error": true
+      },
+      "preflight_passed": true,
+      "error": null
+    }
+  },
+  "updated_at": "2026-11-27 12:59:12"
+}

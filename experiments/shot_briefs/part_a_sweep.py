@@ -349,10 +349,10 @@ def build_svg(geometry_map: dict) -> str:
     y6 = sy(6.0)
     out.append(f'  <line x1="{pad_l}" y1="{y6:.2f}" x2="{W - pad_r}" y2="{y6:.2f}" stroke="#d97706" stroke-width="2.2" stroke-dasharray="7,5"/>')
     out.append(
-        f'  <rect x="{sx(11.0):.1f}" y="{y6 - 24:.1f}" width="318" height="19" rx="4" fill="#fffbeb" stroke="#f59e0b" stroke-width="0.8"/>'
+        f'  <rect x="{sx(11.0):.1f}" y="{y6 + 7.2:.1f}" width="346" height="19" rx="4" fill="#fffbeb" stroke="#f59e0b" stroke-width="0.8"/>'
     )
     out.append(
-        f'  <text x="{sx(12.0):.1f}" y="{y6 - 11:.1f}" class="badge" fill="#b45309">'
+        f'  <text x="{sx(12.0):.1f}" y="{y6 + 20.2:.1f}" class="badge" fill="#b45309">'
         "Default radius r = 6.0: fails &lt;50&#176;, passes &#8805;50&#176; (8/16), tightest at 50&#176;&#8211;55&#176;"
         "</text>"
     )

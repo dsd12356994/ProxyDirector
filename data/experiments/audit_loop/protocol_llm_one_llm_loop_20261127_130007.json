@@ -1,0 +1,121 @@
+{
+  "created": "2026-11-27 13:00:07",
+  "repo_commit": "7f838e60a41a5353806e6044999ba226dd19247e",
+  "geometry_world_vertices_sha256": "5d5539e3079d86078813761baa5a4cf9974a453c3752df292d5986baa8ce0512",
+  "arms": [
+    {
+      "arm": "llm_one",
+      "max_renders": 1
+    },
+    {
+      "arm": "llm_loop",
+      "max_renders": 6
+    }
+  ],
+  "backends": {
+    "deepseek": {
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com/v1"
+    },
+    "glm": {
+      "model": "glm-4.5-flash",
+      "base_url": "https://api.z.ai/api/paas/v4"
+    }
+  },
+  "reps": 1,
+  "briefs": [
+    {
+      "id": "S1_search_e20",
+      "family": "search",
+      "spec": {
+        "elevation": [
+          17,
+          23
+        ],
+        "direction": "cw",
+        "start": 0,
+        "margin": 0.05
+      },
+      "text": "Keep elevation_degrees at 20 (accepted range 17 to 23), direction clockwise, start_degrees 0 and margin 0.05. Among the plans that pass the framing audit, use the smallest radius you can find, in steps of 0.5."
+    },
+    {
+      "id": "S2_search_e70",
+      "family": "search",
+      "spec": {
+        "elevation": [
+          67,
+          73
+        ],
+        "direction": "cw",
+        "start": 0,
+        "margin": 0.05
+      },
+      "text": "Keep elevation_degrees at 70 (accepted range 67 to 73), direction clockwise, start_degrees 0 and margin 0.05. Among the plans that pass the framing audit, use the smallest radius you can find, in steps of 0.5."
+    },
+    {
+      "id": "S3_search_e50_m10",
+      "family": "search",
+      "spec": {
+        "elevation": [
+          47,
+          53
+        ],
+        "direction": "cw",
+        "start": 0,
+        "margin": 0.1
+      },
+      "text": "Keep elevation_degrees at 50 (accepted range 47 to 53), direction clockwise, start_degrees 0 and margin 0.1. Among the plans that pass the framing audit, use the smallest radius you can find, in steps of 0.5."
+    },
+    {
+      "id": "L1_lang_low_tight",
+      "family": "language",
+      "spec": {
+        "elevation": [
+          10,
+          30
+        ],
+        "direction": "cw",
+        "start": 0,
+        "margin": 0.05
+      },
+      "text": "Make the product look imposing: a low camera that is almost at eye level but still clearly looking slightly down. Frame the product as tightly as the 5% safety margin allows. Orbit clockwise, starting from the front."
+    },
+    {
+      "id": "L2_lang_top_back",
+      "family": "language",
+      "spec": {
+        "elevation": [
+          60,
+          85
+        ],
+        "direction": "ccw",
+        "start": 180,
+        "margin": 0.1
+      },
+      "text": "A catalog turntable shot: look down steeply at the product from above, keep a generous 10% safety margin, orbit the opposite way to our usual clockwise, and begin the shot on the back view. Any passing radius is fine."
+    },
+    {
+      "id": "I1_infeasible_e20_r4",
+      "family": "infeasible",
+      "spec": {
+        "elevation": [
+          17,
+          23
+        ],
+        "direction": "cw",
+        "start": 0,
+        "margin": 0.05,
+        "radius_max": 4.0
+      },
+      "text": "Keep elevation_degrees at 20 (accepted range 17 to 23), direction clockwise, start_degrees 0, margin 0.05, and radius at most 4.0. Find a plan within these limits that passes the framing audit. If no plan within the limits can pass, say so plainly."
+    }
+  ],
+  "fixed_lens_mm": 68.17215728759766,
+  "audit_backend": "fast_audit",
+  "system_prompt": "pipeline.director.SYSTEM_PROMPT + pipeline.director._load_wiki()",
+  "baseline_plan_in_context": false,
+  "usage_limits_enforced": false,
+  "video_submission": false,
+  "model_settings": "provider defaults; no seed",
+  "stopping_rule": "Stop after 24 trials (2 models x 2 arms x 6 briefs) if llm_loop beats llm_one on at least 7 of 8 paired threshold trials (S1, S2, S3, L1); otherwise run one additional repetition."
+}
