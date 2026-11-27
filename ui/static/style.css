@@ -505,6 +505,20 @@ span[data-icon] svg {
   color: white;
   border-color: transparent;
 }
+.btn.primary:hover:not(:disabled),
+.btn.rec:hover:not(:disabled) {
+  background: var(--azure);
+}
+.btn,
+.chip,
+.newchat,
+.navbtn,
+.sess,
+.textbtn,
+.iconbtn,
+.send {
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
 .composewrap {
   padding: 10px max(24px, calc((100% - 770px) / 2)) clamp(22px, 5vh, 54px);
 }
@@ -609,7 +623,9 @@ span[data-icon] svg {
   background: var(--azure);
 }
 .send:has(.busy) {
-  opacity: 0.6;
+  opacity: 1;
+  background: var(--azure);
+  animation: pulse 1.4s ease-out infinite;
 }
 .msg {
   max-width: 90%;
@@ -649,6 +665,10 @@ span[data-icon] svg {
   border-radius: 10px;
   background: #fafafb;
   min-width: 0;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.toolcard:hover {
+  border-color: var(--border-hi);
 }
 .tline {
   display: flex;
@@ -698,9 +718,52 @@ span[data-icon] svg {
 .sdot.done {
   background: var(--ok);
 }
-.toolcard.refused .spin,
+.toolcard.failed .spin,
 .sdot.failed {
   background: var(--err);
+}
+.toolcard:not(.done) .spin {
+  background: var(--azure);
+}
+.toolcard.refused .spin {
+  background: var(--warn);
+}
+.toolcard.failed {
+  border-color: #efc9c9;
+  background: #fdf8f8;
+}
+.toolcard.refused {
+  border-color: #eedbb2;
+  background: #fffaf2;
+}
+.toolcard.paid {
+  border-color: #dbd2ec;
+  background: #f8f6fc;
+}
+.toolcard.done .trace-status {
+  color: var(--ok);
+}
+.toolcard.failed .trace-status,
+.toolcard.refused .trace-status {
+  color: var(--err);
+  font-weight: 600;
+}
+.toolcard.refused .trace-status {
+  color: var(--warn);
+}
+.setup-hint {
+  margin-top: 8px;
+  padding: 9px 12px;
+  border: 1px solid #eedbb2;
+  border-radius: 9px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: normal;
+}
+#detail > .setup-hint {
+  margin: 0 0 12px;
 }
 .tresult,
 .log-box,
@@ -747,6 +810,13 @@ span[data-icon] svg {
 .rail-stats {
   white-space: pre-wrap;
   margin: 9px 0;
+}
+.rail-bars {
+  margin: 4px 0 12px;
+}
+.rail .bars {
+  grid-template-columns: 1fr;
+  gap: 6px;
 }
 .mini-contact {
   display: grid;
@@ -877,6 +947,11 @@ input[type="range"] {
 .presets {
   margin: 12px 0 17px;
 }
+.presets .btn[aria-pressed="true"] {
+  background: var(--azure-dim);
+  border-color: #b8b3e4;
+  color: var(--azure);
+}
 .audit {
   border-top: 1px solid var(--border);
   padding: 14px 0 7px;
@@ -1001,6 +1076,9 @@ input[type="range"] {
   min-width: 0;
   overflow: hidden;
 }
+.card {
+  box-shadow: 0 1px 2px rgb(28 27 43 / 0.04);
+}
 .card-h,
 .card-b,
 .quickrun summary {
@@ -1017,9 +1095,12 @@ input[type="range"] {
   font-size: 13px;
   font-weight: 650;
 }
-.card-h span {
+.card-h > span:not(.badge) {
   color: var(--faint);
   font-size: 11px;
+}
+.card-h > h2 + * {
+  margin-left: auto;
 }
 .runlist {
   max-height: 65vh;
@@ -1027,42 +1108,62 @@ input[type="range"] {
 }
 .runrow {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px;
-  padding: 9px 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  width: 100%;
+  padding: 10px 14px 10px 12px;
+  text-align: left;
   border-bottom: 1px solid #ececf0;
-  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 .runrow:hover {
   background: var(--surface-2);
 }
 .runrow.sel {
   background: var(--azure-dim);
+  border-left-color: var(--azure);
+}
+.runrow:focus-visible {
+  outline-offset: -3px;
 }
 .runrow .t {
   display: flex;
-  gap: 5px;
+  gap: 7px;
   align-items: center;
-  font-size: 12px;
-  font-weight: 550;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.runrow .plan {
+  grid-column: 1 / -1;
+  font: 12px/1.5 var(--mono);
+  color: var(--text);
+}
+.runrow .plan.none {
+  font-family: var(--sans);
+  color: var(--faint);
+}
+.runrow .meta {
+  grid-column: 1 / -1;
 }
 .runrow .meta,
 .hint {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--faint);
   overflow-wrap: anywhere;
 }
 .runrow .cost {
-  font-size: 10px;
+  font-size: 11px;
+  color: var(--muted);
 }
 .sdot.running {
   background: var(--azure);
 }
 .flow {
   display: flex;
-  gap: 5px;
+  flex-wrap: wrap;
+  gap: 6px;
   align-items: stretch;
-  overflow: auto;
 }
 .fnode,
 .fgate,
@@ -1095,6 +1196,66 @@ input[type="range"] {
 }
 .fnode.active {
   color: var(--azure);
+  background: var(--azure-dim);
+  border-color: #c9c5ec;
+}
+.fnode.active::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.fnode.warn,
+.b-warn {
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-color: #eedbb2;
+}
+.fnode,
+.fgate {
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: 7px;
+}
+.fnode .n {
+  font-weight: 700;
+  opacity: 0.7;
+}
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.b-ok {
+  border-color: #cde4d8;
+}
+.b-err {
+  border-color: #efc9c9;
+}
+.b-mut {
+  color: var(--muted);
+  background: var(--surface-2);
+}
+.b-paid {
+  color: var(--paid);
+  background: #f2eef9;
+  border-color: #dbd2ec;
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(73 67 151 / 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px rgb(73 67 151 / 0);
+  }
+}
+.toolcard:not(.done) .spin,
+.sdot.running,
+.fnode.active::before {
+  animation: pulse 1.4s ease-out infinite;
 }
 .stats {
   display: grid;
@@ -1124,32 +1285,67 @@ input[type="range"] {
 .bars {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3px;
+  gap: 7px 14px;
+  margin-top: 9px;
 }
 .bar-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+.bar-row > span:first-child {
+  width: 9px;
+  font-weight: 650;
+  color: var(--muted);
 }
 .bar {
+  position: relative;
   flex: 1;
-  height: 4px;
-  background: var(--border);
-  border-radius: 4px;
+  height: 6px;
+  background: #ebebf0;
+  border-radius: 6px;
 }
 .bar i {
   display: block;
   height: 100%;
+  border-radius: inherit;
   background: var(--ok);
+  transition: width 0.35s ease;
 }
 .bar i.warn {
-  background: var(--warn);
+  background: #c58a1f;
 }
 .bar i.bad {
   background: var(--err);
 }
+.bar b,
+.bar-key b {
+  width: 2px;
+  border-radius: 1px;
+  background: #3a3850;
+  opacity: 0.6;
+}
+.bar b {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  margin-left: -1px;
+}
+.bar-key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.bar-key b {
+  height: 10px;
+}
 .bar-row .mono {
-  font-size: 10px;
+  font-size: 10.5px;
+  min-width: 36px;
+  text-align: right;
 }
 .detail-grid {
   display: grid;
@@ -1201,13 +1397,23 @@ th.r {
 }
 .form-row > label {
   font-size: 12px;
-  min-width: 30px;
+  min-width: 62px;
 }
 .form-row input,
 .form-row select,
 .style-row {
   min-width: 0;
   flex: 1;
+}
+/* In a narrow column the button moves under the field instead of squeezing it to nothing. */
+.style-row {
+  flex-wrap: wrap;
+}
+.style-row input {
+  flex: 1 1 150px;
+}
+.style-row .btn {
+  flex: none;
 }
 input[type="number"],
 input[type="text"],
@@ -1232,11 +1438,19 @@ input[type="checkbox"] {
 }
 .warnbox.show {
   display: block;
+  margin: 4px 0 10px;
+  padding: 8px 11px;
+  border: 1px solid #efc9c9;
+  border-radius: 8px;
+  background: var(--err-bg);
   color: var(--err);
   font-size: 12px;
 }
 .expand-box {
-  padding: 8px;
+  margin-bottom: 6px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   background: var(--surface-2);
 }
 .overlay {
@@ -1245,6 +1459,7 @@ input[type="checkbox"] {
   display: none;
   place-items: center;
   background: #18192566;
+  backdrop-filter: blur(2px);
   z-index: 50;
 }
 .overlay.show {
@@ -1255,6 +1470,10 @@ input[type="checkbox"] {
   background: white;
   padding: 24px;
   border-radius: 16px;
+  box-shadow: 0 24px 60px rgb(20 20 33 / 0.22);
+}
+.modal h3 {
+  font-size: 17px;
 }
 .modal .desc,
 .quote {
@@ -1285,6 +1504,14 @@ input[type="checkbox"] {
   background: #302f39;
   border-radius: 9px;
   padding: 8px 14px;
+  box-shadow: 0 8px 24px rgb(20 20 33 / 0.18);
+  animation: toast-in 0.2s ease-out;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 @media (min-width: 1600px) {
   .app {
@@ -1477,5 +1704,7 @@ input[type="checkbox"] {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
   }
 }

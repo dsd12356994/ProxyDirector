@@ -64,6 +64,7 @@
         <video id="rail-video" controls playsinline preload="metadata" style="display:none"></video>
         <div class="rail-empty" id="rail-empty">Your reference clip and measured margins will appear here after a render.</div>
         <div class="rail-stats mono" id="rail-stats"></div>
+        <div class="rail-bars" id="rail-bars"></div>
         <button class="btn ghost" id="rail-open" style="display:none">Open run details</button>
         <h3>Generation mode</h3><div id="rail-mode">Preview</div>
       </aside>
@@ -86,7 +87,7 @@
             <input type="range" id="lab-zoom" min="1" max="1.5" step=".01" value="1">
             <label class="slab" for="lab-margin">Safety margin <output id="margin-value">5%</output></label>
             <input type="range" id="lab-margin" min="0" max=".2" step=".01" value=".05">
-            <div class="presets"><button id="lab-reset" class="btn ghost">Original</button><button id="lab-buffer" class="btn ghost">Zoom 1.08×</button><button id="lab-push" class="btn">Zoom 1.15×</button></div>
+            <div class="presets" role="group" aria-label="Zoom presets"><button id="lab-reset" class="btn ghost" aria-pressed="true">Original</button><button id="lab-buffer" class="btn ghost" aria-pressed="false">Zoom 1.08×</button><button id="lab-push" class="btn ghost" aria-pressed="false">Zoom 1.15×</button></div>
             <div class="audit" aria-live="polite"><strong id="lab-verdict">Loading framing data…</strong><p id="lab-result"></p></div>
             <button id="first-crop" class="textbtn" hidden>First clipped pose</button> <button id="worst" class="textbtn" disabled>Smallest margin</button>
           </div>

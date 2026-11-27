@@ -70,7 +70,7 @@ function heroNode() {
     };
     hero.querySelector(".chips").append(b);
   }
-  hero.querySelector("[data-open]").onclick = () => switchView("lab");
+  hero.querySelector("[data-open]").onclick = () => goView("lab");
   return hero;
 }
 
@@ -95,6 +95,8 @@ async function audit() {
     margin = +$("#lab-margin").value;
   $("#zoom-value").textContent = zoom.toFixed(2) + "×";
   $("#margin-value").textContent = Math.round(margin * 100) + "%";
+  for (const [id, preset] of [["#lab-reset", 1], ["#lab-buffer", 1.08], ["#lab-push", 1.15]])
+    $(id).setAttribute("aria-pressed", Math.abs(zoom - preset) < 0.005);
   drawFrame(+$("#lab-frame").value);
   $("#worst").disabled = true;
   try {
