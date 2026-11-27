@@ -77,7 +77,7 @@ On macOS, double-click **Launch ProxyDirector.command**. The launcher opens the 
 
 Download the [English user guide](<ProxyDirector User Guide.docx>) or select **User guide** in the studio sidebar.
 
-The [class presentation materials](docs/presentation/) include the final English deck, the three-minute agent architecture talk, the editable control-loop diagram and the paired demo video.
+The [class presentation materials](docs/presentation/) include the final English deck, the three-minute agent architecture talk, the editable control-loop diagram and the paired demo video. The [final report working draft and figure pack](docs/report/) contains the ACL-style Word working draft, PDF preview, and high-resolution figures.
 
 - **Director Chat** accepts three local presets. Select **Standard orbit**, **35° elevation**, or **Counterclockwise orbit**, then send the request. Expand a tool entry to inspect its arguments and result. A counterclockwise follow-up keeps the current elevation. For free-form direction, select a configured cloud model. Freezing the video request still allows a cloud director or style expansion to call an LLM.
 - **Framing Lab** recalculates a centered crop of the recorded compact orbit. The audit covers 300 encoded frames and one closure pose. With a 5% margin and 1.15× zoom, the smallest margin occurs at 3.60 s.
@@ -111,6 +111,7 @@ pipeline/
   prompt_template.py    Frozen prompt with slots for measured framing
 ui/                     FastAPI service, offline experiments, and web client
 assets/                 Frozen photos, seed GLB, Framing Lab recording, and Case Replay snapshots
+docs/                   Class presentation materials and final report working draft (docs/report/)
 experiments/            Camera-plan benchmark with a fixed lens; see experiments/shot_briefs/README.md
 data/                   Local runtime artifacts (runs/, eval/, cache/, ledger.jsonl; excluded from Git), plus committed benchmark tables in data/experiments/
 ```
