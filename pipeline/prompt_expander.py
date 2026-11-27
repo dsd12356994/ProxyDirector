@@ -11,16 +11,11 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from . import ledger
+from .camera_words import camera_terms
 from .config import api_key
 
-# 镜头/运镜词汇黑名单（扩写结果里出现任何一个都算越权）
-CAMERA_TERMS = [
-    "camera", "lens", "orbit", "rotate", "rotation", "spin", "zoom", "pan", "dolly",
-    "tracking shot", "close-up", "closeup", "wide shot", "aerial", "top-down",
-    "crane", "handheld", "fisheye", "field of view", "fov",
-    "镜头", "运镜", "环绕", "旋转", "推近", "拉远", "摇移", "特写", "俯拍", "仰拍",
-    "切镜", "变焦", "广角", "长焦", "视角", "环绕",
-]
+# The camera and movement vocabulary lives in camera_words.py. It matches whole words: the earlier
+# substring list rejected harmless ideas such as "Japanese minimalism" ("pan") or "LED panel".
 
 
 class PromptSpec(BaseModel):
@@ -50,8 +45,9 @@ Reply with ONLY one JSON object, no markdown, no code fences, exactly these keys
 
 
 def _violations(spec: PromptSpec) -> list[str]:
-    text = json.dumps(spec.model_dump(), ensure_ascii=False).lower()
-    return [t for t in CAMERA_TERMS if t in text]
+    """Camera or movement terms anywhere in the style block."""
+    return camera_terms("\n".join([spec.visual_style, spec.lighting, spec.background, spec.mood,
+                                   *(spec.extra_notes or [])]))
 
 
 def render_style_block(spec: PromptSpec) -> str:
@@ -92,13 +88,12 @@ def _parse_spec(text: str) -> PromptSpec:
 def expand(idea: str, cfg: dict, backend_name: str | None = None,
            run_id: str = "-", ledger_path=None) -> tuple[PromptSpec, str]:
     """用配置的 LLM 后端扩写。返回 (spec, style_block)。解析失败或镜头词汇违规各重试一次。"""
-    from pydantic_ai import Agent
+    from pydantic_ai import Agent, RunUsage
 
     from .director import build_model
 
     # 入口预检：用户想法本身就是镜头需求 → 明确拒绝，而不是让 LLM 静默吞掉
-    idea_bad = [t for t in CAMERA_TERMS if t in idea.lower()]
-    if idea_bad:
+    if camera_terms(idea):
         raise ValueError("Use the shot planner for camera settings. "
                          "Style details can describe appearance, lighting, background or mood.")
 
@@ -113,27 +108,33 @@ def expand(idea: str, cfg: dict, backend_name: str | None = None,
     agent = Agent(model=build_model(backend_cfg),
                   system_prompt=EXPANDER_PROMPT, retries=1)
     spec = None
+    violations = ["no answer"]
     feedback = ""
-    for _ in range(3):
-        result = agent.run_sync((f"User idea: {idea!r}" + (f"\n{feedback}" if feedback else "")),
-                                model_settings=backend_cfg.get("model_settings") or None)
-        try:
-            spec = _parse_spec(result.output)
-            violations = _violations(spec)
-        except ValueError as e:
-            violations = [str(e)]
-        if not violations:
-            break
-        feedback = (f"Previous answer rejected: {violations}. Reply again with ONLY the JSON "
-                    "object, no camera/movement/framing words.")
-    if spec is None or violations:
+    usage = RunUsage()           # shared by every attempt, so the calls of a rejected answer stay on record
+    attempts, status = 0, "failed"
+    try:
+        for _ in range(3):
+            attempts += 1
+            result = agent.run_sync((f"User idea: {idea!r}" + (f"\n{feedback}" if feedback else "")),
+                                    model_settings=backend_cfg.get("model_settings") or None, usage=usage)
+            try:
+                spec = _parse_spec(result.output)
+                violations = _violations(spec)
+            except ValueError as e:
+                violations = [str(e)]
+            if not violations:
+                break
+            feedback = (f"Previous answer rejected: {violations}. Reply again with ONLY the JSON "
+                        "object, no camera/movement/framing words.")
+        status = "rejected" if spec is None or violations else "ok"
+    finally:
+        if ledger_path is not None:
+            ledger.log({"run_id": run_id, "stage": "style_expand", "provider": "llm",
+                        "backend": backend, "status": status, "attempts": attempts,
+                        "requests": usage.requests,
+                        "input_tokens": usage.input_tokens, "output_tokens": usage.output_tokens,
+                        "cost_usd": float(usage.cost or 0.0),
+                        "mock": False, "idea": idea[:120]}, ledger_path)
+    if status != "ok":
         raise ValueError("The style model could not produce a valid appearance-only prompt. Try a shorter style description.")
-    if ledger_path is not None:
-        usage = result.usage
-        ledger.log({"run_id": run_id, "stage": "style_expand", "provider": "llm",
-                    "backend": backend, "status": "ok",
-                    "input_tokens": getattr(usage, "input_tokens", None),
-                    "output_tokens": getattr(usage, "output_tokens", None),
-                    "cost_usd": float(getattr(usage, "cost", None) or 0.0),
-                    "mock": False, "idea": idea[:120]}, ledger_path)
     return spec, render_style_block(spec)
