@@ -4,8 +4,20 @@ import subprocess
 import time
 from pathlib import Path
 
-from . import ledger
+from . import config, ledger
 from .models import FramingReport, ShotPlan
+
+
+def require_programs(cfg: dict) -> tuple[str, str]:
+    """The Blender and FFmpeg executables, or one clear error before any time is spent rendering."""
+    blender, ffmpeg = config.blender_bin(cfg), config.ffmpeg_bin(cfg)
+    if not config.find_program(blender):
+        raise RuntimeError(f"Blender was not found ({blender}). Install Blender 5.x, or set {config.BLENDER_ENV} "
+                           "or pipeline.blender_bin in config.yaml to the Blender executable.")
+    if not config.find_program(ffmpeg):
+        raise RuntimeError(f"FFmpeg was not found ({ffmpeg}). Install FFmpeg and put it on PATH, or set "
+                           f"{config.FFMPEG_ENV} or pipeline.ffmpeg_bin in config.yaml.")
+    return blender, ffmpeg
 
 
 def render_orbit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
@@ -14,13 +26,18 @@ def render_orbit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
     out = run_dir / f"render_{tag}"
     pl = cfg["pipeline"]
     t0 = time.time()
-    cmd = [pl["blender_bin"], "-b", "--factory-startup",
+    blender, ffmpeg = require_programs(cfg)
+    out.mkdir(parents=True, exist_ok=True)       # the logs below are written even if Blender dies at once
+    cmd = [blender, "-b", "--factory-startup",
            "--python", str(Path(__file__).parent / "worker_render.py"), "--",
            "--glb", str(glb), "--plan", plan.model_dump_json(), "--out", str(out),
            "--width", str(pl["width"]), "--height", str(pl["height"]),
            "--fps", str(pl["fps"]), "--frames", str(pl["frames"]),
            "--normalize", str(pl["normalize_horizontal"])]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=pl["render_timeout_s"])
+    # Decode as UTF-8 and never fail on a stray byte: the console code page of a Windows machine
+    # is not UTF-8, and a decoding error here would hide the real render result.
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                          timeout=pl["render_timeout_s"])
     (out / "worker_stdout.log").write_text(proc.stdout[-20000:], encoding="utf-8")
     (out / "worker_stderr.log").write_text(proc.stderr[-20000:], encoding="utf-8")
     # 注意：Blender 5.2 在脚本异常时退出码仍为 0，不能只看 returncode。
@@ -36,11 +53,11 @@ def render_orbit(cfg: dict, run_dir: Path, ledger_path: Path, run_id: str,
     if n_frames != pl["frames"]:
         raise RuntimeError(f"Expected {pl['frames']} frames but found {n_frames}.")
 
-    encode = subprocess.run([pl["ffmpeg_bin"], "-y", "-framerate", str(pl["fps"]),
+    encode = subprocess.run([ffmpeg, "-y", "-framerate", str(pl["fps"]),
                              "-start_number", "0", "-i", str(frames_dir / "%04d.png"),
                              "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20",
                              str(out / "reference.mp4")],
-                            capture_output=True, text=True, timeout=300)
+                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
     if encode.returncode != 0:
         raise RuntimeError("Video encoding failed: " + encode.stderr[-500:])
 

@@ -17,34 +17,73 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from pipeline import director, ledger, tripo  # noqa: E402
 from pipeline.blender_step import render_orbit  # noqa: E402
-from pipeline.config import api_key, load_config, resolve  # noqa: E402
+from pipeline.config import (BLENDER_ENV, FFMPEG_ENV, api_key, blender_bin, ffmpeg_bin,  # noqa: E402
+                             find_program, load_config, resolve)
 from pipeline.models import ShotPlan  # noqa: E402
 from pipeline.prompt_template import render_prompt  # noqa: E402
 from pipeline.tools import ToolContext  # noqa: E402
 
 
+def utf8_console() -> None:
+    """Print UTF-8 even when the output is redirected on Windows.
+
+    The output contains characters such as the degree sign and an arrow. A redirected stream on
+    Windows uses the legacy code page, where printing them can raise UnicodeEncodeError, and the
+    Studio reads the run log back as UTF-8.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if (stream.encoding or "").lower().replace("-", "") != "utf8":
+                stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
+
 def check(cfg: dict) -> int:
-    ok = True
+    """Report what this machine can run.
+
+    The exit code covers the free local rehearsal only: Blender, FFmpeg and the frozen inputs. API
+    keys are listed without failing the check, because only cloud directors and live generation
+    need them.
+    """
     pl = cfg["pipeline"]
-    blender = Path(pl["blender_bin"])
-    print(("OK  " if blender.exists() else "MISS") + f"  Blender: {blender}")
-    ok &= blender.exists()
+    ready = True
+
+    def required(found: bool, text: str, hint: str = "") -> None:
+        nonlocal ready
+        ready &= bool(found)
+        print(("OK  " if found else "MISS") + "  " + text)
+        if hint and not found:
+            print("      " + hint)
+
+    def optional(found: bool, text: str) -> None:
+        print(("OK  " if found else "--  ") + "  " + text)
+
+    blender = blender_bin(cfg)
+    required(find_program(blender), f"Blender: {blender}",
+             f"Install Blender 5.x, or set {BLENDER_ENV} or pipeline.blender_bin in config.yaml.")
+    ffmpeg = ffmpeg_bin(cfg)
+    required(find_program(ffmpeg), f"FFmpeg: {ffmpeg}",
+             f"Install FFmpeg and put it on PATH, or set {FFMPEG_ENV} or pipeline.ffmpeg_bin in config.yaml.")
     views = resolve(pl["views_dir"])
-    missing = [p.name for p in sorted(views.glob("view_*.png")) if not p.exists()]
-    n_views = len(list(views.glob("view_*.png"))) if views.exists() else 0
-    print(("OK  " if n_views == 4 and not missing else "MISS") +
-          f"  Frozen views: {n_views}/4 ({pl['views_dir']})")
-    ok &= n_views == 4
+    n_views = len(list(views.glob("view_[1-4].png"))) if views.exists() else 0
+    required(n_views == 4, f"Frozen views: {n_views}/4 ({pl['views_dir']})")
     seed = resolve(pl["seed_glb"])
-    print(("OK  " if seed.exists() else "MISS") + f"  Frozen GLB: {pl['seed_glb']}")
-    ok &= seed.exists()
-    key = api_key("TRIPO_API_KEY")
-    print(("OK  " if key else "--  ") + "  TRIPO_API_KEY (required for uncached modeling)")
-    key = api_key("RUNWAYML_API_SECRET")
-    print(("OK  " if key else "--  ") + "  RUNWAYML_API_SECRET (required for Runway generation)")
-    if cfg.get("video_backend") == "kling":
-        key = api_key(cfg["kling"]["api_key_env"])
-        print(("OK  " if key else "MISS") + f"  {cfg['kling']['api_key_env']} (Kling video generation)")
+    required(seed.exists(), f"Frozen GLB: {pl['seed_glb']}")
+    if n_views == 4 and seed.exists():
+        view_files = {name: views / name for name in tripo.SLOT_OF_VIEW}
+        cached = (Path(cfg["_root"]) / "data" / "cache" / "tripo"
+                  / tripo.cache_key(view_files, tripo.frozen_params(cfg)) / "model.glb")
+        optional(cached.exists(), "Frozen GLB cache" + ("" if cached.exists()
+                                                         else ": not seeded yet. Run: python run.py seed-tripo-cache"))
+
+    optional(api_key("TRIPO_API_KEY"), "TRIPO_API_KEY (required for uncached modeling)")
+    optional(api_key("RUNWAYML_API_SECRET"), "RUNWAYML_API_SECRET (required for Runway generation)")
+    video = cfg.get("video_backend", "runway")
+    video_env = cfg["kling"]["api_key_env"] if video == "kling" else "RUNWAYML_API_SECRET"
+    if video == "kling":
+        key = api_key(video_env)
+        optional(key, f"{video_env} (Kling video generation)")
         if key:
             from pipeline import kling as kling_mod
             try:
@@ -57,18 +96,17 @@ def check(cfg: dict) -> int:
                     print("     No active Kling credit pack was reported.")
             except Exception as e:                       # 查询失败不阻断自检
                 print(f"     Credit lookup failed. {str(e)[:120]}")
-        ok &= bool(key)
-    for b in cfg["backends"]:
-        if cfg["backends"][b].get("kind") == "openai_compatible":
-            env = cfg["backends"][b]["api_key_env"]
-            key = api_key(env)
-            print(("OK  " if key else "--  ") + f"  {env} ({b} backend)")
+    for name, backend in cfg["backends"].items():
+        if backend.get("api_key_env"):                   # every cloud director, whichever API style it uses
+            optional(api_key(backend["api_key_env"]), f"{backend['api_key_env']} ({name} backend)")
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
     if ledger_path.exists():
-        print(f"     {len(ledger_path.read_text().splitlines())} ledger entries. Recorded spend "
+        print(f"     {len(ledger_path.read_text(encoding='utf-8').splitlines())} ledger entries. Recorded spend "
               f"${ledger.spent_usd(ledger_path):.2f}")
-    print("Environment check passed." if ok else "Some environment checks failed. See the items above.")
-    return 0 if ok else 1
+    print("Rehearsal runs (--dry-run): " + ("ready." if ready else "not ready. See the MISS items above."))
+    print(f"Live video generation ({video}): "
+          + ("key configured." if api_key(video_env) else f"not configured, {video_env} is missing."))
+    return 0 if ready else 1
 
 
 def new_run_dir(cfg: dict, backend: str, condition: str, seed: int, *, chat: bool = False) -> Path:
@@ -172,6 +210,10 @@ def main() -> int:
     p.add_argument("--expand-backend", default=None,
                    help="Style backend (defaults to the active model or the configured style backend in mock mode)")
     args, extra = p.parse_known_args()
+    utf8_console()
+    if extra[1:] or (extra and extra[0] not in ("check", "seed-tripo-cache")):
+        # A misspelt flag must not be dropped silently: "--dryrun" would otherwise start a live run.
+        p.error("unrecognized arguments: " + " ".join(extra[1:] if extra[0] in ("check", "seed-tripo-cache") else extra))
 
     cfg = load_config()
     if extra and extra[0] in ("check", "seed-tripo-cache"):
@@ -221,8 +263,14 @@ def main() -> int:
         print(output)
 
     ledger_path = Path(cfg["_root"]) / "data" / "ledger.jsonl"
-    rows = [json.loads(l) for l in ledger_path.read_text().splitlines()
-            if json.loads(l).get("run_id") == run_id]
+    rows = []
+    for line in ledger_path.read_text(encoding="utf-8").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:                     # a half-written line must not fail a finished run
+            continue
+        if row.get("run_id") == run_id:
+            rows.append(row)
     print(f"\n=== Run ledger ({len(rows)} entries) ===")
     for r in rows:
         cost = f"${r.get('cost_usd', 0):.2f}" if r.get("cost_usd") else "  -  "

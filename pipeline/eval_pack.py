@@ -55,7 +55,7 @@ def main() -> int:
         framing = sorted(d.glob("render_*/framing.json"))
         entries.append({"run_id": d.name, "condition": meta[0], "backend": meta[1],
                         "seed": meta[2], "src": str(video),
-                        "framing_passed": bool(json.loads(framing[-1].read_text())["passed"])
+                        "framing_passed": bool(json.loads(framing[-1].read_text(encoding="utf-8"))["passed"])
                         if framing else None})
     if not entries:
         print("没有可用成片")
