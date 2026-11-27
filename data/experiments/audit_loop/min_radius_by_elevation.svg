@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520" width="880" height="520">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; fill: #1e293b; }
+    .title { font-size: 16px; font-weight: 700; fill: #0f172a; }
+    .subtitle { font-size: 12px; fill: #475569; }
+    .axis-label { font-size: 12.5px; font-weight: 600; fill: #1e293b; }
+    .tick { font-size: 11px; fill: #475569; }
+    .note { font-size: 11px; fill: #0f172a; }
+    .note-muted { font-size: 10.5px; fill: #475569; }
+    .badge { font-size: 10.5px; font-weight: 600; }
+  </style>
+  <rect x="0" y="0" width="880" height="520" fill="#ffffff" rx="8"/>
+  <text x="78" y="30" class="title">Smallest Passing Orbit Radius by Camera Elevation (Fixed 68.17 mm Lens, 5% Margin)</text>
+  <text x="78" y="49" class="subtitle">Frozen Tripo mouse mesh (49,530 vertices, 301 orbit poses): 223/304 grid plans pass under fixed lens vs. 304/304 under fitted lens</text>
+  <path d="M 78.00 271.16 L 103.53 271.16 L 103.53 271.16 L 154.60 271.16 L 154.60 291.47 L 205.67 291.47 L 205.67 291.47 L 256.73 291.47 L 256.73 291.47 L 307.80 291.47 L 307.80 291.47 L 358.87 291.47 L 358.87 291.47 L 409.93 291.47 L 409.93 291.47 L 461.00 291.47 L 461.00 311.79 L 512.07 311.79 L 512.07 311.79 L 563.13 311.79 L 563.13 332.11 L 614.20 332.11 L 614.20 352.42 L 665.27 352.42 L 665.27 393.05 L 716.33 393.05 L 716.33 433.68 L 767.40 433.68 L 767.40 433.68 L 818.47 433.68 L 818.47 433.68 L 844.00 433.68 L 844.00 68.00 L 78.00 68.00 Z" fill="#ecfdf5" opacity="0.85"/>
+  <path d="M 78.00 271.16 L 103.53 271.16 L 103.53 271.16 L 154.60 271.16 L 154.60 291.47 L 205.67 291.47 L 205.67 291.47 L 256.73 291.47 L 256.73 291.47 L 307.80 291.47 L 307.80 291.47 L 358.87 291.47 L 358.87 291.47 L 409.93 291.47 L 409.93 291.47 L 461.00 291.47 L 461.00 311.79 L 512.07 311.79 L 512.07 311.79 L 563.13 311.79 L 563.13 332.11 L 614.20 332.11 L 614.20 352.42 L 665.27 352.42 L 665.27 393.05 L 716.33 393.05 L 716.33 433.68 L 767.40 433.68 L 767.40 433.68 L 818.47 433.68 L 818.47 433.68 L 844.00 433.68 L 844.00 433.68 L 78.00 433.68 Z" fill="#fef2f2" opacity="0.72"/>
+  <line x1="78" y1="433.68" x2="844" y2="433.68" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="437.68" text-anchor="end" class="tick">3.0</text>
+  <line x1="78" y1="413.37" x2="844" y2="413.37" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="393.05" x2="844" y2="393.05" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="397.05" text-anchor="end" class="tick">4.0</text>
+  <line x1="78" y1="372.74" x2="844" y2="372.74" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="352.42" x2="844" y2="352.42" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="356.42" text-anchor="end" class="tick">5.0</text>
+  <line x1="78" y1="332.11" x2="844" y2="332.11" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="311.79" x2="844" y2="311.79" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="315.79" text-anchor="end" class="tick">6.0</text>
+  <line x1="78" y1="291.47" x2="844" y2="291.47" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="271.16" x2="844" y2="271.16" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="275.16" text-anchor="end" class="tick">7.0</text>
+  <line x1="78" y1="250.84" x2="844" y2="250.84" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="230.53" x2="844" y2="230.53" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="234.53" text-anchor="end" class="tick">8.0</text>
+  <line x1="78" y1="210.21" x2="844" y2="210.21" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="189.89" x2="844" y2="189.89" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="193.89" text-anchor="end" class="tick">9.0</text>
+  <line x1="78" y1="169.58" x2="844" y2="169.58" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="149.26" x2="844" y2="149.26" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="153.26" text-anchor="end" class="tick">10.0</text>
+  <line x1="78" y1="128.95" x2="844" y2="128.95" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="108.63" x2="844" y2="108.63" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="112.63" text-anchor="end" class="tick">11.0</text>
+  <line x1="78" y1="88.32" x2="844" y2="88.32" stroke="#f1f5f9" stroke-width="0.8"/>
+  <line x1="78" y1="68.00" x2="844" y2="68.00" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="68" y="72.00" text-anchor="end" class="tick">12.0</text>
+  <line x1="78.00" y1="68" x2="78.00" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="78.00" y1="454" x2="78.00" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="78.00" y="473" text-anchor="middle" class="tick">10&#176;</text>
+  <line x1="129.07" y1="68" x2="129.07" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="129.07" y1="454" x2="129.07" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="129.07" y="473" text-anchor="middle" class="tick">15&#176;</text>
+  <line x1="180.13" y1="68" x2="180.13" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="180.13" y1="454" x2="180.13" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="180.13" y="473" text-anchor="middle" class="tick">20&#176;</text>
+  <line x1="231.20" y1="68" x2="231.20" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="231.20" y1="454" x2="231.20" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="231.20" y="473" text-anchor="middle" class="tick">25&#176;</text>
+  <line x1="282.27" y1="68" x2="282.27" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="282.27" y1="454" x2="282.27" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="282.27" y="473" text-anchor="middle" class="tick">30&#176;</text>
+  <line x1="333.33" y1="68" x2="333.33" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="333.33" y1="454" x2="333.33" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="333.33" y="473" text-anchor="middle" class="tick">35&#176;</text>
+  <line x1="384.40" y1="68" x2="384.40" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="384.40" y1="454" x2="384.40" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="384.40" y="473" text-anchor="middle" class="tick">40&#176;</text>
+  <line x1="435.47" y1="68" x2="435.47" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="435.47" y1="454" x2="435.47" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="435.47" y="473" text-anchor="middle" class="tick">45&#176;</text>
+  <line x1="486.53" y1="68" x2="486.53" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="486.53" y1="454" x2="486.53" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="486.53" y="473" text-anchor="middle" class="tick">50&#176;</text>
+  <line x1="537.60" y1="68" x2="537.60" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="537.60" y1="454" x2="537.60" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="537.60" y="473" text-anchor="middle" class="tick">55&#176;</text>
+  <line x1="588.67" y1="68" x2="588.67" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="588.67" y1="454" x2="588.67" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="588.67" y="473" text-anchor="middle" class="tick">60&#176;</text>
+  <line x1="639.73" y1="68" x2="639.73" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="639.73" y1="454" x2="639.73" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="639.73" y="473" text-anchor="middle" class="tick">65&#176;</text>
+  <line x1="690.80" y1="68" x2="690.80" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="690.80" y1="454" x2="690.80" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="690.80" y="473" text-anchor="middle" class="tick">70&#176;</text>
+  <line x1="741.87" y1="68" x2="741.87" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="741.87" y1="454" x2="741.87" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="741.87" y="473" text-anchor="middle" class="tick">75&#176;</text>
+  <line x1="792.93" y1="68" x2="792.93" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="792.93" y1="454" x2="792.93" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="792.93" y="473" text-anchor="middle" class="tick">80&#176;</text>
+  <line x1="844.00" y1="68" x2="844.00" y2="454" stroke="#e2e8f0" stroke-width="0.9"/>
+  <line x1="844.00" y1="454" x2="844.00" y2="459" stroke="#475569" stroke-width="1.2"/>
+  <text x="844.00" y="473" text-anchor="middle" class="tick">85&#176;</text>
+  <rect x="78" y="68" width="766" height="386" fill="none" stroke="#64748b" stroke-width="1.2"/>
+  <text x="241.4" y="124.9" class="badge" fill="#047857">FEASIBLE REGION (passes 5% clearance across all 301 poses)</text>
+  <text x="108.6" y="415.4" class="badge" fill="#b91c1c">INFEASIBLE REGION (clips / misses 5% clearance)</text>
+  <line x1="78" y1="311.79" x2="844" y2="311.79" stroke="#d97706" stroke-width="2.2" stroke-dasharray="7,5"/>
+  <rect x="88.2" y="287.8" width="318" height="19" rx="4" fill="#fffbeb" stroke="#f59e0b" stroke-width="0.8"/>
+  <text x="98.4" y="300.8" class="badge" fill="#b45309">Default radius r = 6.0: fails &lt;50&#176;, passes &#8805;50&#176; (8/16), tightest at 50&#176;&#8211;55&#176;</text>
+  <path d="M 78.00 271.16 L 103.53 271.16 L 103.53 271.16 L 154.60 271.16 L 154.60 291.47 L 205.67 291.47 L 205.67 291.47 L 256.73 291.47 L 256.73 291.47 L 307.80 291.47 L 307.80 291.47 L 358.87 291.47 L 358.87 291.47 L 409.93 291.47 L 409.93 291.47 L 461.00 291.47 L 461.00 311.79 L 512.07 311.79 L 512.07 311.79 L 563.13 311.79 L 563.13 332.11 L 614.20 332.11 L 614.20 352.42 L 665.27 352.42 L 665.27 393.05 L 716.33 393.05 L 716.33 433.68 L 767.40 433.68 L 767.40 433.68 L 818.47 433.68 L 818.47 433.68 L 844.00 433.68" fill="none" stroke="#0284c7" stroke-width="2.8"/>
+  <circle cx="78.00" cy="271.16" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="78.00" y="262.16" text-anchor="middle" class="note" font-weight="600">7.0</text>
+  <circle cx="129.07" cy="271.16" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="180.13" cy="291.47" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="180.13" y="282.47" text-anchor="middle" class="note" font-weight="600">6.5</text>
+  <circle cx="231.20" cy="291.47" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="282.27" cy="291.47" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="333.33" cy="291.47" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="384.40" cy="291.47" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="435.47" cy="291.47" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="486.53" cy="311.79" r="4.3" fill="#d97706" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="486.53" y="302.79" text-anchor="middle" class="note" font-weight="600">6.0</text>
+  <circle cx="537.60" cy="311.79" r="4.3" fill="#d97706" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="588.67" cy="332.11" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="588.67" y="323.11" text-anchor="middle" class="note" font-weight="600">5.5</text>
+  <circle cx="639.73" cy="352.42" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="639.73" y="342.42" text-anchor="middle" class="note" font-weight="600">5.0</text>
+  <circle cx="690.80" cy="393.05" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="690.80" y="383.05" text-anchor="middle" class="note" font-weight="600">4.0</text>
+  <circle cx="741.87" cy="433.68" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="741.87" y="423.68" text-anchor="middle" class="note" font-weight="600">3.0</text>
+  <circle cx="792.93" cy="433.68" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="844.00" cy="433.68" r="4.3" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="844.00" y="423.68" text-anchor="middle" class="note" font-weight="600">3.0</text>
+  <circle cx="180.13" cy="393.05" r="4.5" fill="#dc2626" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="186.1" y1="393.1" x2="226.1" y2="378.8" stroke="#dc2626" stroke-width="1.1"/>
+  <text x="231.2" y="376.0" class="note" fill="#991b1b">I1 cap (20°, r ≤ 4.0): infeasible (-26% cutoff)</text>
+  <line x1="185.1" y1="286.5" x2="231.2" y2="226.5" stroke="#0369a1" stroke-width="1.1"/>
+  <text x="236.3" y="222.4" class="note">S1 (20°): tightest r = 6.5 (r = 6.0 fails at 1.5%)</text>
+  <line x1="491.5" y1="306.8" x2="542.7" y2="248.8" stroke="#b45309" stroke-width="1.1"/>
+  <text x="547.8" y="244.7" class="note">Baseline (50°, r = 6.0): fits 68.17 mm lens</text>
+  <line x1="686.8" y1="399.1" x2="604.0" y2="427.6" stroke="#0369a1" stroke-width="1.1"/>
+  <text x="598.9" y="429.6" text-anchor="end" class="note">S2 (70°): tightest r = 4.0 (r = 6.0 wide at 21.4%)</text>
+  <text x="461.0" y="502" text-anchor="middle" class="axis-label">Camera Elevation (degrees)</text>
+  <text x="24" y="261.0" text-anchor="middle" class="axis-label" transform="rotate(-90 24 261.0)">Orbit Radius (0.5 grid steps, [3.0, 12.0])</text>
+</svg>

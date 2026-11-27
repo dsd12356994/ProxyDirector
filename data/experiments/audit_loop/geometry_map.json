@@ -1,0 +1,2674 @@
+{
+  "created_at": "2026-11-27 12:48:10",
+  "glb_path": "assets/seed_tripo/model.glb",
+  "geometry_world_vertices_sha256": "5d5539e3079d86078813761baa5a4cf9974a453c3752df292d5986baa8ce0512",
+  "vertices": 49530,
+  "hull_vertices": 3062,
+  "fixed_lens_mm": 68.17215728759766,
+  "baseline_50deg_r6_fitted_lens_mm": 68.17215728759766,
+  "grid": {
+    "elevations_degrees": [
+      10,
+      15,
+      20,
+      25,
+      30,
+      35,
+      40,
+      45,
+      50,
+      55,
+      60,
+      65,
+      70,
+      75,
+      80,
+      85
+    ],
+    "radii": [
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0,
+      10.5,
+      11.0,
+      11.5,
+      12.0
+    ],
+    "margin": 0.05,
+    "direction": "cw",
+    "start_degrees": 0.0,
+    "total_plans": 304
+  },
+  "summary": {
+    "fitted_lens_passed": 304,
+    "fitted_lens_total": 304,
+    "fixed_lens_passed": 223,
+    "fixed_lens_failed": 81,
+    "fixed_lens_total": 304,
+    "r6_passing_elevations": [
+      50,
+      55,
+      60,
+      65,
+      70,
+      75,
+      80,
+      85
+    ],
+    "r6_passing_elevation_count": 8,
+    "r6_tightest_elevations": [
+      50,
+      55
+    ],
+    "r6_tightest_elevation_count": 2,
+    "monotone_in_radius_all_16_elevations": true
+  },
+  "per_elevation": {
+    "10": {
+      "elevation_degrees": 10,
+      "min_passing_radius": 7.0,
+      "passing_count_of_19": 11,
+      "r6_passed": false,
+      "r6_min_margin": -0.017563,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.061618,
+      "monotone_in_radius": true
+    },
+    "15": {
+      "elevation_degrees": 15,
+      "min_passing_radius": 7.0,
+      "passing_count_of_19": 11,
+      "r6_passed": false,
+      "r6_min_margin": -0.003352,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.07288,
+      "monotone_in_radius": true
+    },
+    "20": {
+      "elevation_degrees": 20,
+      "min_passing_radius": 6.5,
+      "passing_count_of_19": 12,
+      "r6_passed": false,
+      "r6_min_margin": 0.01469,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.054062,
+      "monotone_in_radius": true
+    },
+    "25": {
+      "elevation_degrees": 25,
+      "min_passing_radius": 6.5,
+      "passing_count_of_19": 12,
+      "r6_passed": false,
+      "r6_min_margin": 0.03613,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.073272,
+      "monotone_in_radius": true
+    },
+    "30": {
+      "elevation_degrees": 30,
+      "min_passing_radius": 6.5,
+      "passing_count_of_19": 12,
+      "r6_passed": false,
+      "r6_min_margin": 0.03768,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.077916,
+      "monotone_in_radius": true
+    },
+    "35": {
+      "elevation_degrees": 35,
+      "min_passing_radius": 6.5,
+      "passing_count_of_19": 12,
+      "r6_passed": false,
+      "r6_min_margin": 0.024349,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.064602,
+      "monotone_in_radius": true
+    },
+    "40": {
+      "elevation_degrees": 40,
+      "min_passing_radius": 6.5,
+      "passing_count_of_19": 12,
+      "r6_passed": false,
+      "r6_min_margin": 0.022282,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.061677,
+      "monotone_in_radius": true
+    },
+    "45": {
+      "elevation_degrees": 45,
+      "min_passing_radius": 6.5,
+      "passing_count_of_19": 12,
+      "r6_passed": false,
+      "r6_min_margin": 0.031432,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.069263,
+      "monotone_in_radius": true
+    },
+    "50": {
+      "elevation_degrees": 50,
+      "min_passing_radius": 6.0,
+      "passing_count_of_19": 13,
+      "r6_passed": true,
+      "r6_min_margin": 0.050099,
+      "r6_is_tightest": true,
+      "tightest_min_margin": 0.050099,
+      "monotone_in_radius": true
+    },
+    "55": {
+      "elevation_degrees": 55,
+      "min_passing_radius": 6.0,
+      "passing_count_of_19": 13,
+      "r6_passed": true,
+      "r6_min_margin": 0.076133,
+      "r6_is_tightest": true,
+      "tightest_min_margin": 0.076133,
+      "monotone_in_radius": true
+    },
+    "60": {
+      "elevation_degrees": 60,
+      "min_passing_radius": 5.5,
+      "passing_count_of_19": 14,
+      "r6_passed": true,
+      "r6_min_margin": 0.112642,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.077634,
+      "monotone_in_radius": true
+    },
+    "65": {
+      "elevation_degrees": 65,
+      "min_passing_radius": 5.0,
+      "passing_count_of_19": 15,
+      "r6_passed": true,
+      "r6_min_margin": 0.158986,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.091702,
+      "monotone_in_radius": true
+    },
+    "70": {
+      "elevation_degrees": 70,
+      "min_passing_radius": 4.0,
+      "passing_count_of_19": 17,
+      "r6_passed": true,
+      "r6_min_margin": 0.214343,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.07431,
+      "monotone_in_radius": true
+    },
+    "75": {
+      "elevation_degrees": 75,
+      "min_passing_radius": 3.0,
+      "passing_count_of_19": 19,
+      "r6_passed": true,
+      "r6_min_margin": 0.277644,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.060651,
+      "monotone_in_radius": true
+    },
+    "80": {
+      "elevation_degrees": 80,
+      "min_passing_radius": 3.0,
+      "passing_count_of_19": 19,
+      "r6_passed": true,
+      "r6_min_margin": 0.347531,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.197884,
+      "monotone_in_radius": true
+    },
+    "85": {
+      "elevation_degrees": 85,
+      "min_passing_radius": 3.0,
+      "passing_count_of_19": 19,
+      "r6_passed": true,
+      "r6_min_margin": 0.422314,
+      "r6_is_tightest": false,
+      "tightest_min_margin": 0.345401,
+      "monotone_in_radius": true
+    }
+  },
+  "cells": [
+    {
+      "elevation_degrees": 10,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.723875,
+      "fitted_passed": true,
+      "fitted_lens_mm": 25.06034
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.481326,
+      "fitted_passed": true,
+      "fitted_lens_mm": 31.2538
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.326144,
+      "fitted_passed": true,
+      "fitted_lens_mm": 37.12577
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.216463,
+      "fitted_passed": true,
+      "fitted_lens_mm": 42.80875
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.134101,
+      "fitted_passed": true,
+      "fitted_lens_mm": 48.3694
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.069606,
+      "fitted_passed": true,
+      "fitted_lens_mm": 53.84563
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": -0.017563,
+      "fitted_passed": true,
+      "fitted_lens_mm": 59.26085
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 6.5,
+      "passed": false,
+      "min_margin": 0.025435,
+      "fitted_passed": true,
+      "fitted_lens_mm": 64.6304
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.061618,
+      "fitted_passed": true,
+      "fitted_lens_mm": 69.96479
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.092526,
+      "fitted_passed": true,
+      "fitted_lens_mm": 75.2715
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.119267,
+      "fitted_passed": true,
+      "fitted_lens_mm": 80.55599
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.142619,
+      "fitted_passed": true,
+      "fitted_lens_mm": 85.82238
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.163227,
+      "fitted_passed": true,
+      "fitted_lens_mm": 91.07381
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.181545,
+      "fitted_passed": true,
+      "fitted_lens_mm": 96.31271
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.197943,
+      "fitted_passed": true,
+      "fitted_lens_mm": 101.54103
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.212709,
+      "fitted_passed": true,
+      "fitted_lens_mm": 106.76033
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.226088,
+      "fitted_passed": true,
+      "fitted_lens_mm": 111.97186
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.238247,
+      "fitted_passed": true,
+      "fitted_lens_mm": 117.17667
+    },
+    {
+      "elevation_degrees": 10,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.249367,
+      "fitted_passed": true,
+      "fitted_lens_mm": 122.37561
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.660895,
+      "fitted_passed": true,
+      "fitted_lens_mm": 26.42018
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.440541,
+      "fitted_passed": true,
+      "fitted_lens_mm": 32.61028
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.296279,
+      "fitted_passed": true,
+      "fitted_lens_mm": 38.51831
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.193003,
+      "fitted_passed": true,
+      "fitted_lens_mm": 44.25738
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.114809,
+      "fitted_passed": true,
+      "fitted_lens_mm": 49.88584
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.053261,
+      "fitted_passed": true,
+      "fitted_lens_mm": 55.43739
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": -0.003352,
+      "fitted_passed": true,
+      "fitted_lens_mm": 60.93304
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 6.5,
+      "passed": false,
+      "min_margin": 0.038005,
+      "fitted_passed": true,
+      "fitted_lens_mm": 66.3867
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.07288,
+      "fitted_passed": true,
+      "fitted_lens_mm": 71.80792
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.102723,
+      "fitted_passed": true,
+      "fitted_lens_mm": 77.20354
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.12858,
+      "fitted_passed": true,
+      "fitted_lens_mm": 82.57858
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.151219,
+      "fitted_passed": true,
+      "fitted_lens_mm": 87.93681
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.171195,
+      "fitted_passed": true,
+      "fitted_lens_mm": 93.28112
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.18898,
+      "fitted_passed": true,
+      "fitted_lens_mm": 98.61378
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.204904,
+      "fitted_passed": true,
+      "fitted_lens_mm": 103.93659
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.219266,
+      "fitted_passed": true,
+      "fitted_lens_mm": 109.25098
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.232264,
+      "fitted_passed": true,
+      "fitted_lens_mm": 114.55814
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.244105,
+      "fitted_passed": true,
+      "fitted_lens_mm": 119.859
+    },
+    {
+      "elevation_degrees": 15,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.254939,
+      "fitted_passed": true,
+      "fitted_lens_mm": 125.15438
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.653686,
+      "fitted_passed": true,
+      "fitted_lens_mm": 26.5855
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.392429,
+      "fitted_passed": true,
+      "fitted_lens_mm": 34.36747
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.260172,
+      "fitted_passed": true,
+      "fitted_lens_mm": 40.34688
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.164172,
+      "fitted_passed": true,
+      "fitted_lens_mm": 46.17952
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.090783,
+      "fitted_passed": true,
+      "fitted_lens_mm": 51.91488
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.032653,
+      "fitted_passed": true,
+      "fitted_lens_mm": 57.58203
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": 0.01469,
+      "fitted_passed": true,
+      "fitted_lens_mm": 63.19933
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.054062,
+      "fitted_passed": true,
+      "fitted_lens_mm": 68.77899
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.08736,
+      "fitted_passed": true,
+      "fitted_lens_mm": 74.3295
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.115921,
+      "fitted_passed": true,
+      "fitted_lens_mm": 79.85692
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.140716,
+      "fitted_passed": true,
+      "fitted_lens_mm": 85.36575
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.162431,
+      "fitted_passed": true,
+      "fitted_lens_mm": 90.85936
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.181639,
+      "fitted_passed": true,
+      "fitted_lens_mm": 96.34036
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.198742,
+      "fitted_passed": true,
+      "fitted_lens_mm": 101.81078
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.214087,
+      "fitted_passed": true,
+      "fitted_lens_mm": 107.27225
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.227913,
+      "fitted_passed": true,
+      "fitted_lens_mm": 112.72607
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.240456,
+      "fitted_passed": true,
+      "fitted_lens_mm": 118.17329
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.251885,
+      "fitted_passed": true,
+      "fitted_lens_mm": 123.61478
+    },
+    {
+      "elevation_degrees": 20,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.262332,
+      "fitted_passed": true,
+      "fitted_lens_mm": 129.05128
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.664513,
+      "fitted_passed": true,
+      "fitted_lens_mm": 26.33832
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.411173,
+      "fitted_passed": true,
+      "fitted_lens_mm": 33.66136
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.250979,
+      "fitted_passed": true,
+      "fitted_lens_mm": 40.84177
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.139914,
+      "fitted_passed": true,
+      "fitted_lens_mm": 47.93033
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.062761,
+      "fitted_passed": true,
+      "fitted_lens_mm": 54.50126
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.008372,
+      "fitted_passed": true,
+      "fitted_lens_mm": 60.33252
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": 0.03613,
+      "fitted_passed": true,
+      "fitted_lens_mm": 66.12045
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.073272,
+      "fitted_passed": true,
+      "fitted_lens_mm": 71.87552
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.104777,
+      "fitted_passed": true,
+      "fitted_lens_mm": 77.60504
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.131864,
+      "fitted_passed": true,
+      "fitted_lens_mm": 83.31429
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.155408,
+      "fitted_passed": true,
+      "fitted_lens_mm": 89.00716
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.176076,
+      "fitted_passed": true,
+      "fitted_lens_mm": 94.68661
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.194374,
+      "fitted_passed": true,
+      "fitted_lens_mm": 100.35492
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.210687,
+      "fitted_passed": true,
+      "fitted_lens_mm": 106.01387
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.225327,
+      "fitted_passed": true,
+      "fitted_lens_mm": 111.66489
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.23855,
+      "fitted_passed": true,
+      "fitted_lens_mm": 117.30913
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.250534,
+      "fitted_passed": true,
+      "fitted_lens_mm": 122.94751
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.261463,
+      "fitted_passed": true,
+      "fitted_lens_mm": 128.58081
+    },
+    {
+      "elevation_degrees": 25,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.27147,
+      "fitted_passed": true,
+      "fitted_lens_mm": 134.20967
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.642274,
+      "fitted_passed": true,
+      "fitted_lens_mm": 26.85112
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.409249,
+      "fitted_passed": true,
+      "fitted_lens_mm": 33.73259
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.257069,
+      "fitted_passed": true,
+      "fitted_lens_mm": 40.51323
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.150791,
+      "fitted_passed": true,
+      "fitted_lens_mm": 47.12898
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.072385,
+      "fitted_passed": true,
+      "fitted_lens_mm": 53.58476
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.011318,
+      "fitted_passed": true,
+      "fitted_lens_mm": 59.98447
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": 0.03768,
+      "fitted_passed": true,
+      "fitted_lens_mm": 66.34166
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.077916,
+      "fitted_passed": true,
+      "fitted_lens_mm": 72.66585
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.111581,
+      "fitted_passed": true,
+      "fitted_lens_mm": 78.9639
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.140184,
+      "fitted_passed": true,
+      "fitted_lens_mm": 85.2409
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.1648,
+      "fitted_passed": true,
+      "fitted_lens_mm": 91.5007
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.186218,
+      "fitted_passed": true,
+      "fitted_lens_mm": 97.74628
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.205029,
+      "fitted_passed": true,
+      "fitted_lens_mm": 103.97993
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.221687,
+      "fitted_passed": true,
+      "fitted_lens_mm": 110.20351
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.236545,
+      "fitted_passed": true,
+      "fitted_lens_mm": 116.4185
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.249882,
+      "fitted_passed": true,
+      "fitted_lens_mm": 122.6261
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.261921,
+      "fitted_passed": true,
+      "fitted_lens_mm": 128.8273
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.272741,
+      "fitted_passed": true,
+      "fitted_lens_mm": 134.96025
+    },
+    {
+      "elevation_degrees": 30,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.282229,
+      "fitted_passed": true,
+      "fitted_lens_mm": 140.84224
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.606674,
+      "fitted_passed": true,
+      "fitted_lens_mm": 27.71473
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.400812,
+      "fitted_passed": true,
+      "fitted_lens_mm": 34.04835
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.261783,
+      "fitted_passed": true,
+      "fitted_lens_mm": 40.26231
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.161086,
+      "fitted_passed": true,
+      "fitted_lens_mm": 46.39501
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.084554,
+      "fitted_passed": true,
+      "fitted_lens_mm": 52.46914
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.024336,
+      "fitted_passed": true,
+      "fitted_lens_mm": 58.49483
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": 0.024349,
+      "fitted_passed": true,
+      "fitted_lens_mm": 64.48202
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.064602,
+      "fitted_passed": true,
+      "fitted_lens_mm": 70.44332
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.098465,
+      "fitted_passed": true,
+      "fitted_lens_mm": 76.38413
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.127366,
+      "fitted_passed": true,
+      "fitted_lens_mm": 82.30844
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.152334,
+      "fitted_passed": true,
+      "fitted_lens_mm": 88.21927
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.174126,
+      "fitted_passed": true,
+      "fitted_lens_mm": 94.11893
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.19332,
+      "fitted_passed": true,
+      "fitted_lens_mm": 100.00924
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.210356,
+      "fitted_passed": true,
+      "fitted_lens_mm": 105.89165
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.225583,
+      "fitted_passed": true,
+      "fitted_lens_mm": 111.76733
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.239276,
+      "fitted_passed": true,
+      "fitted_lens_mm": 117.63721
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.251657,
+      "fitted_passed": true,
+      "fitted_lens_mm": 123.50208
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.262908,
+      "fitted_passed": true,
+      "fitted_lens_mm": 129.36258
+    },
+    {
+      "elevation_degrees": 35,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.273177,
+      "fitted_passed": true,
+      "fitted_lens_mm": 135.21922
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.564533,
+      "fitted_passed": true,
+      "fitted_lens_mm": 28.81171
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.379568,
+      "fitted_passed": true,
+      "fitted_lens_mm": 34.8705
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.251049,
+      "fitted_passed": true,
+      "fitted_lens_mm": 40.83749
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.156173,
+      "fitted_passed": true,
+      "fitted_lens_mm": 46.74214
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.083132,
+      "fitted_passed": true,
+      "fitted_lens_mm": 52.5965
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.025073,
+      "fitted_passed": true,
+      "fitted_lens_mm": 58.41225
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": 0.022282,
+      "fitted_passed": true,
+      "fitted_lens_mm": 64.20244
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.061677,
+      "fitted_passed": true,
+      "fitted_lens_mm": 69.9728
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.094987,
+      "fitted_passed": true,
+      "fitted_lens_mm": 75.72746
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.123532,
+      "fitted_passed": true,
+      "fitted_lens_mm": 81.46948
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.148277,
+      "fitted_passed": true,
+      "fitted_lens_mm": 87.20117
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.16994,
+      "fitted_passed": true,
+      "fitted_lens_mm": 92.92432
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.189066,
+      "fitted_passed": true,
+      "fitted_lens_mm": 98.6403
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.20608,
+      "fitted_passed": true,
+      "fitted_lens_mm": 104.35025
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.221316,
+      "fitted_passed": true,
+      "fitted_lens_mm": 110.05504
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.23504,
+      "fitted_passed": true,
+      "fitted_lens_mm": 115.75539
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.247467,
+      "fitted_passed": true,
+      "fitted_lens_mm": 121.4519
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.258775,
+      "fitted_passed": true,
+      "fitted_lens_mm": 127.14507
+    },
+    {
+      "elevation_degrees": 40,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.269108,
+      "fitted_passed": true,
+      "fitted_lens_mm": 132.8353
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.507958,
+      "fitted_passed": true,
+      "fitted_lens_mm": 30.42865
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.343017,
+      "fitted_passed": true,
+      "fitted_lens_mm": 36.38215
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.225638,
+      "fitted_passed": true,
+      "fitted_lens_mm": 42.26723
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.137566,
+      "fitted_passed": true,
+      "fitted_lens_mm": 48.10588
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.068907,
+      "fitted_passed": true,
+      "fitted_lens_mm": 53.91156
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": -0.013806,
+      "fitted_passed": true,
+      "fitted_lens_mm": 59.69299
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 6.0,
+      "passed": false,
+      "min_margin": 0.031432,
+      "fitted_passed": true,
+      "fitted_lens_mm": 65.45608
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.069263,
+      "fitted_passed": true,
+      "fitted_lens_mm": 71.20493
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.101383,
+      "fitted_passed": true,
+      "fitted_lens_mm": 76.94255
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.129005,
+      "fitted_passed": true,
+      "fitted_lens_mm": 82.67111
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.153018,
+      "fitted_passed": true,
+      "fitted_lens_mm": 88.3923
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.17409,
+      "fitted_passed": true,
+      "fitted_lens_mm": 94.10736
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.192733,
+      "fitted_passed": true,
+      "fitted_lens_mm": 99.81732
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.209347,
+      "fitted_passed": true,
+      "fitted_lens_mm": 105.52296
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.224248,
+      "fitted_passed": true,
+      "fitted_lens_mm": 111.22493
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.237688,
+      "fitted_passed": true,
+      "fitted_lens_mm": 116.92373
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.249873,
+      "fitted_passed": true,
+      "fitted_lens_mm": 122.61979
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.260972,
+      "fitted_passed": true,
+      "fitted_lens_mm": 128.31348
+    },
+    {
+      "elevation_degrees": 45,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.271124,
+      "fitted_passed": true,
+      "fitted_lens_mm": 134.00505
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.438678,
+      "fitted_passed": true,
+      "fitted_lens_mm": 32.6744
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.292289,
+      "fitted_passed": true,
+      "fitted_lens_mm": 38.71151
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.186125,
+      "fitted_passed": true,
+      "fitted_lens_mm": 44.70127
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.105433,
+      "fitted_passed": true,
+      "fitted_lens_mm": 50.65897
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.042487,
+      "fitted_passed": true,
+      "fitted_lens_mm": 56.5373
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": 0.008193,
+      "fitted_passed": true,
+      "fitted_lens_mm": 62.36333
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.050099,
+      "fitted_passed": true,
+      "fitted_lens_mm": 68.17216
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.085349,
+      "fitted_passed": true,
+      "fitted_lens_mm": 73.96758
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.115426,
+      "fitted_passed": true,
+      "fitted_lens_mm": 79.75237
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.141398,
+      "fitted_passed": true,
+      "fitted_lens_mm": 85.52855
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.164059,
+      "fitted_passed": true,
+      "fitted_lens_mm": 91.29766
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.184008,
+      "fitted_passed": true,
+      "fitted_lens_mm": 97.06052
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.201704,
+      "fitted_passed": true,
+      "fitted_lens_mm": 102.81847
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.217512,
+      "fitted_passed": true,
+      "fitted_lens_mm": 108.57226
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.231721,
+      "fitted_passed": true,
+      "fitted_lens_mm": 114.32251
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.244562,
+      "fitted_passed": true,
+      "fitted_lens_mm": 120.06969
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.256225,
+      "fitted_passed": true,
+      "fitted_lens_mm": 125.81423
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.266866,
+      "fitted_passed": true,
+      "fitted_lens_mm": 131.55646
+    },
+    {
+      "elevation_degrees": 50,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.276613,
+      "fitted_passed": true,
+      "fitted_lens_mm": 137.29665
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.359452,
+      "fitted_passed": true,
+      "fitted_lens_mm": 35.68644
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.232489,
+      "fitted_passed": true,
+      "fitted_lens_mm": 41.87199
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.138781,
+      "fitted_passed": true,
+      "fitted_lens_mm": 48.01406
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.066643,
+      "fitted_passed": true,
+      "fitted_lens_mm": 54.12659
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": -0.009322,
+      "fitted_passed": true,
+      "fitted_lens_mm": 60.21814
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 5.5,
+      "passed": false,
+      "min_margin": 0.037359,
+      "fitted_passed": true,
+      "fitted_lens_mm": 66.29418
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.076133,
+      "fitted_passed": true,
+      "fitted_lens_mm": 72.35846
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.108864,
+      "fitted_passed": true,
+      "fitted_lens_mm": 78.41357
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.136872,
+      "fitted_passed": true,
+      "fitted_lens_mm": 84.46143
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.161114,
+      "fitted_passed": true,
+      "fitted_lens_mm": 90.50343
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.182307,
+      "fitted_passed": true,
+      "fitted_lens_mm": 96.54064
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.200993,
+      "fitted_passed": true,
+      "fitted_lens_mm": 102.57389
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.217595,
+      "fitted_passed": true,
+      "fitted_lens_mm": 108.60381
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.232443,
+      "fitted_passed": true,
+      "fitted_lens_mm": 114.63092
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.245803,
+      "fitted_passed": true,
+      "fitted_lens_mm": 120.65563
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.257888,
+      "fitted_passed": true,
+      "fitted_lens_mm": 126.67828
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.268873,
+      "fitted_passed": true,
+      "fitted_lens_mm": 132.69913
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.278903,
+      "fitted_passed": true,
+      "fitted_lens_mm": 138.71843
+    },
+    {
+      "elevation_degrees": 55,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.288096,
+      "fitted_passed": true,
+      "fitted_lens_mm": 144.73634
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.274154,
+      "fitted_passed": true,
+      "fitted_lens_mm": 39.61805
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.163018,
+      "fitted_passed": true,
+      "fitted_lens_mm": 46.25884
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.080094,
+      "fitted_passed": true,
+      "fitted_lens_mm": 52.87146
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": -0.015771,
+      "fitted_passed": true,
+      "fitted_lens_mm": 59.46512
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 5.0,
+      "passed": false,
+      "min_margin": 0.035616,
+      "fitted_passed": true,
+      "fitted_lens_mm": 66.04529
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 5.5,
+      "passed": true,
+      "min_margin": 0.077634,
+      "fitted_passed": true,
+      "fitted_lens_mm": 72.61552
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.112642,
+      "fitted_passed": true,
+      "fitted_lens_mm": 79.17821
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.142266,
+      "fitted_passed": true,
+      "fitted_lens_mm": 85.73505
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.167665,
+      "fitted_passed": true,
+      "fitted_lens_mm": 92.28725
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.189684,
+      "fitted_passed": true,
+      "fitted_lens_mm": 98.83574
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.208959,
+      "fitted_passed": true,
+      "fitted_lens_mm": 105.38117
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.225972,
+      "fitted_passed": true,
+      "fitted_lens_mm": 111.92409
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.241102,
+      "fitted_passed": true,
+      "fitted_lens_mm": 118.46489
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.254645,
+      "fitted_passed": true,
+      "fitted_lens_mm": 125.00391
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.266839,
+      "fitted_passed": true,
+      "fitted_lens_mm": 131.5414
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.277877,
+      "fitted_passed": true,
+      "fitted_lens_mm": 138.07759
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.287914,
+      "fitted_passed": true,
+      "fitted_lens_mm": 144.61264
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.297083,
+      "fitted_passed": true,
+      "fitted_lens_mm": 151.14671
+    },
+    {
+      "elevation_degrees": 60,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.30549,
+      "fitted_passed": true,
+      "fitted_lens_mm": 157.67992
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.175883,
+      "fitted_passed": true,
+      "fitted_lens_mm": 45.37828
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": -0.080499,
+      "fitted_passed": true,
+      "fitted_lens_mm": 52.8345
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 4.0,
+      "passed": false,
+      "min_margin": -0.008863,
+      "fitted_passed": true,
+      "fitted_lens_mm": 60.27231
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 4.5,
+      "passed": false,
+      "min_margin": 0.046959,
+      "fitted_passed": true,
+      "fitted_lens_mm": 67.69881
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 5.0,
+      "passed": true,
+      "min_margin": 0.091702,
+      "fitted_passed": true,
+      "fitted_lens_mm": 75.11739
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 5.5,
+      "passed": true,
+      "min_margin": 0.128375,
+      "fitted_passed": true,
+      "fitted_lens_mm": 82.53013
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.158986,
+      "fitted_passed": true,
+      "fitted_lens_mm": 89.93846
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.184927,
+      "fitted_passed": true,
+      "fitted_lens_mm": 97.34337
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.207193,
+      "fitted_passed": true,
+      "fitted_lens_mm": 104.74557
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.226514,
+      "fitted_passed": true,
+      "fitted_lens_mm": 112.14561
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.243439,
+      "fitted_passed": true,
+      "fitted_lens_mm": 119.54386
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.258389,
+      "fitted_passed": true,
+      "fitted_lens_mm": 126.94065
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.27169,
+      "fitted_passed": true,
+      "fitted_lens_mm": 134.33621
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.283602,
+      "fitted_passed": true,
+      "fitted_lens_mm": 141.73073
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.294331,
+      "fitted_passed": true,
+      "fitted_lens_mm": 149.12437
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.304046,
+      "fitted_passed": true,
+      "fitted_lens_mm": 156.51726
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.312883,
+      "fitted_passed": true,
+      "fitted_lens_mm": 163.90948
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.320957,
+      "fitted_passed": true,
+      "fitted_lens_mm": 171.30113
+    },
+    {
+      "elevation_degrees": 65,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.328363,
+      "fitted_passed": true,
+      "fitted_lens_mm": 178.69228
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 3.0,
+      "passed": false,
+      "min_margin": -0.064248,
+      "fitted_passed": true,
+      "fitted_lens_mm": 54.35611
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 3.5,
+      "passed": false,
+      "min_margin": 0.014762,
+      "fitted_passed": true,
+      "fitted_lens_mm": 63.20676
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 4.0,
+      "passed": true,
+      "min_margin": 0.07431,
+      "fitted_passed": true,
+      "fitted_lens_mm": 72.04854
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 4.5,
+      "passed": true,
+      "min_margin": 0.120812,
+      "fitted_passed": true,
+      "fitted_lens_mm": 80.8843
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 5.0,
+      "passed": true,
+      "min_margin": 0.158136,
+      "fitted_passed": true,
+      "fitted_lens_mm": 89.71478
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 5.5,
+      "passed": true,
+      "min_margin": 0.18876,
+      "fitted_passed": true,
+      "fitted_lens_mm": 98.54215
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.214343,
+      "fitted_passed": true,
+      "fitted_lens_mm": 107.36726
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.236035,
+      "fitted_passed": true,
+      "fitted_lens_mm": 116.19061
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.254663,
+      "fitted_passed": true,
+      "fitted_lens_mm": 125.01257
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.270833,
+      "fitted_passed": true,
+      "fitted_lens_mm": 133.83342
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.285002,
+      "fitted_passed": true,
+      "fitted_lens_mm": 142.65335
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.29752,
+      "fitted_passed": true,
+      "fitted_lens_mm": 151.47253
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.308659,
+      "fitted_passed": true,
+      "fitted_lens_mm": 160.29109
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.318637,
+      "fitted_passed": true,
+      "fitted_lens_mm": 169.10913
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.327624,
+      "fitted_passed": true,
+      "fitted_lens_mm": 177.9267
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.335763,
+      "fitted_passed": true,
+      "fitted_lens_mm": 186.7439
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.343168,
+      "fitted_passed": true,
+      "fitted_lens_mm": 195.56075
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.349933,
+      "fitted_passed": true,
+      "fitted_lens_mm": 204.3773
+    },
+    {
+      "elevation_degrees": 70,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.356139,
+      "fitted_passed": true,
+      "fitted_lens_mm": 213.19362
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 3.0,
+      "passed": true,
+      "min_margin": 0.060651,
+      "fitted_passed": true,
+      "fitted_lens_mm": 69.80843
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 3.5,
+      "passed": true,
+      "min_margin": 0.122143,
+      "fitted_passed": true,
+      "fitted_lens_mm": 81.1688
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 4.0,
+      "passed": true,
+      "min_margin": 0.168521,
+      "fitted_passed": true,
+      "fitted_lens_mm": 92.52551
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 4.5,
+      "passed": true,
+      "min_margin": 0.204753,
+      "fitted_passed": true,
+      "fitted_lens_mm": 103.87974
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 5.0,
+      "passed": true,
+      "min_margin": 0.23384,
+      "fitted_passed": true,
+      "fitted_lens_mm": 115.23223
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 5.5,
+      "passed": true,
+      "min_margin": 0.257706,
+      "fitted_passed": true,
+      "fitted_lens_mm": 126.58343
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.277644,
+      "fitted_passed": true,
+      "fitted_lens_mm": 137.93343
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.294548,
+      "fitted_passed": true,
+      "fitted_lens_mm": 149.28268
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.309064,
+      "fitted_passed": true,
+      "fitted_lens_mm": 160.63136
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.321663,
+      "fitted_passed": true,
+      "fitted_lens_mm": 171.97957
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.332702,
+      "fitted_passed": true,
+      "fitted_lens_mm": 183.32739
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.342453,
+      "fitted_passed": true,
+      "fitted_lens_mm": 194.67487
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.351131,
+      "fitted_passed": true,
+      "fitted_lens_mm": 206.02151
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.358902,
+      "fitted_passed": true,
+      "fitted_lens_mm": 217.36794
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.365902,
+      "fitted_passed": true,
+      "fitted_lens_mm": 228.71416
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.37224,
+      "fitted_passed": true,
+      "fitted_lens_mm": 240.06023
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.378005,
+      "fitted_passed": true,
+      "fitted_lens_mm": 251.40616
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.383273,
+      "fitted_passed": true,
+      "fitted_lens_mm": 262.75198
+    },
+    {
+      "elevation_degrees": 75,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.388105,
+      "fitted_passed": true,
+      "fitted_lens_mm": 274.09769
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 3.0,
+      "passed": true,
+      "min_margin": 0.197884,
+      "fitted_passed": true,
+      "fitted_lens_mm": 101.51779
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 3.5,
+      "passed": true,
+      "min_margin": 0.240361,
+      "fitted_passed": true,
+      "fitted_lens_mm": 118.12611
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 4.0,
+      "passed": true,
+      "min_margin": 0.272364,
+      "fitted_passed": true,
+      "fitted_lens_mm": 134.73338
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 4.5,
+      "passed": true,
+      "min_margin": 0.297342,
+      "fitted_passed": true,
+      "fitted_lens_mm": 151.33992
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 5.0,
+      "passed": true,
+      "min_margin": 0.317381,
+      "fitted_passed": true,
+      "fitted_lens_mm": 167.94597
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 5.5,
+      "passed": true,
+      "min_margin": 0.333812,
+      "fitted_passed": true,
+      "fitted_lens_mm": 184.55164
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.347531,
+      "fitted_passed": true,
+      "fitted_lens_mm": 201.15704
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.359158,
+      "fitted_passed": true,
+      "fitted_lens_mm": 217.76222
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.369136,
+      "fitted_passed": true,
+      "fitted_lens_mm": 234.36725
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.377795,
+      "fitted_passed": true,
+      "fitted_lens_mm": 250.97214
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.385378,
+      "fitted_passed": true,
+      "fitted_lens_mm": 267.5769
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.392075,
+      "fitted_passed": true,
+      "fitted_lens_mm": 284.18158
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.398033,
+      "fitted_passed": true,
+      "fitted_lens_mm": 300.78619
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.403368,
+      "fitted_passed": true,
+      "fitted_lens_mm": 317.39075
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.408172,
+      "fitted_passed": true,
+      "fitted_lens_mm": 333.99524
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.412521,
+      "fitted_passed": true,
+      "fitted_lens_mm": 350.59967
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.416476,
+      "fitted_passed": true,
+      "fitted_lens_mm": 367.20407
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.420089,
+      "fitted_passed": true,
+      "fitted_lens_mm": 383.80823
+    },
+    {
+      "elevation_degrees": 80,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.423403,
+      "fitted_passed": true,
+      "fitted_lens_mm": 400.41214
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 3.0,
+      "passed": true,
+      "min_margin": 0.345401,
+      "fitted_passed": true,
+      "fitted_lens_mm": 198.38655
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 3.5,
+      "passed": true,
+      "min_margin": 0.367298,
+      "fitted_passed": true,
+      "fitted_lens_mm": 231.1219
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 4.0,
+      "passed": true,
+      "min_margin": 0.383762,
+      "fitted_passed": true,
+      "fitted_lens_mm": 263.85715
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 4.5,
+      "passed": true,
+      "min_margin": 0.396591,
+      "fitted_passed": true,
+      "fitted_lens_mm": 296.59232
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 5.0,
+      "passed": true,
+      "min_margin": 0.40687,
+      "fitted_passed": true,
+      "fitted_lens_mm": 329.32742
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 5.5,
+      "passed": true,
+      "min_margin": 0.41529,
+      "fitted_passed": true,
+      "fitted_lens_mm": 362.06247
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 6.0,
+      "passed": true,
+      "min_margin": 0.422314,
+      "fitted_passed": true,
+      "fitted_lens_mm": 394.79752
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 6.5,
+      "passed": true,
+      "min_margin": 0.428262,
+      "fitted_passed": true,
+      "fitted_lens_mm": 427.53253
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 7.0,
+      "passed": true,
+      "min_margin": 0.433364,
+      "fitted_passed": true,
+      "fitted_lens_mm": 460.26752
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 7.5,
+      "passed": true,
+      "min_margin": 0.437789,
+      "fitted_passed": true,
+      "fitted_lens_mm": 493.00247
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 8.0,
+      "passed": true,
+      "min_margin": 0.441662,
+      "fitted_passed": true,
+      "fitted_lens_mm": 525.73743
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 8.5,
+      "passed": true,
+      "min_margin": 0.445082,
+      "fitted_passed": true,
+      "fitted_lens_mm": 558.47241
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 9.0,
+      "passed": true,
+      "min_margin": 0.448123,
+      "fitted_passed": true,
+      "fitted_lens_mm": 591.20734
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 9.5,
+      "passed": true,
+      "min_margin": 0.450844,
+      "fitted_passed": true,
+      "fitted_lens_mm": 623.94226
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 10.0,
+      "passed": true,
+      "min_margin": 0.453295,
+      "fitted_passed": true,
+      "fitted_lens_mm": 656.67719
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 10.5,
+      "passed": true,
+      "min_margin": 0.455512,
+      "fitted_passed": true,
+      "fitted_lens_mm": 689.41217
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 11.0,
+      "passed": true,
+      "min_margin": 0.457529,
+      "fitted_passed": true,
+      "fitted_lens_mm": 722.14703
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 11.5,
+      "passed": true,
+      "min_margin": 0.459371,
+      "fitted_passed": true,
+      "fitted_lens_mm": 754.88196
+    },
+    {
+      "elevation_degrees": 85,
+      "radius": 12.0,
+      "passed": true,
+      "min_margin": 0.461059,
+      "fitted_passed": true,
+      "fitted_lens_mm": 787.61688
+    }
+  ]
+}

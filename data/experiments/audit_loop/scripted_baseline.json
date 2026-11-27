@@ -1,0 +1,673 @@
+[
+  {
+    "arm": "script_one",
+    "backend": "script_one",
+    "model": "regex brief-text parser + single probe min(6.0, cap)",
+    "brief": "S1_search_e20",
+    "family": "search",
+    "rep": 1,
+    "max_renders": 1,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. No plan within the brief's limits passed the framing audit.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 20, radius 6"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 6.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": 0.01469
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 1,
+    "compliant_render_count": 1,
+    "passing_compliant_radius": null,
+    "optimal_radius": 6.5,
+    "radius_gap": null,
+    "first_try": false,
+    "outcome": "no_pass",
+    "goal_success": false
+  },
+  {
+    "arm": "script_one",
+    "backend": "script_one",
+    "model": "regex brief-text parser + single probe min(6.0, cap)",
+    "brief": "S2_search_e70",
+    "family": "search",
+    "rep": 1,
+    "max_renders": 1,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. Scripted policy (script_one) finished. Smallest passing radius tried: 6.0.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 70, radius 6"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 70.0,
+          "radius": 6.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": true,
+        "min_margin": 0.21434
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 1,
+    "compliant_render_count": 1,
+    "passing_compliant_radius": 6.0,
+    "optimal_radius": 4.0,
+    "radius_gap": 2.0,
+    "first_try": true,
+    "outcome": "pass_suboptimal",
+    "goal_success": false
+  },
+  {
+    "arm": "script_one",
+    "backend": "script_one",
+    "model": "regex brief-text parser + single probe min(6.0, cap)",
+    "brief": "S3_search_e50_m10",
+    "family": "search",
+    "rep": 1,
+    "max_renders": 1,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. No plan within the brief's limits passed the framing audit.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 50, radius 6"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 50.0,
+          "radius": 6.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.1
+        },
+        "passed": false,
+        "min_margin": 0.0501
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 1,
+    "compliant_render_count": 1,
+    "passing_compliant_radius": null,
+    "optimal_radius": 7.0,
+    "radius_gap": null,
+    "first_try": false,
+    "outcome": "no_pass",
+    "goal_success": false
+  },
+  {
+    "arm": "script_one",
+    "backend": "script_one",
+    "model": "regex brief-text parser + single probe min(6.0, cap)",
+    "brief": "L1_lang_low_tight",
+    "family": "language",
+    "rep": 1,
+    "max_renders": 1,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": false,
+    "final_text": "",
+    "transcript": [],
+    "error": null,
+    "renders": [],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "outcome": "not_attempted",
+    "render_count": 0,
+    "compliant_render_count": 0,
+    "passing_compliant_radius": null,
+    "optimal_radius": null,
+    "radius_gap": null,
+    "goal_success": false
+  },
+  {
+    "arm": "script_one",
+    "backend": "script_one",
+    "model": "regex brief-text parser + single probe min(6.0, cap)",
+    "brief": "L2_lang_top_back",
+    "family": "language",
+    "rep": 1,
+    "max_renders": 1,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": false,
+    "final_text": "",
+    "transcript": [],
+    "error": null,
+    "renders": [],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "outcome": "not_attempted",
+    "render_count": 0,
+    "compliant_render_count": 0,
+    "passing_compliant_radius": null,
+    "optimal_radius": null,
+    "radius_gap": null,
+    "goal_success": false
+  },
+  {
+    "arm": "script_one",
+    "backend": "script_one",
+    "model": "regex brief-text parser + single probe min(6.0, cap)",
+    "brief": "I1_infeasible_e20_r4",
+    "family": "infeasible",
+    "rep": 1,
+    "max_renders": 1,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. No plan within the brief's limits passed the framing audit.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 20, radius 4"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 4.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": -0.26017
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 1,
+    "compliant_render_count": 1,
+    "passing_compliant_radius": null,
+    "optimal_radius": null,
+    "radius_gap": null,
+    "respected_cap": true,
+    "first_try": false,
+    "outcome": "no_pass_within_cap",
+    "goal_success": true
+  },
+  {
+    "arm": "script_loop",
+    "backend": "script_loop",
+    "model": "regex brief-text parser + binary search over [3.0, cap]",
+    "brief": "S1_search_e20",
+    "family": "search",
+    "rep": 1,
+    "max_renders": 6,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. Scripted policy (script_loop) finished. Smallest passing radius tried: 6.5.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 20, radius 7.5"
+      },
+      {
+        "scripted plan": "elevation 20, radius 5"
+      },
+      {
+        "scripted plan": "elevation 20, radius 6"
+      },
+      {
+        "scripted plan": "elevation 20, radius 6.5"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 7.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": true,
+        "min_margin": 0.11592
+      },
+      {
+        "tag": "render_v2",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 5.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": -0.09078
+      },
+      {
+        "tag": "render_v3",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 6.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": 0.01469
+      },
+      {
+        "tag": "render_v4",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 6.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": true,
+        "min_margin": 0.05406
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 4,
+    "compliant_render_count": 4,
+    "passing_compliant_radius": 6.5,
+    "optimal_radius": 6.5,
+    "radius_gap": 0.0,
+    "first_try": true,
+    "outcome": "optimal",
+    "goal_success": true
+  },
+  {
+    "arm": "script_loop",
+    "backend": "script_loop",
+    "model": "regex brief-text parser + binary search over [3.0, cap]",
+    "brief": "S2_search_e70",
+    "family": "search",
+    "rep": 1,
+    "max_renders": 6,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. Scripted policy (script_loop) finished. Smallest passing radius tried: 4.0.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 70, radius 7.5"
+      },
+      {
+        "scripted plan": "elevation 70, radius 5"
+      },
+      {
+        "scripted plan": "elevation 70, radius 3.5"
+      },
+      {
+        "scripted plan": "elevation 70, radius 4"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 70.0,
+          "radius": 7.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": true,
+        "min_margin": 0.27083
+      },
+      {
+        "tag": "render_v2",
+        "plan": {
+          "elevation_degrees": 70.0,
+          "radius": 5.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": true,
+        "min_margin": 0.15814
+      },
+      {
+        "tag": "render_v3",
+        "plan": {
+          "elevation_degrees": 70.0,
+          "radius": 3.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": 0.01476
+      },
+      {
+        "tag": "render_v4",
+        "plan": {
+          "elevation_degrees": 70.0,
+          "radius": 4.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": true,
+        "min_margin": 0.07431
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 4,
+    "compliant_render_count": 4,
+    "passing_compliant_radius": 4.0,
+    "optimal_radius": 4.0,
+    "radius_gap": 0.0,
+    "first_try": true,
+    "outcome": "optimal",
+    "goal_success": true
+  },
+  {
+    "arm": "script_loop",
+    "backend": "script_loop",
+    "model": "regex brief-text parser + binary search over [3.0, cap]",
+    "brief": "S3_search_e50_m10",
+    "family": "search",
+    "rep": 1,
+    "max_renders": 6,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. Scripted policy (script_loop) finished. Smallest passing radius tried: 7.0.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 50, radius 7.5"
+      },
+      {
+        "scripted plan": "elevation 50, radius 5"
+      },
+      {
+        "scripted plan": "elevation 50, radius 6"
+      },
+      {
+        "scripted plan": "elevation 50, radius 6.5"
+      },
+      {
+        "scripted plan": "elevation 50, radius 7"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 50.0,
+          "radius": 7.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.1
+        },
+        "passed": true,
+        "min_margin": 0.1414
+      },
+      {
+        "tag": "render_v2",
+        "plan": {
+          "elevation_degrees": 50.0,
+          "radius": 5.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.1
+        },
+        "passed": false,
+        "min_margin": -0.04249
+      },
+      {
+        "tag": "render_v3",
+        "plan": {
+          "elevation_degrees": 50.0,
+          "radius": 6.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.1
+        },
+        "passed": false,
+        "min_margin": 0.0501
+      },
+      {
+        "tag": "render_v4",
+        "plan": {
+          "elevation_degrees": 50.0,
+          "radius": 6.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.1
+        },
+        "passed": false,
+        "min_margin": 0.08535
+      },
+      {
+        "tag": "render_v5",
+        "plan": {
+          "elevation_degrees": 50.0,
+          "radius": 7.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.1
+        },
+        "passed": true,
+        "min_margin": 0.11543
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 5,
+    "compliant_render_count": 5,
+    "passing_compliant_radius": 7.0,
+    "optimal_radius": 7.0,
+    "radius_gap": 0.0,
+    "first_try": true,
+    "outcome": "optimal",
+    "goal_success": true
+  },
+  {
+    "arm": "script_loop",
+    "backend": "script_loop",
+    "model": "regex brief-text parser + binary search over [3.0, cap]",
+    "brief": "L1_lang_low_tight",
+    "family": "language",
+    "rep": 1,
+    "max_renders": 6,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": false,
+    "final_text": "",
+    "transcript": [],
+    "error": null,
+    "renders": [],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "outcome": "not_attempted",
+    "render_count": 0,
+    "compliant_render_count": 0,
+    "passing_compliant_radius": null,
+    "optimal_radius": null,
+    "radius_gap": null,
+    "goal_success": false
+  },
+  {
+    "arm": "script_loop",
+    "backend": "script_loop",
+    "model": "regex brief-text parser + binary search over [3.0, cap]",
+    "brief": "L2_lang_top_back",
+    "family": "language",
+    "rep": 1,
+    "max_renders": 6,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": false,
+    "final_text": "",
+    "transcript": [],
+    "error": null,
+    "renders": [],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "outcome": "not_attempted",
+    "render_count": 0,
+    "compliant_render_count": 0,
+    "passing_compliant_radius": null,
+    "optimal_radius": null,
+    "radius_gap": null,
+    "goal_success": false
+  },
+  {
+    "arm": "script_loop",
+    "backend": "script_loop",
+    "model": "regex brief-text parser + binary search over [3.0, cap]",
+    "brief": "I1_infeasible_e20_r4",
+    "family": "infeasible",
+    "rep": 1,
+    "max_renders": 6,
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "all_attempts_cost_usd": 0.0,
+    "cost_source": "deterministic_free",
+    "validation_retries": 0,
+    "stop_called": true,
+    "final_text": "Run stopped. No plan within the brief's limits passed the framing audit.",
+    "transcript": [
+      {
+        "scripted plan": "elevation 20, radius 3.5"
+      },
+      {
+        "scripted plan": "elevation 20, radius 4"
+      }
+    ],
+    "error": null,
+    "renders": [
+      {
+        "tag": "render_v1",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 3.5,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": -0.39243
+      },
+      {
+        "tag": "render_v2",
+        "plan": {
+          "elevation_degrees": 20.0,
+          "radius": 4.0,
+          "start_degrees": 0.0,
+          "direction": "cw",
+          "margin": 0.05
+        },
+        "passed": false,
+        "min_margin": -0.26017
+      }
+    ],
+    "emphasis_camera_attempted": 0,
+    "emphasis_camera_leaked": 0,
+    "render_count": 2,
+    "compliant_render_count": 2,
+    "passing_compliant_radius": null,
+    "optimal_radius": null,
+    "radius_gap": null,
+    "respected_cap": true,
+    "first_try": false,
+    "outcome": "no_pass_within_cap",
+    "goal_success": true
+  }
+]

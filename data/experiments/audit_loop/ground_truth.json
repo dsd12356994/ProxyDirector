@@ -1,0 +1,252 @@
+{
+  "created_at": "2026-11-27 12:49:51",
+  "glb_path": "assets/seed_tripo/model.glb",
+  "geometry_world_vertices_sha256": "5d5539e3079d86078813761baa5a4cf9974a453c3752df292d5986baa8ce0512",
+  "fixed_lens_mm": 68.17215728759766,
+  "radii_grid": [
+    3.0,
+    3.5,
+    4.0,
+    4.5,
+    5.0,
+    5.5,
+    6.0,
+    6.5,
+    7.0,
+    7.5,
+    8.0,
+    8.5,
+    9.0,
+    9.5,
+    10.0,
+    10.5,
+    11.0,
+    11.5,
+    12.0
+  ],
+  "ground_truth": {
+    "S1_search_e20": {
+      "family": "search",
+      "accepted_elevation_range": [
+        17,
+        23
+      ],
+      "nominal_elevation": 20,
+      "direction": "cw",
+      "start_degrees": 0.0,
+      "margin": 0.05,
+      "radius_max": null,
+      "min_passing_radius": 6.5,
+      "nominal_optimal_radius": 6.5,
+      "default_probe_radius": 6.0,
+      "default_probe_passed": false,
+      "default_probe_min_margin": 0.01469,
+      "per_elevation": {
+        "17": 7.0,
+        "18": 7.0,
+        "19": 6.5,
+        "20": 6.5,
+        "21": 6.5,
+        "22": 6.5,
+        "23": 6.5
+      }
+    },
+    "S2_search_e70": {
+      "family": "search",
+      "accepted_elevation_range": [
+        67,
+        73
+      ],
+      "nominal_elevation": 70,
+      "direction": "cw",
+      "start_degrees": 0.0,
+      "margin": 0.05,
+      "radius_max": null,
+      "min_passing_radius": 3.5,
+      "nominal_optimal_radius": 4.0,
+      "default_probe_radius": 6.0,
+      "default_probe_passed": true,
+      "default_probe_min_margin": 0.21434,
+      "per_elevation": {
+        "67": 4.5,
+        "68": 4.5,
+        "69": 4.0,
+        "70": 4.0,
+        "71": 4.0,
+        "72": 3.5,
+        "73": 3.5
+      }
+    },
+    "S3_search_e50_m10": {
+      "family": "search",
+      "accepted_elevation_range": [
+        47,
+        53
+      ],
+      "nominal_elevation": 50,
+      "direction": "cw",
+      "start_degrees": 0.0,
+      "margin": 0.1,
+      "radius_max": null,
+      "min_passing_radius": 7.0,
+      "nominal_optimal_radius": 7.0,
+      "default_probe_radius": 6.0,
+      "default_probe_passed": false,
+      "default_probe_min_margin": 0.0501,
+      "per_elevation": {
+        "47": 7.0,
+        "48": 7.0,
+        "49": 7.0,
+        "50": 7.0,
+        "51": 7.0,
+        "52": 7.0,
+        "53": 7.0
+      }
+    },
+    "L1_lang_low_tight": {
+      "family": "language",
+      "accepted_elevation_range": [
+        10,
+        30
+      ],
+      "nominal_elevation": 20,
+      "direction": "cw",
+      "start_degrees": 0.0,
+      "margin": 0.05,
+      "radius_max": null,
+      "min_passing_radius": 6.5,
+      "nominal_optimal_radius": 6.5,
+      "default_probe_radius": 6.0,
+      "default_probe_passed": false,
+      "default_probe_min_margin": 0.01469,
+      "per_elevation": {
+        "10": 7.0,
+        "11": 7.0,
+        "12": 7.0,
+        "13": 7.0,
+        "14": 7.0,
+        "15": 7.0,
+        "16": 7.0,
+        "17": 7.0,
+        "18": 7.0,
+        "19": 6.5,
+        "20": 6.5,
+        "21": 6.5,
+        "22": 6.5,
+        "23": 6.5,
+        "24": 6.5,
+        "25": 6.5,
+        "26": 6.5,
+        "27": 6.5,
+        "28": 6.5,
+        "29": 6.5,
+        "30": 6.5
+      }
+    },
+    "L2_lang_top_back": {
+      "family": "language",
+      "accepted_elevation_range": [
+        60,
+        85
+      ],
+      "nominal_elevation": 72,
+      "direction": "ccw",
+      "start_degrees": 180.0,
+      "margin": 0.1,
+      "radius_max": null,
+      "min_passing_radius": 3.0,
+      "nominal_optimal_radius": 4.0,
+      "default_probe_radius": 6.0,
+      "default_probe_passed": true,
+      "default_probe_min_margin": 0.23878,
+      "per_elevation": {
+        "60": 6.0,
+        "61": 6.0,
+        "62": 6.0,
+        "63": 5.5,
+        "64": 5.5,
+        "65": 5.5,
+        "66": 5.0,
+        "67": 5.0,
+        "68": 5.0,
+        "69": 4.5,
+        "70": 4.5,
+        "71": 4.5,
+        "72": 4.0,
+        "73": 4.0,
+        "74": 4.0,
+        "75": 3.5,
+        "76": 3.5,
+        "77": 3.0,
+        "78": 3.0,
+        "79": 3.0,
+        "80": 3.0,
+        "81": 3.0,
+        "82": 3.0,
+        "83": 3.0,
+        "84": 3.0,
+        "85": 3.0
+      }
+    },
+    "I1_infeasible_e20_r4": {
+      "family": "infeasible",
+      "accepted_elevation_range": [
+        17,
+        23
+      ],
+      "nominal_elevation": 20,
+      "direction": "cw",
+      "start_degrees": 0.0,
+      "margin": 0.05,
+      "radius_max": 4.0,
+      "min_passing_radius": null,
+      "nominal_optimal_radius": null,
+      "default_probe_radius": 4.0,
+      "default_probe_passed": false,
+      "default_probe_min_margin": -0.26017,
+      "per_elevation": {
+        "17": null,
+        "18": null,
+        "19": null,
+        "20": null,
+        "21": null,
+        "22": null,
+        "23": null
+      }
+    },
+    "C2_fixed_e85_ccw_90": {
+      "family": "fixed",
+      "accepted_elevation_range": [
+        85,
+        85
+      ],
+      "nominal_elevation": 85,
+      "direction": "ccw",
+      "start_degrees": 90.0,
+      "margin": 0.03,
+      "radius_max": null,
+      "min_passing_radius": 3.0,
+      "nominal_optimal_radius": 3.0,
+      "default_probe_radius": 6.0,
+      "default_probe_passed": true,
+      "default_probe_min_margin": 0.42231,
+      "per_elevation": {
+        "85": 3.0
+      }
+    }
+  },
+  "side_order_check": {
+    "camera_x_by_azimuth": {
+      "0": 0.0,
+      "90": 8.0,
+      "180": 0.0,
+      "270": -8.0
+    },
+    "fixed_worker_cw_from_90": [
+      "right",
+      "front",
+      "left",
+      "back"
+    ]
+  }
+}

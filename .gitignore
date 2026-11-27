@@ -17,3 +17,4 @@ data/experiments/*/trials.jsonl
 data/experiments/*/trials/
 data/experiments/*/scripted/
 data/experiments/*/logs/
+data/experiments/*/preflight/

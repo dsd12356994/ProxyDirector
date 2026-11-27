@@ -88,11 +88,11 @@ The [class presentation materials](docs/presentation/) include the final English
 
 | Condition | Camera and prompt | Command |
 | --- | --- | --- |
-| Fixed baseline | Fixed `50° / r=6 / cw` camera plan and frozen prompt template | `run.py --condition baseline` (Nov 2026 batch: `run.py --backend mock`) |
+| Fixed baseline | Fixed `50° / r=6 / cw` camera plan and frozen prompt template | `run.py --condition baseline` |
 | Agent with Astra | Configured GPT director | `run.py --backend astra` |
 | Agent with another LLM | Configured DeepSeek or GLM director | `run.py --backend deepseek` or `--backend glm` |
 
-The conditions share one frozen Tripo GLB, four reference photographs, and one frozen prompt template (`--condition baseline` now applies the same Kling `@video_1` / `@image_1..4` reference bindings as the agent path whenever `video_backend: kling` is active; the archived baseline clips in the November batch came from the scripted preset director `--backend mock` at `50° / r=6 / cw`, which already used the Kling prompt path). The seed is recorded as a pipeline run label. The archived Kling requests did not specify a video generation seed.
+The conditions share one frozen Tripo GLB, four reference photographs, and one frozen prompt template (`--condition baseline` applies the same Kling `@video_1` / `@image_1..4` reference bindings as the agent path whenever `video_backend: kling` is active). The seed is recorded as a pipeline run label.
 
 ## Layout
 
@@ -125,37 +125,17 @@ data/                   Local runtime artifacts (runs/, eval/, cache/, ledger.js
 - The render worker checks Blender output for tracebacks and expected files. In tests, a Blender 5.x script error could return exit code zero.
 - The compact reference experiments measured vertical fields of view of 19.97° and 20.03°. Both had a smallest vertical margin of approximately 5.01%. The audit uses the camera matrices for each sampled pose.
 
-## November 2026 evaluation batch
+## Case Replay and blind-evaluation pack
 
-The team reviewed 11 archived clips of one wired mouse. All 11 passed the team's visual orbit check for framing, visible parts, and watermarks. The independent rating sheet remains unfilled.
+Studio's **Case Replay** view loads the committed `assets/case_replay/` snapshots (paired Blender orbit reference `.mp4` clips and generated output `.mp4` clips) as visual examples for offline side-by-side playback.
 
-| Director | Finished clips |
-| --- | ---: |
-| Fixed baseline | 3 |
-| Astra | 3 |
-| DeepSeek | 3 |
-| GLM | 2 |
+`data/runs/` and the anonymized blind-review package in `data/eval/` (`videos/`, the rating sheet, and `key.json`) are local runtime folders excluded from Git. On a machine with local `data/runs/` video clips, run `.venv/bin/python -m pipeline.eval_pack` (Windows: `.\.venv\Scripts\python.exe -m pipeline.eval_pack`) to assemble an anonymized blind-review package in `data/eval/`.
 
-The batch used Kling 4.0 Flash at 720p with a silent ten-second request. The team's historical reconciliation recorded 8.03 credits per clip, or 88.33 credits from 112 available, leaving 23.67. The model ledger recorded approximately $0.19 overall. Cached Tripo geometry incurred no new reconstruction charge. The recorded LLM estimates were under 0.2 cents per DeepSeek run, about 0.2 cents per GLM run, and about 4.5 cents per Astra run.
+## 2×2 audit-loop camera-planning benchmark
 
-The recorded director plans matched the fixed camera settings of 50° elevation, radius 6, and clockwise motion. In an earlier dry run, DeepSeek chose 35° and radius 6.5 and passed the audit on the first attempt.
+Because the production render worker fits the focal length (`lens_mm`) to every schema-valid plan (`304/304` grid plans pass), `experiments/shot_briefs/` fixes the lens at `68.17 mm` (the lens fitted for the `50° / r=6 / 5%` baseline plan) so plans can genuinely fail (`223/304` grid plans pass) and evaluates camera planning across four planners on six briefs (`S1`, `S2`, `S3`, `L1`, `L2`, `I1`), writing artifacts to `data/experiments/audit_loop/`:
 
-`data/runs/` and the anonymized blind-review package in `data/eval/` (`videos/`, the rating sheet, and `key.json`) are local-only runtime archives excluded from Git. On a machine with the archived `data/runs/` clips, run `.venv/bin/python -m pipeline.eval_pack` (Windows: `.\.venv\Scripts\python.exe -m pipeline.eval_pack`) to build `data/eval/`; in a clean checkout, Studio's Case Replay uses the committed `assets/case_replay/` snapshots and evaluation summary.
+- **Part A (`part_a_sweep.py`)** — deterministic local sweep over `16` elevations (`10°–85°`) × `19` radii (`3.0–12.0`) = `304` plans under both fitted and fixed lens, producing `geometry_map.json`, `ground_truth.json`, and `min_radius_by_elevation.svg`.
+- **Part B (`run_scripted_baseline.py`, `preflight.py`, `run_trials.py`, `aggregate.py`)** — compares four planners (`Script (1 audit)`, `Script (loop, <=6)`, `LLM (1 audit)`, `LLM (loop, <=6)`) on the six briefs, verifies live endpoints/models on pre-flight brief `C2` before paid trials, preserves full message histories (`messages.json`) and SHA-256 manifests (`manifest_sha256.json`), and builds `results.csv` and `summary.md` directly from recorded trials.
 
-## Shot-brief benchmark (November 26)
-
-The framing audit above fits the lens to every plan, so any schema-valid plan passes it. The benchmark in `experiments/shot_briefs/` runs the director with a fixed lens, so plans can fail, on eight briefs instead of one fixed message. It evaluates camera planning only and imports the production pipeline unchanged. The published results below (`48` LLM + `6` scripted trials; protocol `repo_commit ce34d05`, benchmark committed in `cc32d17`) were recorded before the post-benchmark pipeline fixes on this branch. Each LLM cell is three repetitions per brief.
-
-| Director | Trials | Success | Strict success | Search trials solved optimally |
-| --- | ---: | ---: | ---: | ---: |
-| Scripted policy, no LLM | 6 | 6 | 5 | 2 of 3 (one run per brief) |
-| DeepSeek | 24 | 19 | 17 | 8 of 9 |
-| GLM | 24 | 19 | 16 | 4 of 9 |
-
-- The scripted policy cannot attempt the two natural-language briefs. On the three search briefs it was optimal twice and ran out of its four renders once. DeepSeek was optimal on all three runs of that brief; GLM failed all three runs of another.
-- No schema-invalid camera plan was recorded in the 47 completed transcripts (or in the renders of the errored run). On the infeasible brief (`I1`), all six LLM runs scored `no_pass_within_cap` (automatic grading checks that every render respected the radius cap and no compliant plan passed, without parsing prose replies — denoted "no pass claimed" in `summary.md`).
-- Of the two natural-language briefs, GLM passed five of six trials and DeepSeek two of six. All three of DeepSeek's failures on the `L2` turntable brief depend on the 70° cut-off used for "steeply"; `summary.md` reports that sensitivity next to the result.
-- One DeepSeek trial (`S1` rep 1) ended in `GateRefused` after it had already rendered an optimal passing plan; because usage was logged only on normal completion at `ce34d05` (since fixed in the production director), DeepSeek's mean requests/cost and the `~$0.20` (`USD 0.1958`) total reflect the 23 of 24 DeepSeek runs with logged usage.
-- Astra was not run: the OpenAI API returned 403 on the experiment network.
-
-The tables are in `data/experiments/shot_briefs/summary.md` and `results.csv`. The protocol, the production issues the benchmark exposed (and how they are now fixed), and its limits are in `experiments/shot_briefs/README.md`.
+See [experiments/shot_briefs/README.md](experiments/shot_briefs/README.md) for protocol details and exact commands.
